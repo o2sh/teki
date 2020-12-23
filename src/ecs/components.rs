@@ -11,6 +11,10 @@ pub enum Direction {
 
 #[derive(Component, Debug, Default)]
 #[storage(NullStorage)]
+pub struct Enemy;
+
+#[derive(Component, Debug, Default)]
+#[storage(NullStorage)]
 pub struct KeyboardControlled;
 
 #[derive(Component, Debug)]

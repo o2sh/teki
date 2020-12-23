@@ -21,6 +21,52 @@ pub enum MovementCommand {
     Move(Direction),
 }
 
+fn initialize_player(world: &mut World, spritesheet: usize) {
+    let player_top_left_frame = Rect::new(0, 0, 45, 45);
+    let (frame_width, frame_height) = player_top_left_frame.size();
+
+    let sprite = Sprite {
+        spritesheet,
+        region: Rect::new(
+            player_top_left_frame.x(),
+            player_top_left_frame.y(),
+            frame_width,
+            frame_height,
+        ),
+    };
+
+    world
+        .create_entity()
+        .with(KeyboardControlled)
+        .with(Position(Point::new(122, 260)))
+        .with(Velocity { speed: 0, direction: Direction::Right })
+        .with(sprite)
+        .build();
+}
+
+fn initialize_enemy(world: &mut World, spritesheet: usize, position: Point) {
+    let enemy_top_left_frame = Rect::new(0, 0, 45, 45);
+    let (frame_width, frame_height) = enemy_top_left_frame.size();
+
+    let sprite = Sprite {
+        spritesheet,
+        region: Rect::new(
+            enemy_top_left_frame.x(),
+            enemy_top_left_frame.y(),
+            frame_width,
+            frame_height,
+        ),
+    };
+
+    world
+        .create_entity()
+        .with(Enemy)
+        .with(Position(position))
+        .with(Velocity { speed: 0, direction: Direction::Right })
+        .with(sprite)
+        .build();
+}
+
 fn main() -> Result<(), String> {
     let matches = App::new(crate_name!())
         .version(crate_version!())
@@ -58,11 +104,10 @@ fn main() -> Result<(), String> {
 
     let mut canvas = window.into_canvas().build().expect("could not make a canvas");
 
-    let texture_creator = canvas.texture_creator();
-
     let mut dispatcher = DispatcherBuilder::new()
         .with(keyboard::Keyboard, "Keyboard", &[])
         .with(physics::Physics, "Physics", &["Keyboard"])
+        .with(ai::AI, "Ai", &[])
         .build();
 
     let mut world = World::new();
@@ -71,30 +116,22 @@ fn main() -> Result<(), String> {
 
     let movement_command: Option<MovementCommand> = None;
     world.insert(movement_command);
+    let (width, height) = canvas.output_size()?;
+    world.insert((width, height));
 
-    let textures = [texture_creator.load_texture("assets/neko.png")?];
+    let texture_creator = canvas.texture_creator();
+    let textures = [
+        texture_creator.load_texture("assets/neko.png")?,
+        texture_creator.load_texture("assets/corgi.png")?,
+    ];
 
-    let spritesheet = 0;
-    let player_top_left_frame = Rect::new(0, 0, 45, 45);
-    let (frame_width, frame_height) = player_top_left_frame.size();
+    let player_spritesheet = 0;
+    let enemy_spritesheet = 1;
 
-    let sprite = Sprite {
-        spritesheet,
-        region: Rect::new(
-            player_top_left_frame.x(),
-            player_top_left_frame.y(),
-            frame_width,
-            frame_height,
-        ),
-    };
-
-    world
-        .create_entity()
-        .with(KeyboardControlled)
-        .with(Position(Point::new(0, 0)))
-        .with(Velocity { speed: 0, direction: Direction::Right })
-        .with(sprite)
-        .build();
+    initialize_player(&mut world, player_spritesheet);
+    initialize_enemy(&mut world, enemy_spritesheet, Point::new(10, 10));
+    initialize_enemy(&mut world, enemy_spritesheet, Point::new(50, 50));
+    initialize_enemy(&mut world, enemy_spritesheet, Point::new(100, 100));
 
     let mut event_pump = sdl_context.event_pump()?;
     let mut i = 0;
@@ -130,6 +167,8 @@ fn main() -> Result<(), String> {
         }
 
         *world.write_resource() = movement_command;
+        let (width, height) = canvas.output_size()?;
+        *world.write_resource() = (width, height);
 
         // Update
         i = (i + 1) % 255;
