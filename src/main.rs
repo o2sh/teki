@@ -1,9 +1,8 @@
-mod components;
-mod keyboard;
-mod physics;
+mod consts;
+mod ecs;
 mod renderer;
 
-use clap::{crate_description, crate_name, crate_version, App};
+use clap::{crate_description, crate_name, crate_version, App, Arg};
 
 use sdl2::event::Event;
 use sdl2::image::{self, InitFlag, LoadTexture};
@@ -13,7 +12,9 @@ use sdl2::rect::{Point, Rect};
 use specs::prelude::*;
 use std::time::Duration;
 
-use crate::components::*;
+use consts::*;
+use ecs::components::*;
+use ecs::systems::*;
 
 pub enum MovementCommand {
     Stop,
@@ -21,16 +22,39 @@ pub enum MovementCommand {
 }
 
 fn main() -> Result<(), String> {
-    App::new(crate_name!()).version(crate_version!()).about(crate_description!());
+    let matches = App::new(crate_name!())
+        .version(crate_version!())
+        .about(crate_description!())
+        .arg(Arg::with_name("full").help("Use fullscreen").short("f").long("fullscreen"))
+        .arg(
+            Arg::with_name("scale")
+                .help("Specify window scale (default: 3)")
+                .short("s")
+                .long("scale")
+                .takes_value(true),
+        )
+        .get_matches();
+    let fullscreen = matches.is_present("full");
+    let scale = if let Some(scale) = matches.value_of("scale") {
+        String::from(scale).parse().unwrap()
+    } else {
+        3
+    };
 
     let sdl_context = sdl2::init()?;
     let video_subsystem = sdl_context.video()?;
     let _image_context = image::init(InitFlag::PNG)?;
-    let window = video_subsystem
-        .window("game tutorial", 800, 600)
-        .position_centered()
-        .build()
-        .expect("could not initialize video subsystem");
+
+    let mut window_builder =
+        video_subsystem.window(APP_NAME, WIDTH as u32 * scale, HEIGHT as u32 * scale);
+
+    if fullscreen {
+        window_builder.fullscreen();
+    } else {
+        window_builder.position_centered().resizable();
+    }
+
+    let window = window_builder.opengl().build().map_err(|e| e.to_string())?;
 
     let mut canvas = window.into_canvas().build().expect("could not make a canvas");
 
@@ -109,14 +133,14 @@ fn main() -> Result<(), String> {
 
         // Update
         i = (i + 1) % 255;
-        dispatcher.dispatch(&mut world);
+        dispatcher.dispatch(&world);
         world.maintain();
 
         // Render
         renderer::render(&mut canvas, Color::RGB(i, 64, 255 - i), &textures, world.system_data())?;
 
         // Time management!
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 20));
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / FPS));
     }
 
     Ok(())

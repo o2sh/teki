@@ -1,10 +1,8 @@
 use specs::prelude::*;
 
-use crate::components::*;
-
-use super::MovementCommand;
-
-const PLAYER_MOVEMENT_SPEED: i32 = 20;
+use crate::consts::*;
+use crate::ecs::components::*;
+use crate::MovementCommand;
 
 pub struct Keyboard;
 

@@ -1,6 +1,6 @@
 use specs::prelude::*;
 
-use crate::components::*;
+use crate::ecs::components::*;
 
 pub struct Physics;
 
