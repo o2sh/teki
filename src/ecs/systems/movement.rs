@@ -2,9 +2,9 @@ use specs::prelude::*;
 
 use crate::ecs::components::*;
 
-pub struct Physics;
+pub struct Movement;
 
-impl<'a> System<'a> for Physics {
+impl<'a> System<'a> for Movement {
     type SystemData =
         (ReadExpect<'a, (u32, u32)>, WriteStorage<'a, Position>, ReadStorage<'a, Velocity>);
 

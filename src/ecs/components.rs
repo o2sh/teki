@@ -9,6 +9,12 @@ pub enum Direction {
     Right,
 }
 
+#[derive(Component, Debug)]
+#[storage(VecStorage)]
+pub struct Gun {
+    pub fire: bool,
+}
+
 #[derive(Component, Debug, Default)]
 #[storage(NullStorage)]
 pub struct Enemy;

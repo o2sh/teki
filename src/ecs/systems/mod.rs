@@ -1,3 +1,4 @@
 pub mod ai;
 pub mod keyboard;
-pub mod physics;
+pub mod movement;
+pub mod shooting;

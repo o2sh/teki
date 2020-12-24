@@ -21,6 +21,11 @@ pub enum MovementCommand {
     Move(Direction),
 }
 
+pub enum ShootCommand {
+    Fire,
+    Rest,
+}
+
 fn initialize_player(world: &mut World, spritesheet: usize) {
     let player_top_left_frame = Rect::new(0, 0, 45, 45);
     let (frame_width, frame_height) = player_top_left_frame.size();
@@ -38,6 +43,7 @@ fn initialize_player(world: &mut World, spritesheet: usize) {
     world
         .create_entity()
         .with(KeyboardControlled)
+        .with(Gun { fire: false })
         .with(Position(Point::new(122, 260)))
         .with(Velocity { speed: 0, direction: Direction::Right })
         .with(sprite)
@@ -106,7 +112,8 @@ fn main() -> Result<(), String> {
 
     let mut dispatcher = DispatcherBuilder::new()
         .with(keyboard::Keyboard, "Keyboard", &[])
-        .with(physics::Physics, "Physics", &["Keyboard"])
+        .with(movement::Movement, "Movement", &["Keyboard"])
+        .with(shooting::Shooting, "Shooting", &["Keyboard"])
         .with(ai::AI, "Ai", &[])
         .build();
 
@@ -115,7 +122,9 @@ fn main() -> Result<(), String> {
     renderer::SystemData::setup(&mut world);
 
     let movement_command: Option<MovementCommand> = None;
+    let shoot_command: Option<ShootCommand> = None;
     world.insert(movement_command);
+    world.insert(shoot_command);
     let (width, height) = canvas.output_size()?;
     world.insert((width, height));
 
@@ -137,6 +146,7 @@ fn main() -> Result<(), String> {
     let mut i = 0;
     'running: loop {
         let mut movement_command = None;
+        let mut shoot_command = None;
 
         // Handle events
         for event in event_pump.poll_iter() {
@@ -156,17 +166,23 @@ fn main() -> Result<(), String> {
                 Event::KeyDown { keycode: Some(Keycode::Down), repeat: false, .. } => {
                     movement_command = Some(MovementCommand::Move(Direction::Down));
                 }
+                Event::KeyDown { keycode: Some(Keycode::Space), repeat: false, .. } => {
+                    shoot_command = Some(ShootCommand::Fire);
+                }
                 Event::KeyUp { keycode: Some(Keycode::Left), repeat: false, .. }
                 | Event::KeyUp { keycode: Some(Keycode::Right), repeat: false, .. }
                 | Event::KeyUp { keycode: Some(Keycode::Up), repeat: false, .. }
-                | Event::KeyUp { keycode: Some(Keycode::Down), repeat: false, .. } => {
+                | Event::KeyUp { keycode: Some(Keycode::Down), repeat: false, .. }
+                | Event::KeyUp { keycode: Some(Keycode::Space), repeat: false, .. } => {
                     movement_command = Some(MovementCommand::Stop);
+                    shoot_command = Some(ShootCommand::Rest);
                 }
                 _ => {}
             }
         }
 
         *world.write_resource() = movement_command;
+        *world.write_resource() = shoot_command;
         let (width, height) = canvas.output_size()?;
         *world.write_resource() = (width, height);
 
