@@ -7,7 +7,6 @@ use clap::{crate_description, crate_name, crate_version, App, Arg};
 use sdl2::event::Event;
 use sdl2::image::{self, InitFlag, LoadTexture};
 use sdl2::keyboard::Keycode;
-use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
 use specs::prelude::*;
 use std::time::Duration;
@@ -23,10 +22,10 @@ pub enum MovementCommand {
 
 pub enum ShootCommand {
     Fire,
-    Rest,
+    Idle,
 }
 
-fn initialize_player(world: &mut World, spritesheet: usize) {
+fn initialize_player(world: &mut World, spritesheet: usize, window_size: (u32, u32)) {
     let player_top_left_frame = Rect::new(0, 0, 45, 45);
     let (frame_width, frame_height) = player_top_left_frame.size();
 
@@ -40,11 +39,13 @@ fn initialize_player(world: &mut World, spritesheet: usize) {
         ),
     };
 
+    let (width, height) = window_size;
+
     world
         .create_entity()
         .with(KeyboardControlled)
         .with(Gun { fire: false })
-        .with(Position(Point::new(122, 260)))
+        .with(Position(Point::new(width as i32 / 2, height as i32 - 50)))
         .with(Velocity { speed: 0, direction: Direction::Right })
         .with(sprite)
         .build();
@@ -132,18 +133,18 @@ fn main() -> Result<(), String> {
     let textures = [
         texture_creator.load_texture("assets/neko.png")?,
         texture_creator.load_texture("assets/corgi.png")?,
+        texture_creator.load_texture("assets/Water.png")?,
     ];
 
     let player_spritesheet = 0;
     let enemy_spritesheet = 1;
 
-    initialize_player(&mut world, player_spritesheet);
-    initialize_enemy(&mut world, enemy_spritesheet, Point::new(10, 10));
-    initialize_enemy(&mut world, enemy_spritesheet, Point::new(50, 50));
-    initialize_enemy(&mut world, enemy_spritesheet, Point::new(100, 100));
+    initialize_player(&mut world, player_spritesheet, (width, height));
+    for _ in 1..10 {
+        initialize_enemy(&mut world, enemy_spritesheet, Point::new(100, 100));
+    }
 
     let mut event_pump = sdl_context.event_pump()?;
-    let mut i = 0;
     'running: loop {
         let mut movement_command = None;
         let mut shoot_command = None;
@@ -175,7 +176,7 @@ fn main() -> Result<(), String> {
                 | Event::KeyUp { keycode: Some(Keycode::Down), repeat: false, .. }
                 | Event::KeyUp { keycode: Some(Keycode::Space), repeat: false, .. } => {
                     movement_command = Some(MovementCommand::Stop);
-                    shoot_command = Some(ShootCommand::Rest);
+                    shoot_command = Some(ShootCommand::Idle);
                 }
                 _ => {}
             }
@@ -187,12 +188,11 @@ fn main() -> Result<(), String> {
         *world.write_resource() = (width, height);
 
         // Update
-        i = (i + 1) % 255;
         dispatcher.dispatch(&world);
         world.maintain();
 
         // Render
-        renderer::render(&mut canvas, Color::RGB(i, 64, 255 - i), &textures, world.system_data())?;
+        renderer::render(&mut canvas, &textures, world.system_data())?;
 
         // Time management!
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / FPS));

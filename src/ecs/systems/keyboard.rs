@@ -33,7 +33,7 @@ impl<'a> System<'a> for Keyboard {
             for (_, gun) in (&data.2, &mut data.4).join() {
                 match shoot_command {
                     ShootCommand::Fire => gun.fire = true,
-                    ShootCommand::Rest => gun.fire = false,
+                    ShootCommand::Idle => gun.fire = false,
                 }
             }
         };

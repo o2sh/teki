@@ -16,22 +16,22 @@ impl<'a> System<'a> for Movement {
         for (pos, vel) in (&mut data.1, &data.2).join() {
             match vel.direction {
                 Left => {
-                    if pos.0.x > 0 {
+                    if pos.0.x > 40 {
                         pos.0 = pos.0.offset(-vel.speed, 0);
                     }
                 }
                 Right => {
-                    if pos.0.x < *width as i32 {
+                    if pos.0.x < *width as i32 - 40 {
                         pos.0 = pos.0.offset(vel.speed, 0);
                     }
                 }
                 Up => {
-                    if pos.0.y > 0 {
+                    if pos.0.y > 40 {
                         pos.0 = pos.0.offset(0, -vel.speed);
                     }
                 }
                 Down => {
-                    if pos.0.y < *height as i32 {
+                    if pos.0.y < *height as i32 - 40 {
                         pos.0 = pos.0.offset(0, vel.speed);
                     }
                 }

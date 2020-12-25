@@ -1,4 +1,3 @@
-use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::{Texture, WindowCanvas};
 use specs::prelude::*;
@@ -10,12 +9,10 @@ pub type SystemData<'a> = (ReadStorage<'a, Position>, ReadStorage<'a, Sprite>);
 
 pub fn render(
     canvas: &mut WindowCanvas,
-    background: Color,
     textures: &[Texture],
     data: SystemData,
 ) -> Result<(), String> {
-    canvas.set_draw_color(background);
-    canvas.clear();
+    canvas.copy(&textures[2], None, None)?;
 
     for (pos, sprite) in (&data.0, &data.1).join() {
         let current_frame = sprite.region;
