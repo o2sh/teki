@@ -1,77 +1,29 @@
+mod app;
+mod components;
 mod consts;
-mod ecs;
-mod renderer;
+mod sdl_renderer;
+mod system_player;
 
 use clap::{crate_description, crate_name, crate_version, App, Arg};
 
+use app::EcsApp;
 use sdl2::event::Event;
-use sdl2::image::{self, InitFlag, LoadTexture};
-use sdl2::keyboard::Keycode;
-use sdl2::rect::{Point, Rect};
-use specs::prelude::*;
+use sdl2::image::{self, InitFlag};
+use sdl2::Sdl;
+use sdl_renderer::SdlRenderer;
 use std::time::Duration;
 
 use consts::*;
-use ecs::components::*;
-use ecs::systems::*;
 
-pub enum MovementCommand {
-    Stop,
-    Move(Direction),
-}
+#[derive(Clone, Copy, PartialEq)]
 
-pub enum ShootCommand {
-    Fire,
-    Idle,
-}
-
-fn initialize_player(world: &mut World, spritesheet: usize, window_size: (u32, u32)) {
-    let player_top_left_frame = Rect::new(0, 0, 45, 45);
-    let (frame_width, frame_height) = player_top_left_frame.size();
-
-    let sprite = Sprite {
-        spritesheet,
-        region: Rect::new(
-            player_top_left_frame.x(),
-            player_top_left_frame.y(),
-            frame_width,
-            frame_height,
-        ),
-    };
-
-    let (width, height) = window_size;
-
-    world
-        .create_entity()
-        .with(KeyboardControlled)
-        .with(Gun { fire: false })
-        .with(Position(Point::new(width as i32 / 2, height as i32 - 50)))
-        .with(Velocity { speed: 0, direction: Direction::Right })
-        .with(sprite)
-        .build();
-}
-
-fn initialize_enemy(world: &mut World, spritesheet: usize, position: Point) {
-    let enemy_top_left_frame = Rect::new(0, 0, 45, 45);
-    let (frame_width, frame_height) = enemy_top_left_frame.size();
-
-    let sprite = Sprite {
-        spritesheet,
-        region: Rect::new(
-            enemy_top_left_frame.x(),
-            enemy_top_left_frame.y(),
-            frame_width,
-            frame_height,
-        ),
-    };
-
-    world
-        .create_entity()
-        .with(Enemy)
-        .with(Position(position))
-        .with(Velocity { speed: 0, direction: Direction::Right })
-        .with(sprite)
-        .build();
+pub enum VKey {
+    Space,
+    Escape,
+    Left,
+    Right,
+    Up,
+    Down,
 }
 
 fn main() -> Result<(), String> {
@@ -109,94 +61,51 @@ fn main() -> Result<(), String> {
 
     let window = window_builder.opengl().build().map_err(|e| e.to_string())?;
 
-    let mut canvas = window.into_canvas().build().expect("could not make a canvas");
-
-    let mut dispatcher = DispatcherBuilder::new()
-        .with(keyboard::Keyboard, "Keyboard", &[])
-        .with(movement::Movement, "Movement", &["Keyboard"])
-        .with(shooting::Shooting, "Shooting", &["Keyboard"])
-        .with(ai::AI, "Ai", &[])
-        .build();
-
-    let mut world = World::new();
-    dispatcher.setup(&mut world);
-    renderer::SystemData::setup(&mut world);
-
-    let movement_command: Option<MovementCommand> = None;
-    let shoot_command: Option<ShootCommand> = None;
-    world.insert(movement_command);
-    world.insert(shoot_command);
-    let (width, height) = canvas.output_size()?;
-    world.insert((width, height));
-
-    let texture_creator = canvas.texture_creator();
-    let textures = [
-        texture_creator.load_texture("assets/neko.png")?,
-        texture_creator.load_texture("assets/corgi.png")?,
-        texture_creator.load_texture("assets/Water.png")?,
-    ];
-
-    let player_spritesheet = 0;
-    let enemy_spritesheet = 1;
-
-    initialize_player(&mut world, player_spritesheet, (width, height));
-    for _ in 1..10 {
-        initialize_enemy(&mut world, enemy_spritesheet, Point::new(100, 100));
+    if fullscreen {
+        sdl_context.mouse().show_cursor(false);
     }
 
-    let mut event_pump = sdl_context.event_pump()?;
-    'running: loop {
-        let mut movement_command = None;
-        let mut shoot_command = None;
+    let canvas = window.into_canvas().present_vsync().build().map_err(|e| e.to_string())?;
 
-        // Handle events
-        for event in event_pump.poll_iter() {
-            match event {
-                Event::Quit { .. } | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
-                    break 'running;
-                }
-                Event::KeyDown { keycode: Some(Keycode::Left), repeat: false, .. } => {
-                    movement_command = Some(MovementCommand::Move(Direction::Left));
-                }
-                Event::KeyDown { keycode: Some(Keycode::Right), repeat: false, .. } => {
-                    movement_command = Some(MovementCommand::Move(Direction::Right));
-                }
-                Event::KeyDown { keycode: Some(Keycode::Up), repeat: false, .. } => {
-                    movement_command = Some(MovementCommand::Move(Direction::Up));
-                }
-                Event::KeyDown { keycode: Some(Keycode::Down), repeat: false, .. } => {
-                    movement_command = Some(MovementCommand::Move(Direction::Down));
-                }
-                Event::KeyDown { keycode: Some(Keycode::Space), repeat: false, .. } => {
-                    shoot_command = Some(ShootCommand::Fire);
-                }
-                Event::KeyUp { keycode: Some(Keycode::Left), repeat: false, .. }
-                | Event::KeyUp { keycode: Some(Keycode::Right), repeat: false, .. }
-                | Event::KeyUp { keycode: Some(Keycode::Up), repeat: false, .. }
-                | Event::KeyUp { keycode: Some(Keycode::Down), repeat: false, .. }
-                | Event::KeyUp { keycode: Some(Keycode::Space), repeat: false, .. } => {
-                    movement_command = Some(MovementCommand::Stop);
-                    shoot_command = Some(ShootCommand::Idle);
-                }
-                _ => {}
+    let mut renderer = SdlRenderer::new(canvas, (WIDTH as u32, HEIGHT as u32));
+
+    let mut app = EcsApp::new();
+
+    let skip_count = 0;
+    'running: loop {
+        if !pump_events(&sdl_context, &mut app)? {
+            break 'running;
+        }
+        let step = 1 + skip_count;
+
+        for _ in 0..step {
+            if !app.update() {
+                break 'running;
             }
         }
+        app.draw(&mut renderer);
+        renderer.present();
 
-        *world.write_resource() = movement_command;
-        *world.write_resource() = shoot_command;
-        let (width, height) = canvas.output_size()?;
-        *world.write_resource() = (width, height);
-
-        // Update
-        dispatcher.dispatch(&world);
-        world.maintain();
-
-        // Render
-        renderer::render(&mut canvas, &textures, world.system_data())?;
-
-        // Time management!
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / FPS));
     }
-
     Ok(())
+}
+
+fn pump_events(sdl_context: &Sdl, app: &mut EcsApp) -> Result<bool, String> {
+    let mut event_pump = sdl_context.event_pump()?;
+    for event in event_pump.poll_iter() {
+        match event {
+            Event::Quit { .. } => {
+                return Ok(false);
+            }
+            Event::KeyDown { keycode: Some(key), .. } => {
+                app.on_key(key, true);
+            }
+            Event::KeyUp { keycode: Some(key), .. } => {
+                app.on_key(key, false);
+            }
+            _ => {}
+        }
+    }
+    Ok(true)
 }

@@ -11,7 +11,7 @@ repository = "https://github.com/o2sh/teki"
 
 [dependencies]
 clap = "2.33.3"
-specs = { version = "0.16.1", features = ["specs-derive"] }
+legion = "0.3.1"
 rand = "0.8.0"
 
 [dependencies.sdl2]
