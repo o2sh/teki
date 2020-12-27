@@ -1,6 +1,7 @@
 mod app;
 mod components;
 mod consts;
+mod pad;
 mod sdl_renderer;
 mod system_player;
 

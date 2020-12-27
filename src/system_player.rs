@@ -1,5 +1,7 @@
 use crate::components::*;
-use legion::systems::CommandBuffer;
+use crate::consts::*;
+use crate::pad::{Pad, PadBit};
+use legion::world::SubWorld;
 use legion::*;
 use sdl2::rect::Point;
 
@@ -17,14 +19,26 @@ pub fn player_sprite() -> SpriteDrawable {
     SpriteDrawable { sprite_name: SPRITE_NAME, offset: Point::new(-8, -8) }
 }
 
-//#[system(for_each)]
-//#[write_component(Position)]
-//pub fn move_player(
-//    player: &mut Player, entity: &Entity,
-//    #[resource] pad: &Pad,
-//    #[resource] game_info: &mut GameInfo,
-//    #[resource] attack_manager: &mut AttackManager,
-//    world: &mut SubWorld, commands: &mut CommandBuffer,
-//) {
-//    do_move_player(player, pad, *entity, game_info, attack_manager, world, commands);
-//}
+#[system(for_each)]
+#[write_component(Position)]
+pub fn move_player(entity: &Entity, #[resource] pad: &Pad, world: &mut SubWorld) {
+    do_move_player(pad, *entity, world);
+}
+
+pub fn do_move_player(pad: &Pad, entity: Entity, world: &mut SubWorld) {
+    let position = <&mut Position>::query().get_mut(world, entity).unwrap();
+    let pos = &mut position.0;
+    if pad.is_pressed(PadBit::L) {
+        pos.x -= PLAYER_SPEED;
+    }
+    if pad.is_pressed(PadBit::R) {
+        pos.x += PLAYER_SPEED;
+    }
+
+    if pad.is_pressed(PadBit::U) {
+        pos.y -= PLAYER_SPEED;
+    }
+    if pad.is_pressed(PadBit::D) {
+        pos.y += PLAYER_SPEED;
+    }
+}

@@ -1,5 +1,6 @@
 use crate::components::*;
 use crate::consts::*;
+use crate::pad::{Pad, PadBit};
 use crate::system_player::*;
 use crate::SdlRenderer;
 use legion::*;
@@ -14,20 +15,23 @@ enum AppState {
 pub struct EcsApp {
     pressed_key: Option<Keycode>,
     state: AppState,
+    pad: Pad,
 }
 
 impl EcsApp {
     pub fn new() -> Self {
-        Self { pressed_key: None, state: AppState::Title(Title) }
+        Self { pressed_key: None, state: AppState::Title(Title), pad: Pad::default() }
     }
 
     pub fn on_key(&mut self, key: Keycode, down: bool) {
+        self.pad.on_key(key, down);
         if down {
             self.pressed_key = Some(key);
         }
     }
 
     pub fn update(&mut self) -> bool {
+        self.pad.update();
         if self.pressed_key == Some(Keycode::Escape) {
             match &self.state {
                 AppState::Title(_title) => {
@@ -40,7 +44,7 @@ impl EcsApp {
 
         match &mut self.state {
             AppState::Title(title) => {
-                if let Some(value) = title.update(self.pressed_key) {
+                if let Some(value) = title.update(&self.pad) {
                     if value {
                         self.start_game();
                     } else {
@@ -48,7 +52,11 @@ impl EcsApp {
                     }
                 }
             }
-            AppState::Game(game) => {}
+            AppState::Game(game) => {
+                if !game.update(&self.pad) {
+                    self.back_to_title();
+                }
+            }
         };
         self.pressed_key = None;
         true
@@ -73,8 +81,8 @@ impl EcsApp {
 struct Title;
 
 impl Title {
-    fn update(&mut self, key_pressed: Option<Keycode>) -> Option<bool> {
-        if key_pressed == Some(Keycode::Space) {
+    fn update(&mut self, pad: &Pad) -> Option<bool> {
+        if pad.is_pressed(PadBit::A) {
             return Some(true);
         }
         None
@@ -93,21 +101,23 @@ impl Title {
 
 struct Game {
     world: World,
+    resources: Resources,
     schedule: Schedule,
 }
 
 impl Game {
     fn new() -> Self {
-        let schedule = Schedule::builder()
-            //.add_system(move_player_system())
-            .build();
+        let schedule = Schedule::builder().add_system(move_player_system()).build();
         let mut world = World::default();
         world.push((new_player(), Position(Point::new(CENTER_X, PLAYER_Y)), player_sprite()));
+        let mut resources = Resources::default();
 
-        Self { world, schedule }
+        Self { world, resources, schedule }
     }
 
-    fn update(&mut self) -> bool {
+    fn update(&mut self, pad: &Pad) -> bool {
+        self.resources.insert(pad.clone());
+        self.schedule.execute(&mut self.world, &mut self.resources);
         true
     }
 
