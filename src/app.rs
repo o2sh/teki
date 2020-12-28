@@ -63,6 +63,7 @@ impl EcsApp {
     }
 
     pub fn draw(&mut self, renderer: &mut SdlRenderer) {
+        renderer.draw_bg("assets/water.png");
         match &self.state {
             AppState::Title(title) => title.draw(renderer),
             AppState::Game(game) => game.draw(renderer),
@@ -89,7 +90,7 @@ impl Title {
     }
 
     fn draw(&self, renderer: &mut SdlRenderer) {
-        renderer.set_draw_color(0, 0, 0);
+        renderer.set_draw_color(135, 135, 135);
         renderer.clear();
 
         renderer.draw_str("assets/font.png", 10 * 9, 8 * 8, "TEKI");

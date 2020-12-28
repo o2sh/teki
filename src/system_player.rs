@@ -22,7 +22,7 @@ pub fn player_sprite() -> SpriteDrawable {
 
 #[system(for_each)]
 #[write_component(Position)]
-pub fn move_player(entity: &Entity, #[resource] pad: &Pad, world: &mut SubWorld) {
+pub fn move_player(_: &mut Player, entity: &Entity, #[resource] pad: &Pad, world: &mut SubWorld) {
     do_move_player(pad, *entity, world);
 }
 
