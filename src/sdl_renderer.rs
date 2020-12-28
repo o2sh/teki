@@ -1,9 +1,9 @@
+use crate::components::*;
 use sdl2::image::LoadTexture;
 use sdl2::pixels::Color;
 use sdl2::rect::Point;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
-
 pub struct SdlRenderer {
     canvas: WindowCanvas,
 }
@@ -27,15 +27,13 @@ impl SdlRenderer {
         self.canvas.clear();
     }
 
-    pub fn draw_sprite(&mut self, path: &str, pos: Point) {
+    pub fn draw_sprite(&mut self, sprite: &SpriteDrawable, pos: Point) {
         let texture_creator = self.canvas.texture_creator();
-        let texture = texture_creator.load_texture(path).expect("No texture");
+        let texture = texture_creator.load_texture(sprite.sprite_name).expect("No texture");
 
-        let current_frame = Rect::new(0, 0, 45, 45);
+        let screen_rect = Rect::from_center(pos, sprite.rect.width(), sprite.rect.height());
 
-        let screen_rect = Rect::from_center(pos, current_frame.width(), current_frame.height());
-
-        self.canvas.copy(&texture, current_frame, screen_rect).expect("copy failed");
+        self.canvas.copy(&texture, sprite.rect, screen_rect).expect("copy failed");
     }
 
     pub fn draw_bg(&mut self, path: &str) {

@@ -6,5 +6,5 @@ pub const PLAYER_Y: i32 = HEIGHT - 16 - 8;
 
 pub const APP_NAME: &str = "Teki";
 pub const PLAYER_SPEED: i32 = 20;
-
+pub const MYSHOT_SPEED: i32 = 6;
 pub const FPS: u32 = 60;

@@ -107,7 +107,11 @@ struct Game {
 
 impl Game {
     fn new() -> Self {
-        let schedule = Schedule::builder().add_system(move_player_system()).build();
+        let schedule = Schedule::builder()
+            .add_system(move_player_system())
+            .add_system(fire_myshot_system())
+            .add_system(move_myshot_system())
+            .build();
         let mut world = World::default();
         world.push((new_player(), Position(Point::new(CENTER_X, PLAYER_Y)), player_sprite()));
         let mut resources = Resources::default();
@@ -125,7 +129,7 @@ impl Game {
         renderer.draw_bg("assets/water.png");
 
         for (position, drawable) in <(&Position, &SpriteDrawable)>::query().iter(&self.world) {
-            renderer.draw_sprite(drawable.sprite_name, position.0);
+            renderer.draw_sprite(drawable, position.0);
         }
     }
 }

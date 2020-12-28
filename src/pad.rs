@@ -16,15 +16,23 @@ bitflags! {
 pub struct Pad {
     key: PadBit,
     pad: PadBit,
+    trg: PadBit,
+    last_pad: PadBit,
 }
 
 impl Pad {
     pub fn update(&mut self) {
         self.pad = self.key;
+        self.trg = self.pad & !self.last_pad;
+        self.last_pad = self.pad;
     }
 
     pub fn is_pressed(&self, btn: PadBit) -> bool {
         self.pad.contains(btn)
+    }
+
+    pub fn is_trigger(&self, btn: PadBit) -> bool {
+        self.trg.contains(btn)
     }
 
     pub fn on_key(&mut self, keycode: Keycode, down: bool) {
