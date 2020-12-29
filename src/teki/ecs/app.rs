@@ -1,7 +1,7 @@
-use crate::components::*;
-use crate::consts::*;
-use crate::pad::{Pad, PadBit};
-use crate::system_player::*;
+use crate::teki::consts::*;
+use crate::teki::ecs::components::*;
+use crate::teki::ecs::system_player::*;
+use crate::teki::pad::{Pad, PadBit};
 use crate::SdlRenderer;
 use legion::*;
 use sdl2::keyboard::Keycode;
@@ -90,8 +90,7 @@ impl Title {
     }
 
     fn draw(&self, renderer: &mut SdlRenderer) {
-        renderer.set_draw_color(135, 135, 135);
-        renderer.clear();
+        renderer.draw_bg("assets/vine.png");
 
         renderer.draw_str("assets/font.png", 10 * 9, 8 * 8, "TEKI");
 
@@ -115,9 +114,8 @@ impl Game {
             .build();
         let mut world = World::default();
         world.push((new_player(), Position(Point::new(CENTER_X, PLAYER_Y)), player_sprite()));
-        let mut resources = Resources::default();
 
-        Self { world, resources, schedule }
+        Self { world, resources: Resources::default(), schedule }
     }
 
     fn update(&mut self, pad: &Pad) -> bool {

@@ -1,4 +1,4 @@
-use crate::components::*;
+use crate::teki::ecs::components::*;
 use sdl2::image::LoadTexture;
 use sdl2::pixels::Color;
 use sdl2::rect::Point;

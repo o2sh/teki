@@ -1,20 +1,15 @@
-mod app;
-mod components;
-mod consts;
-mod pad;
-mod sdl_renderer;
-mod system_player;
+mod teki;
 
 use clap::{crate_description, crate_name, crate_version, App, Arg};
 
-use app::EcsApp;
 use sdl2::event::Event;
 use sdl2::image::{self, InitFlag};
 use sdl2::Sdl;
-use sdl_renderer::SdlRenderer;
 use std::time::Duration;
+use teki::ecs::app::EcsApp;
+use teki::sdl::sdl_renderer::SdlRenderer;
 
-use consts::*;
+use teki::consts::*;
 
 #[derive(Clone, Copy, PartialEq)]
 
