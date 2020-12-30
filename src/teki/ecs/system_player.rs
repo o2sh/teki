@@ -30,24 +30,32 @@ pub fn do_move_player(pad: &Pad, entity: Entity, world: &mut SubWorld) {
     let position = <&mut Position>::query().get_mut(world, entity).unwrap();
     let pos = &mut position.0;
     if pad.is_pressed(PadBit::L) {
-        if pos.x > 40 {
-            pos.x -= PLAYER_SPEED;
+        pos.x -= PLAYER_SPEED;
+        let left = PADDING + 15;
+        if pos.x < left {
+            pos.x = left;
         }
     }
     if pad.is_pressed(PadBit::R) {
-        if pos.x < WIDTH - 40 {
-            pos.x += PLAYER_SPEED;
+        pos.x += PLAYER_SPEED;
+        let right = GAME_WIDTH - 10;
+        if pos.x > right {
+            pos.x = right;
         }
     }
 
     if pad.is_pressed(PadBit::U) {
-        if pos.y > 40 {
-            pos.y -= PLAYER_SPEED;
+        pos.y -= PLAYER_SPEED;
+        let top = PADDING + 20;
+        if pos.y < top {
+            pos.y = top;
         }
     }
     if pad.is_pressed(PadBit::D) {
-        if pos.y < HEIGHT - 40 {
-            pos.y += PLAYER_SPEED;
+        pos.y += PLAYER_SPEED;
+        let bottom = GAME_HEIGHT - 10;
+        if pos.y > bottom {
+            pos.y = bottom;
         }
     }
 }
@@ -116,11 +124,11 @@ pub fn do_move_myshot(entity: Entity, world: &mut SubWorld, commands: &mut Comma
 }
 
 fn out_of_screen(pos: &Point) -> bool {
-    const MARGIN: i32 = 4;
-    const TOP: i32 = -MARGIN;
-    const LEFT: i32 = -MARGIN;
-    const RIGHT: i32 = WIDTH + MARGIN;
-    const BOTTOM: i32 = HEIGHT + MARGIN;
+    const MARGIN: i32 = 5;
+    const TOP: i32 = MARGIN + PADDING;
+    const LEFT: i32 = MARGIN + PADDING;
+    const RIGHT: i32 = GAME_WIDTH;
+    const BOTTOM: i32 = GAME_HEIGHT - PADDING;
     pos.y < TOP || pos.x < LEFT || pos.x > RIGHT || pos.y > BOTTOM
 }
 

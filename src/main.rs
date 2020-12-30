@@ -47,7 +47,7 @@ fn main() -> Result<(), String> {
     let _image_context = image::init(InitFlag::PNG)?;
 
     let mut window_builder =
-        video_subsystem.window(APP_NAME, WIDTH as u32 * scale, HEIGHT as u32 * scale);
+        video_subsystem.window(APP_NAME, WINDOW_WIDTH as u32 * scale, WINDOW_HEIGHT as u32 * scale);
 
     if fullscreen {
         window_builder.fullscreen();
@@ -63,7 +63,7 @@ fn main() -> Result<(), String> {
 
     let canvas = window.into_canvas().present_vsync().build().map_err(|e| e.to_string())?;
 
-    let mut renderer = SdlRenderer::new(canvas, (WIDTH as u32, HEIGHT as u32));
+    let mut renderer = SdlRenderer::new(canvas, (WINDOW_WIDTH as u32, WINDOW_HEIGHT as u32));
 
     let mut app = EcsApp::new();
 

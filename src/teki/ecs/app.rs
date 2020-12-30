@@ -63,7 +63,8 @@ impl EcsApp {
     }
 
     pub fn draw(&mut self, renderer: &mut SdlRenderer) {
-        renderer.draw_bg("assets/water.png");
+        renderer.clear();
+        renderer.set_draw_gradient();
         match &self.state {
             AppState::Title(title) => title.draw(renderer),
             AppState::Game(game) => game.draw(renderer),
@@ -90,12 +91,21 @@ impl Title {
     }
 
     fn draw(&self, renderer: &mut SdlRenderer) {
-        renderer.draw_bg("assets/vine.png");
-
-        renderer.draw_str("assets/font.png", 10 * 9, 8 * 8, "TEKI");
+        let title = "TEKI";
+        renderer.draw_str(
+            "assets/font.png",
+            (WINDOW_WIDTH / 2) - (title.len() as i32 / 2) * 8,
+            8 * 8,
+            title,
+        );
 
         let msg = "PRESS SPACE KEY TO START";
-        renderer.draw_str("assets/font.png", (28 - msg.len() as i32) / 2 * 8, 25 * 8, msg);
+        renderer.draw_str(
+            "assets/font.png",
+            (WINDOW_WIDTH / 2) - (msg.len() as i32 / 2) * 8,
+            25 * 8,
+            msg,
+        );
     }
 }
 
@@ -125,7 +135,7 @@ impl Game {
     }
 
     fn draw(&self, renderer: &mut SdlRenderer) {
-        renderer.draw_bg("assets/water.png");
+        renderer.draw_bg("assets/water.png", false);
 
         for (position, drawable) in <(&Position, &SpriteDrawable)>::query().iter(&self.world) {
             renderer.draw_sprite(drawable, position.0);
