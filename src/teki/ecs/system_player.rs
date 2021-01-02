@@ -1,6 +1,6 @@
-use crate::teki::consts::*;
 use crate::teki::ecs::components::*;
-use crate::teki::pad::{Pad, PadBit};
+use crate::teki::utils::consts::*;
+use crate::teki::utils::pad::{Pad, PadBit};
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;

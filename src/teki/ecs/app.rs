@@ -1,7 +1,8 @@
-use crate::teki::consts::*;
 use crate::teki::ecs::components::*;
 use crate::teki::ecs::system_player::*;
-use crate::teki::pad::{Pad, PadBit};
+use crate::teki::utils::consts::*;
+use crate::teki::utils::fps_calc::FpsCalc;
+use crate::teki::utils::pad::{Pad, PadBit};
 use crate::SdlRenderer;
 use legion::*;
 use sdl2::keyboard::Keycode;
@@ -16,11 +17,17 @@ pub struct EcsApp {
     pressed_key: Option<Keycode>,
     state: AppState,
     pad: Pad,
+    fps_calc: FpsCalc,
 }
 
 impl EcsApp {
     pub fn new() -> Self {
-        Self { pressed_key: None, state: AppState::Title(Title), pad: Pad::default() }
+        Self {
+            pressed_key: None,
+            state: AppState::Title(Title),
+            pad: Pad::default(),
+            fps_calc: FpsCalc::new(),
+        }
     }
 
     pub fn on_key(&mut self, key: Keycode, down: bool) {
@@ -69,6 +76,15 @@ impl EcsApp {
             AppState::Title(title) => title.draw(renderer),
             AppState::Game(game) => game.draw(renderer),
         }
+
+        self.fps_calc.update();
+
+        renderer.draw_str(
+            "assets/font.png",
+            WINDOW_WIDTH - 6 * 8,
+            1 * 8,
+            &format!("FPS{:2}", self.fps_calc.fps()),
+        );
     }
 
     fn start_game(&mut self) {

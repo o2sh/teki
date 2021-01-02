@@ -1,5 +1,5 @@
-use crate::teki::consts::*;
 use crate::teki::ecs::components::*;
+use crate::teki::utils::consts::*;
 use sdl2::image::LoadTexture;
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Point;

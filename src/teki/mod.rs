@@ -1,4 +1,3 @@
-pub mod consts;
 pub mod ecs;
-mod pad;
 pub mod sdl;
+pub mod utils;

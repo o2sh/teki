@@ -9,7 +9,7 @@ use std::time::Duration;
 use teki::ecs::app::EcsApp;
 use teki::sdl::sdl_renderer::SdlRenderer;
 
-use teki::consts::*;
+use teki::utils::consts::*;
 
 #[derive(Clone, Copy, PartialEq)]
 
