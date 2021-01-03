@@ -19,4 +19,4 @@ bitflags = "1.2.1"
 [dependencies.sdl2]
 version = "0.34.3"
 default-features = false
-features = ["image"]
+features = ["image", "mixer"]

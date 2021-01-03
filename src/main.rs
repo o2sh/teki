@@ -2,8 +2,10 @@ mod teki;
 
 use clap::{crate_description, crate_name, crate_version, App, Arg};
 
+use crate::teki::sdl::sdl_audio::SdlAudio;
 use sdl2::event::Event;
 use sdl2::image::{self, InitFlag};
+use sdl2::mixer::{AUDIO_S16LSB, DEFAULT_CHANNELS};
 use sdl2::Sdl;
 use std::time::Duration;
 use teki::ecs::app::EcsApp;
@@ -65,7 +67,15 @@ fn main() -> Result<(), String> {
 
     let mut renderer = SdlRenderer::new(canvas, (WINDOW_WIDTH as u32, WINDOW_HEIGHT as u32));
 
-    let mut app = EcsApp::new();
+    let audio = SdlAudio::new(CHANNEL_COUNT, BASE_VOLUME);
+
+    let frequency = 44_100;
+    let format = AUDIO_S16LSB; // signed 16 bit samples, in little-endian byte order
+    let channels = DEFAULT_CHANNELS; // Stereo
+    let chunk_size = 1_024;
+    sdl2::mixer::open_audio(frequency, format, channels, chunk_size)?;
+
+    let mut app = EcsApp::new(audio);
 
     let skip_count = 0;
     'running: loop {

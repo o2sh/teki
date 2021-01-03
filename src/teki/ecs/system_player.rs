@@ -1,12 +1,11 @@
 use crate::teki::ecs::components::*;
+use crate::teki::ecs::resources::SoundQueue;
 use crate::teki::utils::consts::*;
 use crate::teki::utils::pad::{Pad, PadBit};
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
 use sdl2::rect::{Point, Rect};
-
-const SPRITE_NAME: &str = "assets/neko.png";
 
 pub struct Player {
     pub shot_enable: bool,
@@ -17,7 +16,7 @@ pub fn new_player() -> Player {
 }
 
 pub fn player_sprite() -> SpriteDrawable {
-    SpriteDrawable { sprite_name: SPRITE_NAME, rect: Rect::new(5, 5, 40, 40) }
+    SpriteDrawable { sprite_name: NEKO_SPRITE, rect: Rect::new(5, 5, 40, 40) }
 }
 
 #[system(for_each)]
@@ -67,9 +66,11 @@ pub fn fire_myshot(
     position: &Position,
     entity: &Entity,
     #[resource] pad: &Pad,
+    #[resource] sound_queue: &mut SoundQueue,
     commands: &mut CommandBuffer,
 ) {
     if pad.is_trigger(PadBit::A) {
+        sound_queue.push_play(0, BUBBLE_SOUND);
         do_fire_myshot(player, position, *entity, commands)
     }
 }
@@ -91,7 +92,7 @@ pub fn do_fire_myshot(
         commands.push((
             MyShot { player_entity: entity },
             pos,
-            SpriteDrawable { sprite_name: "assets/heart.png", rect: Rect::new(0, 0, 20, 20) },
+            SpriteDrawable { sprite_name: HEART_SPRITE, rect: Rect::new(0, 0, 20, 20) },
         ));
     }
 }

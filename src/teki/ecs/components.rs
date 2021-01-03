@@ -1,3 +1,4 @@
+use crate::teki::ecs::EnemyType;
 use legion::*;
 use sdl2::rect::{Point, Rect};
 
@@ -11,4 +12,8 @@ pub struct SpriteDrawable {
 
 pub struct MyShot {
     pub player_entity: Entity,
+}
+
+pub struct Enemy {
+    pub enemy_type: EnemyType,
 }
