@@ -25,5 +25,5 @@ pub const NEKO_SPRITE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/neko.
 pub const CORGI_SPRITE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/corgi.png");
 pub const HEART_SPRITE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/heart.png");
 
-pub const BUBBLE_SOUND: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/audio/bubble.wav");
-pub const BG_LOOP: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/audio/8bit.mp3");
+pub const BUBBLE_SOUND: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/audio/bubble.ogg");
+pub const BG_LOOP: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/audio/8bit.ogg");

@@ -25,7 +25,7 @@ impl SdlAudio {
         sdl2::mixer::Channel::all().fade_out(100);
     }
 
-    fn play(&mut self, channel: u32, filename: &str, loops: i32){
+    fn play(&mut self, channel: u32, filename: &str, loops: i32) {
         if channel < self.channels.len() as u32 {
             let path = format!("{}", filename);
             let mut chunk = Chunk::from_file(path).expect("play: No music flile");

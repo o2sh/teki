@@ -76,7 +76,7 @@ fn main() -> Result<(), String> {
     sdl2::mixer::open_audio(frequency, format, channels, chunk_size)?;
 
     sdl2::mixer::allocate_channels(4);
-    
+
     let mut app = EcsApp::new(audio);
 
     let skip_count = 0;
