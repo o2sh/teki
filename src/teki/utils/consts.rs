@@ -17,13 +17,13 @@ pub const PLAYER_SPEED: i32 = 10;
 pub const MYSHOT_SPEED: i32 = 6;
 pub const FPS: u32 = 60;
 
-pub const FONTS: &str = "assets/font.png";
+pub const FONTS: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/font.png");
 
-pub const WATER_TEXTURE: &str = "assets/water.png";
+pub const WATER_TEXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/water.png");
 
-pub const NEKO_SPRITE: &str = "assets/neko.png";
-pub const CORGI_SPRITE: &str = "assets/corgi.png";
-pub const HEART_SPRITE: &str = "assets/heart.png";
+pub const NEKO_SPRITE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/neko.png");
+pub const CORGI_SPRITE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/corgi.png");
+pub const HEART_SPRITE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/heart.png");
 
-pub const BUBBLE_SOUND: &str = "assets/audio/bubble.wav";
-pub const BG_LOOP: &str = "assets/audio/8bit.mp3";
+pub const BUBBLE_SOUND: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/audio/bubble.wav");
+pub const BG_LOOP: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/audio/8bit.mp3");
