@@ -26,3 +26,4 @@ pub const CORGI_SPRITE: &str = "assets/corgi.png";
 pub const HEART_SPRITE: &str = "assets/heart.png";
 
 pub const BUBBLE_SOUND: &str = "assets/audio/bubble.wav";
+pub const BG_LOOP: &str = "assets/audio/8bit.mp3";

@@ -98,9 +98,11 @@ impl EcsApp {
 
     fn start_game(&mut self) {
         self.state = AppState::Game(Game::new());
+        self.audio.play_loop(1, BG_LOOP);
     }
 
     fn back_to_title(&mut self) {
+        self.audio.halt();
         self.state = AppState::Title(Title);
     }
 }

@@ -11,7 +11,7 @@ impl SoundQueue {
 
     pub fn flush(&mut self, audio: &mut SdlAudio) {
         for (channel, filename) in self.queue.iter() {
-            audio.play(*channel, filename);
+            audio.play_sound(*channel, filename);
         }
         self.queue.clear();
     }

@@ -13,12 +13,24 @@ impl SdlAudio {
         Self { channels, base_volume: (MAX_VOLUME as f32 * base_volume) as i32 }
     }
 
-    pub fn play(&mut self, channel: u32, filename: &str) {
+    pub fn play_sound(&mut self, channel: u32, filename: &str) {
+        self.play(channel, filename, 0)
+    }
+
+    pub fn play_loop(&mut self, channel: u32, filename: &str) {
+        self.play(channel, filename, i32::MAX)
+    }
+
+    pub fn halt(&mut self) {
+        sdl2::mixer::Channel::all().fade_out(100);
+    }
+
+    fn play(&mut self, channel: u32, filename: &str, loops: i32){
         if channel < self.channels.len() as u32 {
             let path = format!("{}", filename);
             let mut chunk = Chunk::from_file(path).expect("play: No music flile");
             chunk.set_volume(self.base_volume);
-            sdl2::mixer::Channel::all().play(&chunk, 0).expect("Play music failed");
+            sdl2::mixer::Channel::all().play(&chunk, loops).expect("Play music failed");
             self.channels[channel as usize] = Some(chunk);
         }
     }
