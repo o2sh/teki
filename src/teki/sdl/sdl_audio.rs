@@ -28,9 +28,9 @@ impl SdlAudio {
     fn play(&mut self, channel: u32, filename: &str, loops: i32) {
         if channel < self.channels.len() as u32 {
             let path = format!("{}", filename);
-            let mut chunk = Chunk::from_file(path).expect("play: No music flile");
+            let mut chunk = Chunk::from_file(path).expect("No music file");
             chunk.set_volume(self.base_volume);
-            sdl2::mixer::Channel::all().play(&chunk, loops).expect("Play music failed");
+            sdl2::mixer::Channel::all().play(&chunk, loops).expect("Music cannot be played");
             self.channels[channel as usize] = Some(chunk);
         }
     }

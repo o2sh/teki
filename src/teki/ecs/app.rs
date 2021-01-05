@@ -1,6 +1,6 @@
 use crate::{
     teki::{
-        ecs::{components::*, resources::SoundQueue, system_enemy::*, system_player::*},
+        ecs::{components::*, resources::*, system_enemy::*, system_player::*},
         sdl::sdl_audio::SdlAudio,
         utils::{
             consts::*,
@@ -138,12 +138,16 @@ impl Game {
             .add_system(move_player_system())
             .add_system(fire_myshot_system())
             .add_system(move_myshot_system())
-            //.add_system(spawn_enemy_system())
+            .add_system(spawn_enemy_system())
+            .add_system(update_enemy_formation_system())
+            .flush()
+            .add_system(move_enemy_formation_system())
             .build();
         let mut world = World::default();
         world.push((new_player(), Position(Point::new(CENTER_X, PLAYER_Y)), player_sprite()));
         let mut resources = Resources::default();
         resources.insert(SoundQueue::new());
+        resources.insert(EnemyFormation::default());
         Self { world, resources, schedule }
     }
 

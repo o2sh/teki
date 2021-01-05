@@ -17,6 +17,11 @@ pub const PLAYER_SPEED: i32 = 10;
 pub const MYSHOT_SPEED: i32 = 6;
 pub const FPS: u32 = 60;
 
+pub const X_COUNT: usize = 3;
+pub const Y_COUNT: usize = 6;
+
+pub const BASE_Y: i32 = 50;
+
 pub const FONTS: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/font.png");
 
 pub const WATER_TEXTURE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/water.png");

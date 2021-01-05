@@ -2,7 +2,7 @@ use crate::teki::ecs::EnemyType;
 use legion::*;
 use sdl2::rect::{Point, Rect};
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct Position(pub Point);
 
 pub struct SpriteDrawable {
@@ -16,4 +16,5 @@ pub struct MyShot {
 
 pub struct Enemy {
     pub enemy_type: EnemyType,
+    pub formation_index: u8,
 }
