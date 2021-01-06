@@ -1,11 +1,13 @@
 use crate::teki::ecs::components::*;
-use crate::teki::ecs::resources::SoundQueue;
+use crate::teki::ecs::resources::{SoundQueue, GameInfo};
+use crate::teki::utils::collision::CollBox;
 use crate::teki::utils::consts::*;
 use crate::teki::utils::pad::{Pad, PadBit};
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
-use sdl2::rect::{Point, Rect};
+use sdl2::rect::Rect;
+use vector2d::Vector2D;
 
 pub struct Player {
     pub shot_enable: bool,
@@ -13,6 +15,10 @@ pub struct Player {
 
 pub fn new_player() -> Player {
     Player { shot_enable: true }
+}
+
+pub fn player_hit_box() -> HitBox {
+    HitBox { size: Vector2D::new(40, 40) }
 }
 
 pub fn player_sprite() -> SpriteDrawable {
@@ -70,7 +76,7 @@ pub fn fire_myshot(
     commands: &mut CommandBuffer,
 ) {
     if pad.is_trigger(PadBit::A) {
-        sound_queue.push_play(0, BUBBLE_SOUND);
+        sound_queue.push_play(CH_SHOT, BUBBLE_SOUND);
         do_fire_myshot(player, position, *entity, commands)
     }
 }
@@ -88,10 +94,11 @@ pub fn do_fire_myshot(
     commands: &mut CommandBuffer,
 ) {
     if can_player_fire(player) {
-        let pos = Position(Point::new(position.0.x, position.0.y - 20));
+        let pos = Position(Vector2D::new(position.0.x, position.0.y - 20));
         commands.push((
             MyShot { player_entity: entity },
             pos,
+            HitBox { size: Vector2D::new(20, 20) },
             SpriteDrawable { sprite_name: HEART_SPRITE, rect: Rect::new(0, 0, 20, 20) },
         ));
     }
@@ -120,11 +127,11 @@ pub fn do_move_myshot(entity: Entity, world: &mut SubWorld, commands: &mut Comma
         }
     }
     if !cont {
-        delete_myshot(entity, commands);
+        delete_entity(entity, commands);
     }
 }
 
-fn out_of_screen(pos: &Point) -> bool {
+fn out_of_screen(pos: &Vector2D<i32>) -> bool {
     const MARGIN: i32 = 5;
     const TOP: i32 = MARGIN + PADDING;
     const LEFT: i32 = MARGIN + PADDING;
@@ -133,6 +140,41 @@ fn out_of_screen(pos: &Point) -> bool {
     pos.y < TOP || pos.x < LEFT || pos.x > RIGHT || pos.y > BOTTOM
 }
 
-pub fn delete_myshot(entity: Entity, commands: &mut CommandBuffer) {
+pub fn delete_entity(entity: Entity, commands: &mut CommandBuffer) {
     commands.remove(entity);
+}
+
+#[system]
+#[read_component(MyShot)]
+#[read_component(Position)]
+#[read_component(HitBox)]
+#[write_component(Enemy)]
+#[write_component(SpriteDrawable)]
+pub fn collision_check(
+    world: &mut SubWorld,
+    #[resource] sound_queue: &mut SoundQueue,
+    #[resource] game_info: &mut GameInfo,
+    commands: &mut CommandBuffer,
+) {
+    for (_, shot_pos, shot_hit_box, shot_entity) in
+        <(&MyShot, &Position, &HitBox, Entity)>::query().iter(world)
+    {
+        let shot_coll_box = pos_to_coll_box(&shot_pos.0, &shot_hit_box);
+
+        for (_enemy, enemy_pos, enemy_hit_box, enemy_entity) in
+            <(&Enemy, &Position, &HitBox, Entity)>::query().iter(world)
+        {
+            let enemy_collbox = CollBox { top_left: enemy_pos.0, size: enemy_hit_box.size };
+            if shot_coll_box.check_collision(&enemy_collbox) {
+                delete_entity(*shot_entity, commands);
+                delete_entity(*enemy_entity, commands);
+                sound_queue.push_play(CH_KILL, SE_KILL);
+                game_info.add_score(20);
+            }
+        }
+    }
+}
+
+fn pos_to_coll_box(pos: &Vector2D<i32>, coll_rect: &HitBox) -> CollBox {
+    CollBox { top_left: *pos, size: coll_rect.size }
 }

@@ -6,10 +6,11 @@ use lazy_static::lazy_static;
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
-use sdl2::rect::{Point, Rect};
+use sdl2::rect::Rect;
+use vector2d::Vector2D;
 
 lazy_static! {
-    pub static ref POSITION_ZERO: Position = Position(Point::new(0, 0));
+    pub static ref POSITION_ZERO: Position = Position(Vector2D::new(0, 0));
 }
 #[system]
 pub fn spawn_enemy(#[resource] enemy_formation: &mut EnemyFormation, commands: &mut CommandBuffer) {
@@ -24,7 +25,8 @@ pub fn spawn_enemy(#[resource] enemy_formation: &mut EnemyFormation, commands: &
 
     for enemy in enemies {
         let drawable = SpriteDrawable { sprite_name: CORGI_SPRITE, rect: Rect::new(5, 5, 40, 40) };
-        commands.push((enemy, *POSITION_ZERO, drawable));
+        let hit_box = HitBox { size: Vector2D::new(35, 35) };
+        commands.push((enemy, *POSITION_ZERO, hit_box, drawable));
     }
     enemy_formation.done_appearance = true;
 }

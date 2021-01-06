@@ -1,5 +1,8 @@
 pub const BASE_VOLUME: f32 = 1.0 / 4.0;
 pub const CHANNEL_COUNT: u32 = 3;
+pub const CH_SHOT: u32 = 0;
+pub const CH_BG_MUSIC: u32 = 1;
+pub const CH_KILL: u32 = 2;
 
 pub const PADDING: i32 = 10;
 
@@ -31,4 +34,5 @@ pub const CORGI_SPRITE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/corg
 pub const HEART_SPRITE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/heart.png");
 
 pub const BUBBLE_SOUND: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/audio/bubble.ogg");
-pub const BG_LOOP: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/audio/8bit.ogg");
+pub const BG_MUSIC: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/audio/8bit.ogg");
+pub const SE_KILL: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/audio/pop.ogg");

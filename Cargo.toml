@@ -17,6 +17,7 @@ rand = "0.8.0"
 bitflags = "1.2.1"
 lazy_static = "1.4.0"
 array-macro = "1.0.5"
+vector2d = "2.2.0"
 
 [dependencies.sdl2]
 version = "0.34.3"

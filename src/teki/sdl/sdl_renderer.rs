@@ -2,9 +2,10 @@ use crate::teki::ecs::components::*;
 use crate::teki::utils::consts::*;
 use sdl2::image::LoadTexture;
 use sdl2::pixels::PixelFormatEnum;
-use sdl2::rect::Point;
-use sdl2::rect::Rect;
+use sdl2::rect::{Point, Rect};
 use sdl2::render::WindowCanvas;
+use vector2d::Vector2D;
+
 pub struct SdlRenderer {
     canvas: WindowCanvas,
 }
@@ -60,11 +61,12 @@ impl SdlRenderer {
         self.canvas.copy(&texture, None, None).expect("copy failed");
     }
 
-    pub fn draw_sprite(&mut self, sprite: &SpriteDrawable, pos: Point) {
+    pub fn draw_sprite(&mut self, sprite: &SpriteDrawable, pos: Vector2D<i32>) {
         let texture_creator = self.canvas.texture_creator();
         let texture = texture_creator.load_texture(sprite.sprite_name).expect("No texture");
 
-        let screen_rect = Rect::from_center(pos, sprite.rect.width(), sprite.rect.height());
+        let screen_rect =
+            Rect::from_center(Point::new(pos.x, pos.y), sprite.rect.width(), sprite.rect.height());
 
         self.canvas.copy(&texture, sprite.rect, screen_rect).expect("copy failed");
     }
@@ -82,10 +84,10 @@ impl SdlRenderer {
             .expect("copy failed");
     }
 
-    pub fn draw_str(&mut self, path: &str, x: i32, y: i32, text: &str) {
+    pub fn draw_str(&mut self, path: &str, x: i32, y: i32, text: &str, r: u8, g: u8, b: u8) {
         let texture_creator = self.canvas.texture_creator();
-        let texture = texture_creator.load_texture(path).expect("No texture");
-
+        let mut texture = texture_creator.load_texture(path).expect("No texture");
+        texture.set_color_mod(r, g, b);
         let w = 8;
         let h = 8;
         let mut x = x;

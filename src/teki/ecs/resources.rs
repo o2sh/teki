@@ -1,8 +1,9 @@
 use crate::teki::sdl::sdl_audio::SdlAudio;
+use crate::teki::sdl::sdl_renderer::SdlRenderer;
 use crate::teki::utils::consts::*;
 use array_macro::*;
 use lazy_static::lazy_static;
-use sdl2::rect::Point;
+use vector2d::Vector2D;
 
 pub struct SoundQueue {
     queue: Vec<(u32, &'static str)>,
@@ -26,8 +27,8 @@ impl SoundQueue {
 }
 
 pub struct EnemyFormation {
-    xtbl: [i32; X_COUNT],
-    ytbl: [i32; Y_COUNT],
+    x_indices: [i32; X_COUNT],
+    y_indices: [i32; Y_COUNT],
     to_left: bool,
     pub done_appearance: bool,
     moving_count: u32,
@@ -36,8 +37,8 @@ pub struct EnemyFormation {
 impl Default for EnemyFormation {
     fn default() -> Self {
         let mut formation = Self {
-            xtbl: Default::default(),
-            ytbl: Default::default(),
+            x_indices: Default::default(),
+            y_indices: Default::default(),
             done_appearance: false,
             moving_count: 0,
             to_left: false,
@@ -52,10 +53,10 @@ impl EnemyFormation {
         *self = Self { moving_count: 0, done_appearance: false, ..*self };
 
         for j in 0..X_COUNT {
-            self.xtbl[j] = BASE_X_TABLE[j];
+            self.x_indices[j] = BASE_X_TABLE[j];
         }
         for i in 0..Y_COUNT {
-            self.ytbl[i] = BASE_Y_TABLE[i];
+            self.y_indices[i] = BASE_Y_TABLE[i];
         }
     }
 
@@ -64,10 +65,10 @@ impl EnemyFormation {
         let dx = if self.to_left { -dx } else { dx };
 
         for i in 0..X_COUNT {
-            self.xtbl[i] += dx;
+            self.x_indices[i] += dx;
         }
 
-        if self.xtbl[0] - 20 < 15 || self.xtbl[X_COUNT - 1] + 10 > GAME_WIDTH {
+        if self.x_indices[0] < 35 || self.x_indices[X_COUNT - 1] > GAME_WIDTH - 10 {
             self.to_left = !self.to_left;
             self.moving_count = 0
         } else {
@@ -75,8 +76,8 @@ impl EnemyFormation {
         }
     }
 
-    pub fn pos(&self, index: &u8) -> Point {
-        Point::new(self.xtbl[*index as usize], self.ytbl[*index as usize])
+    pub fn pos(&self, index: &u8) -> Vector2D<i32> {
+        Vector2D::new(self.x_indices[*index as usize], self.y_indices[*index as usize])
     }
 }
 
@@ -94,4 +95,20 @@ lazy_static! {
             BASE_Y
         ; Y_COUNT]
     };
+}
+
+#[derive(Default)]
+pub struct GameInfo {
+    pub score: u32,
+}
+
+impl GameInfo {
+    pub fn add_score(&mut self, add: u32) {
+        self.score += add;
+    }
+
+    pub fn draw(&self, renderer: &mut SdlRenderer) {
+        renderer.draw_str(FONTS, GAME_WIDTH + 25, 35, "SCORE", 255, 0, 0);
+        renderer.draw_str(FONTS, GAME_WIDTH + 25 + 8 * 6, 35, &format!("{}", self.score), 255, 255, 255);
+    }
 }

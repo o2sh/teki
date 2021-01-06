@@ -13,7 +13,7 @@ use crate::{
 
 use legion::*;
 use sdl2::keyboard::Keycode;
-use sdl2::rect::Point;
+use vector2d::Vector2D;
 
 enum AppState {
     Title(Title),
@@ -91,14 +91,14 @@ impl EcsApp {
         renderer.draw_str(
             FONTS,
             WINDOW_WIDTH - 6 * 8,
-            1 * 8,
-            &format!("FPS{:2}", self.fps_calc.fps()),
+            WINDOW_HEIGHT - 20,
+            &format!("FPS{:2}", self.fps_calc.fps()), 255, 255, 255
         );
     }
 
     fn start_game(&mut self) {
         self.state = AppState::Game(Game::new());
-        self.audio.play_loop(1, BG_LOOP);
+        self.audio.play_loop(CH_BG_MUSIC, BG_MUSIC);
     }
 
     fn back_to_title(&mut self) {
@@ -119,10 +119,10 @@ impl Title {
 
     fn draw(&self, renderer: &mut SdlRenderer) {
         let title = "TEKI";
-        renderer.draw_str(FONTS, (WINDOW_WIDTH / 2) - (title.len() as i32 / 2) * 8, 8 * 8, title);
+        renderer.draw_str(FONTS, (WINDOW_WIDTH / 2) - (title.len() as i32 / 2) * 8, 8 * 8, title, 255, 255, 255);
 
         let msg = "PRESS SPACE KEY TO START";
-        renderer.draw_str(FONTS, (WINDOW_WIDTH / 2) - (msg.len() as i32 / 2) * 8, 25 * 8, msg);
+        renderer.draw_str(FONTS, (WINDOW_WIDTH / 2) - (msg.len() as i32 / 2) * 8, 25 * 8, msg, 255, 255, 255);
     }
 }
 
@@ -142,12 +142,19 @@ impl Game {
             .add_system(update_enemy_formation_system())
             .flush()
             .add_system(move_enemy_formation_system())
+            .add_system(collision_check_system())
             .build();
         let mut world = World::default();
-        world.push((new_player(), Position(Point::new(CENTER_X, PLAYER_Y)), player_sprite()));
+        world.push((
+            new_player(),
+            Position(Vector2D::new(CENTER_X, PLAYER_Y)),
+            player_hit_box(),
+            player_sprite(),
+        ));
         let mut resources = Resources::default();
         resources.insert(SoundQueue::new());
         resources.insert(EnemyFormation::default());
+        resources.insert(GameInfo::default());
         Self { world, resources, schedule }
     }
 
@@ -165,5 +172,13 @@ impl Game {
         for (position, drawable) in <(&Position, &SpriteDrawable)>::query().iter(&self.world) {
             renderer.draw_sprite(drawable, position.0);
         }
+
+        if let Some(game_info) = self.get_game_info() {
+            game_info.draw(renderer);
+        }
+    }
+
+    fn get_game_info(&self) -> Option<legion::systems::Fetch<'_, GameInfo>> {
+        self.resources.get::<GameInfo>()
     }
 }
