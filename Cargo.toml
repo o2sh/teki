@@ -1,6 +1,6 @@
 [package]
 name = "teki"
-version = "0.1.0"
+version = "0.2.0"
 description = "Touhou-style shoot'em up"
 authors = ["o2sh <ossama-hjaji@live.fr>"]
 edition = "2018"
