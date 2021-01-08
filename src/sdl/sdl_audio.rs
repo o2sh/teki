@@ -1,4 +1,5 @@
 use sdl2::mixer::{Chunk, MAX_VOLUME};
+use teki_common::traits::audio::Audio;
 
 pub struct SdlAudio {
     channels: Vec<Option<Chunk>>,
@@ -13,18 +14,6 @@ impl SdlAudio {
         Self { channels, base_volume: (MAX_VOLUME as f32 * base_volume) as i32 }
     }
 
-    pub fn play_sound(&mut self, channel: u32, filename: &str) {
-        self.play(channel, filename, 0)
-    }
-
-    pub fn play_loop(&mut self, channel: u32, filename: &str) {
-        self.play(channel, filename, i32::MAX)
-    }
-
-    pub fn halt(&mut self) {
-        sdl2::mixer::Channel::all().fade_out(100);
-    }
-
     fn play(&mut self, channel: u32, filename: &str, loops: i32) {
         if channel < self.channels.len() as u32 {
             let path = format!("{}", filename);
@@ -33,5 +22,19 @@ impl SdlAudio {
             sdl2::mixer::Channel::all().play(&chunk, loops).expect("Music cannot be played");
             self.channels[channel as usize] = Some(chunk);
         }
+    }
+}
+
+impl Audio for SdlAudio {
+    fn play_sound(&mut self, channel: u32, filename: &str) {
+        self.play(channel, filename, 0)
+    }
+
+    fn play_loop(&mut self, channel: u32, filename: &str) {
+        self.play(channel, filename, i32::MAX)
+    }
+
+    fn halt(&mut self) {
+        sdl2::mixer::Channel::all().fade_out(100);
     }
 }

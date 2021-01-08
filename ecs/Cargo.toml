@@ -1,0 +1,13 @@
+[package]
+name = "teki-ecs"
+version = "0.2.0"
+authors = ["o2sh <ossama-hjaji@live.fr>"]
+edition = "2018"
+
+[dependencies]
+legion = "0.3.1"
+vector2d = "2.2.0"
+lazy_static = "1.4.0"
+array-macro = "1.0.5"
+
+teki-common = {path = "../common" }

@@ -1,17 +1,17 @@
-use crate::teki::ecs::components::*;
-use crate::teki::ecs::resources::EnemyFormation;
-use crate::teki::ecs::EnemyType;
-use crate::teki::utils::consts::*;
+use crate::app::components::*;
+use crate::app::resources::EnemyFormation;
 use lazy_static::lazy_static;
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
-use sdl2::rect::Rect;
+use teki_common::utils::consts::*;
+use teki_common::EnemyType;
 use vector2d::Vector2D;
 
 lazy_static! {
     pub static ref POSITION_ZERO: Position = Position(Vector2D::new(0, 0));
 }
+
 #[system]
 pub fn spawn_enemy(#[resource] enemy_formation: &mut EnemyFormation, commands: &mut CommandBuffer) {
     if enemy_formation.done_appearance {
@@ -24,7 +24,7 @@ pub fn spawn_enemy(#[resource] enemy_formation: &mut EnemyFormation, commands: &
     }
 
     for enemy in enemies {
-        let drawable = SpriteDrawable { sprite_name: CORGI_SPRITE, rect: Rect::new(5, 5, 40, 40) };
+        let drawable = SpriteDrawable { sprite_name: CORGI_SPRITE };
         let hit_box = HitBox { size: Vector2D::new(35, 35) };
         commands.push((enemy, *POSITION_ZERO, hit_box, drawable));
     }

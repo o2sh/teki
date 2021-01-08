@@ -1,5 +1,14 @@
 use bitflags::bitflags;
-use sdl2::keyboard::Keycode;
+
+#[derive(Clone, Copy, PartialEq)]
+pub enum Key {
+    Space,
+    Escape,
+    Left,
+    Right,
+    Up,
+    Down,
+}
 
 bitflags! {
     #[derive(Default)]
@@ -35,8 +44,8 @@ impl Pad {
         self.trg.contains(btn)
     }
 
-    pub fn on_key(&mut self, keycode: Keycode, down: bool) {
-        let bit = get_key_bit(keycode);
+    pub fn on_key(&mut self, key: Key, down: bool) {
+        let bit = get_key_bit(key);
         if down {
             self.key |= bit;
         } else {
@@ -45,13 +54,13 @@ impl Pad {
     }
 }
 
-fn get_key_bit(key: Keycode) -> PadBit {
+fn get_key_bit(key: Key) -> PadBit {
     match key {
-        Keycode::Left => PadBit::L,
-        Keycode::Right => PadBit::R,
-        Keycode::Up => PadBit::U,
-        Keycode::Down => PadBit::D,
-        Keycode::Space => PadBit::A,
+        Key::Left => PadBit::L,
+        Key::Right => PadBit::R,
+        Key::Up => PadBit::U,
+        Key::Down => PadBit::D,
+        Key::Space => PadBit::A,
         _ => PadBit::empty(),
     }
 }

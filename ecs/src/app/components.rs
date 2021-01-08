@@ -1,6 +1,5 @@
-use crate::teki::ecs::EnemyType;
 use legion::*;
-use sdl2::rect::Rect;
+use teki_common::EnemyType;
 use vector2d::Vector2D;
 
 #[derive(Clone, Copy)]
@@ -8,7 +7,6 @@ pub struct Position(pub Vector2D<i32>);
 
 pub struct SpriteDrawable {
     pub sprite_name: &'static str,
-    pub rect: Rect,
 }
 
 pub struct MyShot {

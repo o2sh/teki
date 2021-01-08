@@ -1,12 +1,11 @@
-use crate::teki::ecs::components::*;
-use crate::teki::ecs::resources::{SoundQueue, GameInfo};
-use crate::teki::utils::collision::CollBox;
-use crate::teki::utils::consts::*;
-use crate::teki::utils::pad::{Pad, PadBit};
+use crate::app::components::*;
+use crate::app::resources::{GameInfo, SoundQueue};
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
-use sdl2::rect::Rect;
+use teki_common::utils::collision::CollBox;
+use teki_common::utils::consts::*;
+use teki_common::utils::pad::{Pad, PadBit};
 use vector2d::Vector2D;
 
 pub struct Player {
@@ -22,7 +21,7 @@ pub fn player_hit_box() -> HitBox {
 }
 
 pub fn player_sprite() -> SpriteDrawable {
-    SpriteDrawable { sprite_name: NEKO_SPRITE, rect: Rect::new(5, 5, 40, 40) }
+    SpriteDrawable { sprite_name: NEKO_SPRITE }
 }
 
 #[system(for_each)]
@@ -99,7 +98,7 @@ pub fn do_fire_myshot(
             MyShot { player_entity: entity },
             pos,
             HitBox { size: Vector2D::new(20, 20) },
-            SpriteDrawable { sprite_name: HEART_SPRITE, rect: Rect::new(0, 0, 20, 20) },
+            SpriteDrawable { sprite_name: HEART_SPRITE },
         ));
     }
 }

@@ -9,17 +9,24 @@ license = "MIT"
 repository = "https://github.com/o2sh/teki"
 exclude = ["resources/*"]
 
-
 [dependencies]
 clap = "2.33.3"
-legion = "0.3.1"
 rand = "0.8.0"
-bitflags = "1.2.1"
-lazy_static = "1.4.0"
-array-macro = "1.0.5"
 vector2d = "2.2.0"
+lazy_static = "1.4.0"
+counted-array = "0.1.2"
+
+teki-ecs = {path = "./ecs" }
+teki-common = {path = "./common" }
 
 [dependencies.sdl2]
 version = "0.34.3"
 default-features = false
 features = ["image", "mixer"]
+
+[workspace]
+members = [
+    "ecs",
+    "wasm",
+    "common"
+]

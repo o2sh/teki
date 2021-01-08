@@ -1,8 +1,8 @@
-use crate::teki::sdl::sdl_audio::SdlAudio;
-use crate::teki::sdl::sdl_renderer::SdlRenderer;
-use crate::teki::utils::consts::*;
 use array_macro::*;
 use lazy_static::lazy_static;
+use teki_common::traits::Audio;
+use teki_common::traits::Renderer;
+use teki_common::utils::consts::*;
 use vector2d::Vector2D;
 
 pub struct SoundQueue {
@@ -14,7 +14,7 @@ impl SoundQueue {
         Self { queue: Vec::new() }
     }
 
-    pub fn flush(&mut self, audio: &mut SdlAudio) {
+    pub fn flush<A: Audio>(&mut self, audio: &mut A) {
         for (channel, filename) in self.queue.iter() {
             audio.play_sound(*channel, filename);
         }
@@ -107,8 +107,16 @@ impl GameInfo {
         self.score += add;
     }
 
-    pub fn draw(&self, renderer: &mut SdlRenderer) {
+    pub fn draw<R: Renderer>(&self, renderer: &mut R) {
         renderer.draw_str(FONTS, GAME_WIDTH + 25, 35, "SCORE", 255, 0, 0);
-        renderer.draw_str(FONTS, GAME_WIDTH + 25 + 8 * 6, 35, &format!("{}", self.score), 255, 255, 255);
+        renderer.draw_str(
+            FONTS,
+            GAME_WIDTH + 25 + 8 * 6,
+            35,
+            &format!("{}", self.score),
+            255,
+            255,
+            255,
+        );
     }
 }

@@ -1,27 +1,35 @@
-use crate::teki::ecs::components::*;
-use crate::teki::utils::consts::*;
 use sdl2::image::LoadTexture;
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::{Point, Rect};
 use sdl2::render::WindowCanvas;
+use std::collections::HashMap;
+use teki_common::traits::Renderer;
+use teki_common::utils::consts::*;
 use vector2d::Vector2D;
 
 pub struct SdlRenderer {
     canvas: WindowCanvas,
+    sheet_map: HashMap<String, Rect>,
 }
 
 impl SdlRenderer {
     pub fn new(mut canvas: WindowCanvas, logical_size: (u32, u32)) -> Self {
         canvas.set_logical_size(logical_size.0, logical_size.1).expect("set_logical_size failed");
 
-        Self { canvas }
+        Self { canvas, sheet_map: HashMap::new() }
     }
 
     pub fn present(&mut self) {
         self.canvas.present();
     }
+}
 
-    pub fn set_draw_gradient(&mut self) {
+impl Renderer for SdlRenderer {
+    fn load_sprite(&mut self, filename: &str, x: i32, y: i32, w: u32, h: u32) {
+        self.sheet_map.insert(String::from(filename), Rect::new(x, y, w, h));
+    }
+
+    fn set_draw_gradient(&mut self) {
         let texture_creator = self.canvas.texture_creator();
         let mut texture = texture_creator
             .create_texture_streaming(PixelFormatEnum::IYUV, 256, 256)
@@ -61,17 +69,17 @@ impl SdlRenderer {
         self.canvas.copy(&texture, None, None).expect("copy failed");
     }
 
-    pub fn draw_sprite(&mut self, sprite: &SpriteDrawable, pos: Vector2D<i32>) {
+    fn draw_sprite(&mut self, sprite_name: &str, pos: &Vector2D<i32>) {
         let texture_creator = self.canvas.texture_creator();
-        let texture = texture_creator.load_texture(sprite.sprite_name).expect("No texture");
-
+        let texture = texture_creator.load_texture(sprite_name).expect("No texture");
+        let sprite_rect = self.sheet_map.get(sprite_name).unwrap();
         let screen_rect =
-            Rect::from_center(Point::new(pos.x, pos.y), sprite.rect.width(), sprite.rect.height());
+            Rect::from_center(Point::new(pos.x, pos.y), sprite_rect.width(), sprite_rect.height());
 
-        self.canvas.copy(&texture, sprite.rect, screen_rect).expect("copy failed");
+        self.canvas.copy(&texture, sprite_rect.clone(), screen_rect).expect("copy failed");
     }
 
-    pub fn draw_bg(&mut self, path: &str, is_fullscreen: bool) {
+    fn draw_bg(&mut self, path: &str, is_fullscreen: bool) {
         let texture_creator = self.canvas.texture_creator();
         let texture = texture_creator.load_texture(path).expect("No texture");
         let (w, h) = if is_fullscreen {
@@ -84,7 +92,7 @@ impl SdlRenderer {
             .expect("copy failed");
     }
 
-    pub fn draw_str(&mut self, path: &str, x: i32, y: i32, text: &str, r: u8, g: u8, b: u8) {
+    fn draw_str(&mut self, path: &str, x: i32, y: i32, text: &str, r: u8, g: u8, b: u8) {
         let texture_creator = self.canvas.texture_creator();
         let mut texture = texture_creator.load_texture(path).expect("No texture");
         texture.set_color_mod(r, g, b);
@@ -102,7 +110,7 @@ impl SdlRenderer {
         }
     }
 
-    pub fn clear(&mut self) {
+    fn clear(&mut self) {
         self.canvas.clear();
     }
 }

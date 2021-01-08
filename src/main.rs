@@ -1,17 +1,22 @@
-mod teki;
+mod sdl;
 
 use clap::{crate_description, crate_name, crate_version, App, Arg};
 
-use crate::teki::sdl::sdl_audio::SdlAudio;
+use crate::sdl::SdlAudio;
+use crate::sdl::SdlRenderer;
+use counted_array::counted_array;
+use lazy_static::lazy_static;
 use sdl2::event::Event;
 use sdl2::image::{self, InitFlag};
+use sdl2::keyboard::Keycode;
 use sdl2::mixer::{AUDIO_S16LSB, DEFAULT_CHANNELS};
 use sdl2::Sdl;
+use std::collections::HashMap;
 use std::time::Duration;
-use teki::ecs::app::EcsApp;
-use teki::sdl::sdl_renderer::SdlRenderer;
+use teki_common::utils::pad::Key;
+use teki_ecs::app::EcsApp;
 
-use teki::utils::consts::*;
+use teki_common::utils::consts::*;
 
 #[derive(Clone, Copy, PartialEq)]
 
@@ -79,6 +84,8 @@ fn main() -> Result<(), String> {
 
     let mut app = EcsApp::new(audio);
 
+    app.init(&mut renderer);
+
     let skip_count = 0;
     'running: loop {
         if !pump_events(&sdl_context, &mut app)? {
@@ -99,7 +106,7 @@ fn main() -> Result<(), String> {
     Ok(())
 }
 
-fn pump_events(sdl_context: &Sdl, app: &mut EcsApp) -> Result<bool, String> {
+fn pump_events(sdl_context: &Sdl, app: &mut EcsApp<SdlAudio>) -> Result<bool, String> {
     let mut event_pump = sdl_context.event_pump()?;
     for event in event_pump.poll_iter() {
         match event {
@@ -107,13 +114,41 @@ fn pump_events(sdl_context: &Sdl, app: &mut EcsApp) -> Result<bool, String> {
                 return Ok(false);
             }
             Event::KeyDown { keycode: Some(key), .. } => {
-                app.on_key(key, true);
+                if let Some(vkey) = map_key(key) {
+                    app.on_key(vkey, true);
+                }
             }
             Event::KeyUp { keycode: Some(key), .. } => {
-                app.on_key(key, false);
+                if let Some(vkey) = map_key(key) {
+                    app.on_key(vkey, false);
+                }
             }
             _ => {}
         }
     }
     Ok(true)
+}
+
+counted_array!(const KEY_MAP_TABLE: [(Keycode, Key); _] = [
+    (Keycode::Space,  Key::Space),
+    (Keycode::Escape, Key::Escape),
+    (Keycode::Left,   Key::Left),
+    (Keycode::Right,  Key::Right),
+    (Keycode::Up,     Key::Up),
+    (Keycode::Down,   Key::Down),
+
+]);
+
+lazy_static! {
+    static ref KEY_MAP: HashMap<Keycode, Key> = {
+        let mut m = HashMap::new();
+        for &(keycode, vkey) in KEY_MAP_TABLE.iter() {
+            m.insert(keycode, vkey);
+        }
+        m
+    };
+}
+
+fn map_key(keycode: Keycode) -> Option<Key> {
+    KEY_MAP.get(&keycode).map(|x| *x)
 }

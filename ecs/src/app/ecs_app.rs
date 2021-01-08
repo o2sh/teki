@@ -1,18 +1,10 @@
-use crate::{
-    teki::{
-        ecs::{components::*, resources::*, system_enemy::*, system_player::*},
-        sdl::sdl_audio::SdlAudio,
-        utils::{
-            consts::*,
-            fps_calc::FpsCalc,
-            pad::{Pad, PadBit},
-        },
-    },
-    SdlRenderer,
-};
-
+use crate::app::{components::*, resources::*, system_enemy::*, system_player::*};
 use legion::*;
-use sdl2::keyboard::Keycode;
+use teki_common::traits::Audio;
+use teki_common::traits::Renderer;
+use teki_common::utils::consts::*;
+use teki_common::utils::pad::{Key, Pad, PadBit};
+use teki_common::utils::FpsCalc;
 use vector2d::Vector2D;
 
 enum AppState {
@@ -20,16 +12,16 @@ enum AppState {
     Game(Game),
 }
 
-pub struct EcsApp {
-    pressed_key: Option<Keycode>,
+pub struct EcsApp<A> {
+    pressed_key: Option<Key>,
     state: AppState,
     pad: Pad,
     fps_calc: FpsCalc,
-    audio: SdlAudio,
+    audio: A,
 }
 
-impl EcsApp {
-    pub fn new(audio: SdlAudio) -> Self {
+impl<A: Audio> EcsApp<A> {
+    pub fn new(audio: A) -> Self {
         Self {
             pressed_key: None,
             state: AppState::Title(Title),
@@ -39,7 +31,13 @@ impl EcsApp {
         }
     }
 
-    pub fn on_key(&mut self, key: Keycode, down: bool) {
+    pub fn init<R: Renderer>(&mut self, renderer: &mut R) {
+        renderer.load_sprite(NEKO_SPRITE, 5, 5, 40, 40);
+        renderer.load_sprite(CORGI_SPRITE, 5, 5, 40, 40);
+        renderer.load_sprite(HEART_SPRITE, 0, 0, 20, 20);
+    }
+
+    pub fn on_key(&mut self, key: Key, down: bool) {
         self.pad.on_key(key, down);
         if down {
             self.pressed_key = Some(key);
@@ -48,7 +46,7 @@ impl EcsApp {
 
     pub fn update(&mut self) -> bool {
         self.pad.update();
-        if self.pressed_key == Some(Keycode::Escape) {
+        if self.pressed_key == Some(Key::Escape) {
             match &self.state {
                 AppState::Title(_title) => {
                     self.pressed_key = None;
@@ -78,7 +76,7 @@ impl EcsApp {
         true
     }
 
-    pub fn draw(&mut self, renderer: &mut SdlRenderer) {
+    pub fn draw<R: Renderer>(&mut self, renderer: &mut R) {
         renderer.clear();
         renderer.set_draw_gradient();
         match &self.state {
@@ -92,7 +90,10 @@ impl EcsApp {
             FONTS,
             WINDOW_WIDTH - 6 * 8,
             WINDOW_HEIGHT - 20,
-            &format!("FPS{:2}", self.fps_calc.fps()), 255, 255, 255
+            &format!("FPS{:2}", self.fps_calc.fps()),
+            255,
+            255,
+            255,
         );
     }
 
@@ -117,12 +118,28 @@ impl Title {
         None
     }
 
-    fn draw(&self, renderer: &mut SdlRenderer) {
+    fn draw<R: Renderer>(&self, renderer: &mut R) {
         let title = "TEKI";
-        renderer.draw_str(FONTS, (WINDOW_WIDTH / 2) - (title.len() as i32 / 2) * 8, 8 * 8, title, 255, 255, 255);
+        renderer.draw_str(
+            FONTS,
+            (WINDOW_WIDTH / 2) - (title.len() as i32 / 2) * 8,
+            8 * 8,
+            title,
+            255,
+            255,
+            255,
+        );
 
         let msg = "PRESS SPACE KEY TO START";
-        renderer.draw_str(FONTS, (WINDOW_WIDTH / 2) - (msg.len() as i32 / 2) * 8, 25 * 8, msg, 255, 255, 255);
+        renderer.draw_str(
+            FONTS,
+            (WINDOW_WIDTH / 2) - (msg.len() as i32 / 2) * 8,
+            25 * 8,
+            msg,
+            255,
+            255,
+            255,
+        );
     }
 }
 
@@ -158,7 +175,7 @@ impl Game {
         Self { world, resources, schedule }
     }
 
-    fn update(&mut self, pad: &Pad, audio: &mut SdlAudio) -> bool {
+    fn update<A: Audio>(&mut self, pad: &Pad, audio: &mut A) -> bool {
         self.resources.insert(pad.clone());
         self.schedule.execute(&mut self.world, &mut self.resources);
         let mut sound_queue = self.resources.get_mut::<SoundQueue>().unwrap();
@@ -166,11 +183,11 @@ impl Game {
         true
     }
 
-    fn draw(&self, renderer: &mut SdlRenderer) {
+    fn draw<R: Renderer>(&self, renderer: &mut R) {
         renderer.draw_bg(WATER_TEXTURE, false);
 
         for (position, drawable) in <(&Position, &SpriteDrawable)>::query().iter(&self.world) {
-            renderer.draw_sprite(drawable, position.0);
+            renderer.draw_sprite(drawable.sprite_name, &position.0);
         }
 
         if let Some(game_info) = self.get_game_info() {
