@@ -1,5 +1,6 @@
 use crate::app::{components::*, resources::*, system_enemy::*, system_player::*};
 use legion::*;
+use teki_common::traits::App;
 use teki_common::traits::Audio;
 use teki_common::traits::Renderer;
 use teki_common::utils::consts::*;
@@ -31,20 +32,32 @@ impl<A: Audio> EcsApp<A> {
         }
     }
 
-    pub fn init<R: Renderer>(&mut self, renderer: &mut R) {
+    fn start_game(&mut self) {
+        self.state = AppState::Game(Game::new());
+        self.audio.play_loop(CH_BG_MUSIC, BG_MUSIC);
+    }
+
+    fn back_to_title(&mut self) {
+        self.audio.halt();
+        self.state = AppState::Title(Title);
+    }
+}
+
+impl<R: Renderer, A: Audio> App<R> for EcsApp<A> {
+    fn init(&mut self, renderer: &mut R) {
         renderer.load_sprite(NEKO_SPRITE, 5, 5, 40, 40);
         renderer.load_sprite(CORGI_SPRITE, 5, 5, 40, 40);
         renderer.load_sprite(HEART_SPRITE, 0, 0, 20, 20);
     }
 
-    pub fn on_key(&mut self, key: Key, down: bool) {
+    fn on_key(&mut self, key: Key, down: bool) {
         self.pad.on_key(key, down);
         if down {
             self.pressed_key = Some(key);
         }
     }
 
-    pub fn update(&mut self) -> bool {
+    fn update(&mut self) -> bool {
         self.pad.update();
         if self.pressed_key == Some(Key::Escape) {
             match &self.state {
@@ -76,7 +89,7 @@ impl<A: Audio> EcsApp<A> {
         true
     }
 
-    pub fn draw<R: Renderer>(&mut self, renderer: &mut R) {
+    fn draw(&mut self, renderer: &mut R) {
         renderer.clear();
         renderer.set_draw_gradient();
         match &self.state {
@@ -95,16 +108,6 @@ impl<A: Audio> EcsApp<A> {
             255,
             255,
         );
-    }
-
-    fn start_game(&mut self) {
-        self.state = AppState::Game(Game::new());
-        self.audio.play_loop(CH_BG_MUSIC, BG_MUSIC);
-    }
-
-    fn back_to_title(&mut self) {
-        self.audio.halt();
-        self.state = AppState::Title(Title);
     }
 }
 

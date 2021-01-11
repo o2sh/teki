@@ -5,9 +5,12 @@ authors = ["o2sh <ossama-hjaji@live.fr>"]
 edition = "2018"
 
 [dependencies]
-legion = "0.3.1"
+legion = { version = "0.3.1", default-features = false, features = ["codegen"] }
 vector2d = "2.2.0"
 lazy_static = "1.4.0"
 array-macro = "1.0.5"
 
 teki-common = {path = "../common" }
+
+[features]
+wasm = ["legion/wasm-bindgen"]
