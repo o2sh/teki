@@ -3,6 +3,8 @@ use legion::*;
 use teki_common::traits::App;
 use teki_common::traits::Audio;
 use teki_common::traits::Renderer;
+use teki_common::traits::Timer;
+use teki_common::utils::collision::VRect;
 use teki_common::utils::consts::*;
 use teki_common::utils::pad::{Key, Pad, PadBit};
 use teki_common::utils::FpsCalc;
@@ -13,21 +15,21 @@ enum AppState {
     Game(Game),
 }
 
-pub struct EcsApp<A> {
+pub struct EcsApp<A: Audio, T: Timer> {
     pressed_key: Option<Key>,
     state: AppState,
     pad: Pad,
-    fps_calc: FpsCalc,
+    fps_calc: FpsCalc<T>,
     audio: A,
 }
 
-impl<A: Audio> EcsApp<A> {
-    pub fn new(audio: A) -> Self {
+impl<A: Audio, T: Timer> EcsApp<A, T> {
+    pub fn new(audio: A, timer: T) -> Self {
         Self {
             pressed_key: None,
             state: AppState::Title(Title),
             pad: Pad::default(),
-            fps_calc: FpsCalc::new(),
+            fps_calc: FpsCalc::new(timer),
             audio,
         }
     }
@@ -43,11 +45,11 @@ impl<A: Audio> EcsApp<A> {
     }
 }
 
-impl<R: Renderer, A: Audio> App<R> for EcsApp<A> {
+impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
     fn init(&mut self, renderer: &mut R) {
-        renderer.load_sprite(NEKO_SPRITE, 5, 5, 40, 40);
-        renderer.load_sprite(CORGI_SPRITE, 5, 5, 40, 40);
-        renderer.load_sprite(HEART_SPRITE, 0, 0, 20, 20);
+        renderer.load_sprite(NEKO_SPRITE, VRect::new(5, 5, 40, 40));
+        renderer.load_sprite(CORGI_SPRITE, VRect::new(5, 5, 40, 40));
+        renderer.load_sprite(HEART_SPRITE, VRect::new(0, 0, 20, 20));
     }
 
     fn on_key(&mut self, key: Key, down: bool) {

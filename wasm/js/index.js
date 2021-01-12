@@ -1,6 +1,13 @@
 import {WasmApp, WasmRenderer} from '../pkg/index'
+import {audioManager} from './audio'
+
+const CHANNEL_COUNT = 3
 
 const CANVAS_ID = 'mycanvas'
+
+window.play_se = function play_se(channel, filename) {
+  audioManager.playSe(channel, filename)
+}
 
 function fitCanvas() {
   const canvas = document.getElementById(CANVAS_ID)
@@ -37,17 +44,10 @@ fitCanvas()
 setupResizeListener()
 
 const renderer = WasmRenderer.new(CANVAS_ID)
-const app = WasmApp.new(
-  renderer,
-  function get_now() {
-    return performance.now()
-  },
-  function get_item(key) {
-    return localStorage.getItem(key)
-  },
-  function set_item(key, value) {
-    localStorage.setItem(key, value)
-  })
+const app = WasmApp.new(renderer,
+   function get_now() {
+  return performance.now()
+},)
 
 document.addEventListener('keydown', (event) => {
   app.on_key(event.code, true)
@@ -81,4 +81,4 @@ const loop = (function() {
   }
 })()
 
-const cover = createCoverScreen('Loading...')
+    requestAnimationFrame(loop)

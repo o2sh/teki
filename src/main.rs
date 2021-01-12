@@ -1,9 +1,11 @@
 mod sdl;
+mod std_timer;
 
 use crate::sdl::SdlApp;
 use clap::{crate_description, crate_name, crate_version, App, Arg};
 
 use crate::sdl::SdlAudio;
+use crate::std_timer::StdTimer;
 use sdl2::mixer::{AUDIO_S16LSB, DEFAULT_CHANNELS};
 use teki_common::utils::consts::*;
 use teki_ecs::app::EcsApp;
@@ -48,7 +50,8 @@ fn main() -> Result<(), String> {
 
     sdl2::mixer::allocate_channels(4);
 
-    let mut app = SdlApp::new(EcsApp::new(audio))?;
+    let timer = StdTimer::new();
+    let mut app = SdlApp::new(EcsApp::new(audio, timer))?;
 
     app.run(scale, fullscreen)?;
 

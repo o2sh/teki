@@ -1,7 +1,8 @@
+use crate::utils::collision::VRect;
 use vector2d::Vector2D;
 
 pub trait Renderer {
-    fn load_sprite(&mut self, filename: &str, x: i32, y: i32, w: u32, h: u32);
+    fn load_sprite(&mut self, path: &str, vrect: VRect);
     fn set_draw_gradient(&mut self);
     fn clear(&mut self);
     fn draw_str(&mut self, path: &str, x: i32, y: i32, text: &str, r: u8, g: u8, b: u8);

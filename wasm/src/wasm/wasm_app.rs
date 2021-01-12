@@ -1,3 +1,5 @@
+extern crate js_sys;
+
 use wasm_bindgen::prelude::*;
 
 use teki_common::traits::App;
@@ -5,8 +7,9 @@ use teki_common::utils::pad::Key;
 
 use teki_ecs::app::ecs_app::EcsApp;
 
-use crate::wasm_audio::WasmAudio;
-use crate::wasm_renderer::WasmRenderer;
+use crate::wasm::wasm_audio::WasmAudio;
+use crate::wasm::wasm_renderer::WasmRenderer;
+use crate::wasm::wasm_timer::WasmTimer;
 
 #[wasm_bindgen]
 pub struct WasmApp {
@@ -16,10 +19,19 @@ pub struct WasmApp {
 
 #[wasm_bindgen]
 impl WasmApp {
-    pub fn new(mut renderer: WasmRenderer) -> Self {
+    pub fn new(mut renderer: WasmRenderer, get_now_fn: js_sys::Function) -> Self {
+        crate::utils::set_panic_hook();
         let audio = WasmAudio::new();
-
-        let mut app = EcsApp::new(audio);
+        let timer = WasmTimer::new(move || {
+            let this = JsValue::NULL;
+            if let Ok(v) = get_now_fn.call0(&this) {
+                if let Some(t) = v.as_f64() {
+                    return t;
+                }
+            }
+            0.0
+        });
+        let mut app = EcsApp::new(audio, timer);
 
         app.init(&mut renderer);
 

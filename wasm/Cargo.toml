@@ -12,9 +12,11 @@ default = ["console_error_panic_hook"]
 
 [dependencies]
 wasm-bindgen = "0.2.45"
+wasm-bindgen-futures = "0.4.14"
 wee_alloc = { version = "0.4.2", optional = true }
 vector2d = "2.2.0"
 console_error_panic_hook = { version = "0.1.6", optional = true }
+js-sys = "0.3.41"
 
 teki-ecs = {path = "../ecs", features = ["wasm"]}
 teki-common = {path = "../common" }

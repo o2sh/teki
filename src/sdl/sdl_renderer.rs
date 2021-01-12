@@ -4,19 +4,20 @@ use sdl2::rect::{Point, Rect};
 use sdl2::render::WindowCanvas;
 use std::collections::HashMap;
 use teki_common::traits::Renderer;
+use teki_common::utils::collision::VRect;
 use teki_common::utils::consts::*;
 use vector2d::Vector2D;
 
 pub struct SdlRenderer {
     canvas: WindowCanvas,
-    sheet_map: HashMap<String, Rect>,
+    sprite_sheet: HashMap<String, VRect>,
 }
 
 impl SdlRenderer {
     pub fn new(mut canvas: WindowCanvas, logical_size: (u32, u32)) -> Self {
         canvas.set_logical_size(logical_size.0, logical_size.1).expect("set_logical_size failed");
 
-        Self { canvas, sheet_map: HashMap::new() }
+        Self { canvas, sprite_sheet: HashMap::new() }
     }
 
     pub fn present(&mut self) {
@@ -25,8 +26,8 @@ impl SdlRenderer {
 }
 
 impl Renderer for SdlRenderer {
-    fn load_sprite(&mut self, filename: &str, x: i32, y: i32, w: u32, h: u32) {
-        self.sheet_map.insert(String::from(filename), Rect::new(x, y, w, h));
+    fn load_sprite(&mut self, path: &str, vrect: VRect) {
+        self.sprite_sheet.insert(String::from(path), vrect);
     }
 
     fn set_draw_gradient(&mut self) {
@@ -72,11 +73,16 @@ impl Renderer for SdlRenderer {
     fn draw_sprite(&mut self, sprite_name: &str, pos: &Vector2D<i32>) {
         let texture_creator = self.canvas.texture_creator();
         let texture = texture_creator.load_texture(sprite_name).expect("No texture");
-        let sprite_rect = self.sheet_map.get(sprite_name).unwrap();
-        let screen_rect =
-            Rect::from_center(Point::new(pos.x, pos.y), sprite_rect.width(), sprite_rect.height());
+        let sprite_rect = self.sprite_sheet.get(sprite_name).unwrap();
+        let screen_rect = Rect::from_center(Point::new(pos.x, pos.y), sprite_rect.w, sprite_rect.h);
 
-        self.canvas.copy(&texture, sprite_rect.clone(), screen_rect).expect("copy failed");
+        self.canvas
+            .copy(
+                &texture,
+                Rect::new(sprite_rect.x, sprite_rect.y, sprite_rect.w, sprite_rect.h),
+                screen_rect,
+            )
+            .expect("copy failed");
     }
 
     fn draw_bg(&mut self, path: &str, is_fullscreen: bool) {
