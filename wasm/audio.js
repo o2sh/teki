@@ -54,6 +54,12 @@ class AudioManager {
     }
   }
 
+  stopAll() {
+    for (let ch = 0; ch < this.channels.length; ++ch) {
+      this.stop(ch)
+    }
+  }
+
   stop(channel) {
     const source = this.channels[channel]
     if (source != null) {
