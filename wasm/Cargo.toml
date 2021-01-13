@@ -26,7 +26,7 @@ version = "0.3.46"
 features = [
     "console", "Window", "Document", "Element",
     "HtmlImageElement", "HtmlCanvasElement", "CanvasRenderingContext2d",
-    "Headers", "Request", "RequestInit", "RequestMode", "Response", "ReadableStream",
+    "Headers", "Request", "RequestInit", "RequestMode", "Response", "ReadableStream","CanvasGradient"
 ]
 
 [dev-dependencies]

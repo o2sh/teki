@@ -1,12 +1,30 @@
-import {WasmApp, WasmRenderer} from '../pkg/index'
-import {audioManager} from './audio'
+import { WasmApp, WasmRenderer } from '../pkg/index'
+import { audioManager } from './audio'
 
 const CHANNEL_COUNT = 3
+
+const AUDIO_ASSETS = [
+  '../assets/audio/8bit',
+  '../assets/audio/bubble',
+  '../assets/audio/pop'
+]
+const ENALBE_AUDIO = '../assets/audio/toggle_sound'
+
+const ICON_SOUND_ON = '../assets/images/sound_on.svg'
+const ICON_SOUND_OFF = '../assets/images/sound_off.svg'
 
 const CANVAS_ID = 'mycanvas'
 
 window.play_se = function play_se(channel, filename) {
   audioManager.playSe(channel, filename)
+}
+
+window.play_loop = function play_loop(channel, filename) {
+  audioManager.playLoop(channel, filename)
+}
+
+window.stop = function stop(channel) {
+  audioManager.stop(channel)
 }
 
 function fitCanvas() {
@@ -18,6 +36,18 @@ function fitCanvas() {
     canvas.style.height = `100%`
     canvas.style.width = `${canvas.width * window.innerHeight / canvas.height}px`
   }
+}
+
+function setupSoundButton() {
+  const toggleSound = () => {
+    audioManager.toggleEnabled()
+    if (audioManager.enabled)
+      audioManager.playSe(0, ENALBE_AUDIO)
+    document.getElementById('sound-icon').src = audioManager.enabled ? ICON_SOUND_ON : ICON_SOUND_OFF
+  }
+  const soundIconHolder = document.getElementById('sound-icon-holder')
+  soundIconHolder.addEventListener('click', toggleSound)
+  soundIconHolder.addEventListener('touchstart', toggleSound)
 }
 
 function setupResizeListener() {
@@ -45,9 +75,9 @@ setupResizeListener()
 
 const renderer = WasmRenderer.new(CANVAS_ID)
 const app = WasmApp.new(renderer,
-   function get_now() {
-  return performance.now()
-},)
+  function get_now() {
+    return performance.now()
+  })
 
 document.addEventListener('keydown', (event) => {
   app.on_key(event.code, true)
@@ -56,7 +86,7 @@ document.addEventListener('keyup', (event) => {
   app.on_key(event.code, false)
 })
 
-const loop = (function() {
+const loop = (function () {
   const target_fps = 60
   const ticks = 1000 / target_fps
   const max_skip = 5
@@ -81,4 +111,11 @@ const loop = (function() {
   }
 })()
 
+const cover = createCoverScreen('Loading...')
+audioManager.createContext(CHANNEL_COUNT)
+audioManager.loadAllAudios(AUDIO_ASSETS)
+  .then(() => {
+    document.body.removeChild(cover)
+    setupSoundButton()
     requestAnimationFrame(loop)
+  })

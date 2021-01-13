@@ -40,7 +40,7 @@ impl<A: Audio, T: Timer> EcsApp<A, T> {
     }
 
     fn back_to_title(&mut self) {
-        self.audio.halt();
+        self.audio.stop(CH_BG_MUSIC);
         self.state = AppState::Title(Title);
     }
 }
@@ -50,6 +50,8 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
         renderer.load_sprite(NEKO_SPRITE, VRect::new(5, 5, 40, 40));
         renderer.load_sprite(CORGI_SPRITE, VRect::new(5, 5, 40, 40));
         renderer.load_sprite(HEART_SPRITE, VRect::new(0, 0, 20, 20));
+        renderer.load_sprite(FONTS, VRect::new(0, 0, 20, 20));
+        renderer.load_sprite(WATER_TEXTURE, VRect::new(0, 0, 32, 32));
     }
 
     fn on_key(&mut self, key: Key, down: bool) {
@@ -189,7 +191,7 @@ impl Game {
     }
 
     fn draw<R: Renderer>(&self, renderer: &mut R) {
-        renderer.draw_bg(WATER_TEXTURE, false);
+        renderer.draw_bg(WATER_TEXTURE);
 
         for (position, drawable) in <(&Position, &SpriteDrawable)>::query().iter(&self.world) {
             renderer.draw_sprite(drawable.sprite_name, &position.0);

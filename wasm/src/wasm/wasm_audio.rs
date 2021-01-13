@@ -7,6 +7,16 @@ extern "C" {
     fn play_se(channel: u32, filename: &str);
 }
 
+#[wasm_bindgen]
+extern "C" {
+    fn play_loop(channel: u32, filename: &str);
+}
+
+#[wasm_bindgen]
+extern "C" {
+    fn stop(channel: u32);
+}
+
 pub struct WasmAudio;
 
 impl WasmAudio {
@@ -20,6 +30,10 @@ impl Audio for WasmAudio {
         play_se(channel, filename);
     }
 
-    fn play_loop(&mut self, channel: u32, filename: &str) {}
-    fn halt(&mut self) {}
+    fn play_loop(&mut self, channel: u32, filename: &str) {
+        play_loop(channel, filename);
+    }
+    fn stop(&mut self, channel: u32) {
+        stop(channel);
+    }
 }

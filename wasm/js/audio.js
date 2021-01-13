@@ -18,12 +18,21 @@ class AudioManager {
       this.stopAll()
   }
 
+
   playSe(channel, filename) {
+    this.playMusic(channel, filename, false)
+  }
+
+  playLoop(channel, filename) {
+    this.playMusic(channel, filename, true)
+  }
+
+  playMusic(channel, filename, isLoop) {
     if (!this.enabled)
       return
 
     if (filename in this.audios) {
-     if (channel < this.channels.length) {
+      if (channel < this.channels.length) {
         if (this.channels[channel] != null) {
           this.channels[channel].stop()
         }
@@ -34,6 +43,9 @@ class AudioManager {
 
         source.buffer = this.audios[filename]
         source.start(0)
+        if (isLoop) {
+          source.loop = true
+        }
       }
     } else if (!(filename in this.audioLoadings)) {
       this.loadAudio(filename)
@@ -42,13 +54,11 @@ class AudioManager {
     }
   }
 
-  stopAll() {
-    for (let ch = 0; ch < this.channels.length; ++ch) {
-      const source = this.channels[ch]
-      if (source != null) {
-        source.stop()
-        this.channels[ch] = null
-      }
+  stop(channel) {
+    const source = this.channels[channel]
+    if (source != null) {
+      source.stop()
+      this.channels[channel] = null
     }
   }
 

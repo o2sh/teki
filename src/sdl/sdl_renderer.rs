@@ -85,14 +85,11 @@ impl Renderer for SdlRenderer {
             .expect("copy failed");
     }
 
-    fn draw_bg(&mut self, path: &str, is_fullscreen: bool) {
+    fn draw_bg(&mut self, path: &str) {
         let texture_creator = self.canvas.texture_creator();
         let texture = texture_creator.load_texture(path).expect("No texture");
-        let (w, h) = if is_fullscreen {
-            (WINDOW_WIDTH as u32, WINDOW_HEIGHT as u32)
-        } else {
-            (GAME_WIDTH as u32, GAME_HEIGHT as u32)
-        };
+        let (w, h) = (GAME_WIDTH as u32, GAME_HEIGHT as u32);
+
         self.canvas
             .copy(&texture, None, Some(Rect::new(PADDING, PADDING, w, h)))
             .expect("copy failed");

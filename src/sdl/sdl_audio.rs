@@ -16,7 +16,7 @@ impl SdlAudio {
 
     fn play(&mut self, channel: u32, filename: &str, loops: i32) {
         if channel < self.channels.len() as u32 {
-            let path = format!("{}", filename);
+            let path = format!("{}.ogg", filename);
             let mut chunk = Chunk::from_file(path).expect("No music file");
             chunk.set_volume(self.base_volume);
             sdl2::mixer::Channel::all().play(&chunk, loops).expect("Music cannot be played");
@@ -34,7 +34,7 @@ impl Audio for SdlAudio {
         self.play(channel, filename, i32::MAX)
     }
 
-    fn halt(&mut self) {
+    fn stop(&mut self, channel: u32) {
         sdl2::mixer::Channel::all().fade_out(100);
     }
 }

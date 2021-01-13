@@ -33,6 +33,6 @@ pub const NEKO_SPRITE: &str = "./assets/neko.png";
 pub const CORGI_SPRITE: &str = "./assets/corgi.png";
 pub const HEART_SPRITE: &str = "./assets/heart.png";
 
-pub const BUBBLE_SOUND: &str = "./assets/audio/bubble.ogg";
-pub const BG_MUSIC: &str = "./assets/audio/8bit.ogg";
-pub const SE_KILL: &str = "./assets/audio/pop.ogg";
+pub const BUBBLE_SOUND: &str = "./assets/audio/bubble";
+pub const BG_MUSIC: &str = "./assets/audio/8bit";
+pub const SE_KILL: &str = "./assets/audio/pop";
