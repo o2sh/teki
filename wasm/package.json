@@ -5,7 +5,8 @@
   "scripts": {
     "build": "rimraf dist pkg && webpack",
     "start": "cp -r ../assets ./ && rimraf dist pkg && webpack-dev-server --open -d",
-    "test": "cargo test && wasm-pack test --headless"
+    "test": "cargo test && wasm-pack test --headless",
+    "deploy": "rimraf dist pkg ../docs/* && npm run build && cp -r dist/* ../docs/"
   },
 
   "devDependencies": {
