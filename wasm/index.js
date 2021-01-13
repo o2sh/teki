@@ -1,17 +1,17 @@
-import { WasmApp, WasmRenderer } from '../pkg/index'
+import { WasmApp, WasmRenderer } from './pkg/index'
 import { audioManager } from './audio'
 
 const CHANNEL_COUNT = 3
 
 const AUDIO_ASSETS = [
-  '../assets/audio/8bit',
-  '../assets/audio/bubble',
-  '../assets/audio/pop'
+  'assets/audio/8bit',
+  'assets/audio/bubble',
+  'assets/audio/pop'
 ]
-const ENALBE_AUDIO = '../assets/audio/toggle_sound'
+const ENALBE_AUDIO = 'assets/audio/toggle_sound'
 
-const ICON_SOUND_ON = '../assets/images/sound_on.svg'
-const ICON_SOUND_OFF = '../assets/images/sound_off.svg'
+const ICON_SOUND_ON = 'assets/images/sound_on.svg'
+const ICON_SOUND_OFF = 'assets/images/sound_off.svg'
 
 const CANVAS_ID = 'mycanvas'
 
