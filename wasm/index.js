@@ -47,7 +47,6 @@ function setupSoundButton() {
   }
   const soundIconHolder = document.getElementById('sound-icon-holder')
   soundIconHolder.addEventListener('click', toggleSound)
-  soundIconHolder.addEventListener('touchstart', toggleSound)
 }
 
 function setupResizeListener() {
