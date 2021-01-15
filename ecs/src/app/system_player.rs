@@ -21,7 +21,7 @@ pub fn player_hit_box() -> HitBox {
 }
 
 pub fn player_sprite() -> SpriteDrawable {
-    SpriteDrawable { sprite_name: NEKO_SPRITE }
+    SpriteDrawable { sprite_name: PLAYER_SPRITE }
 }
 
 #[system(for_each)]
@@ -98,7 +98,7 @@ pub fn do_fire_myshot(
             MyShot { player_entity: entity },
             pos,
             HitBox { size: Vector2D::new(20, 20) },
-            SpriteDrawable { sprite_name: HEART_SPRITE },
+            SpriteDrawable { sprite_name: BULLET_SPRITE },
         ));
     }
 }

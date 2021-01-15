@@ -1,18 +1,5 @@
 use vector2d::Vector2D;
 
-pub struct VRect {
-    pub x: i32,
-    pub y: i32,
-    pub w: u32,
-    pub h: u32,
-}
-
-impl VRect {
-    pub fn new(x: i32, y: i32, w: u32, h: u32) -> Self {
-        Self { x, y, w, h }
-    }
-}
-
 pub struct CollBox {
     pub top_left: Vector2D<i32>,
     pub size: Vector2D<i32>,

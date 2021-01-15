@@ -24,7 +24,7 @@ pub fn spawn_enemy(#[resource] enemy_formation: &mut EnemyFormation, commands: &
     }
 
     for enemy in enemies {
-        let drawable = SpriteDrawable { sprite_name: CORGI_SPRITE };
+        let drawable = SpriteDrawable { sprite_name: ENEMY_SPRITE };
         let hit_box = HitBox { size: Vector2D::new(35, 35) };
         commands.push((enemy, *POSITION_ZERO, hit_box, drawable));
     }

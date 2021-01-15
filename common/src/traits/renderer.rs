@@ -1,11 +1,11 @@
-use crate::utils::collision::VRect;
 use vector2d::Vector2D;
 
 pub trait Renderer {
-    fn load_sprite(&mut self, path: &str, vrect: VRect);
-    fn set_draw_gradient(&mut self);
+    fn load_textures(&mut self, base_path: &str, filenames: &[&str]);
+    fn load_sprite_sheet(&mut self, filename: &str);
     fn clear(&mut self);
-    fn draw_str(&mut self, path: &str, x: i32, y: i32, text: &str, r: u8, g: u8, b: u8);
+    fn draw_str(&mut self, sprite_name: &str, x: i32, y: i32, text: &str, r: u8, g: u8, b: u8);
     fn draw_sprite(&mut self, sprite_name: &str, pos: &Vector2D<i32>);
-    fn draw_bg(&mut self, path: &str);
+    fn draw_bg(&mut self, sprite_name: &str, width: i32, height: i32, padding: i32);
+    fn set_draw_color(&mut self, r: u8, g: u8, b: u8);
 }

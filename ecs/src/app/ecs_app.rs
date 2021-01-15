@@ -4,7 +4,6 @@ use teki_common::traits::App;
 use teki_common::traits::Audio;
 use teki_common::traits::Renderer;
 use teki_common::traits::Timer;
-use teki_common::utils::collision::VRect;
 use teki_common::utils::consts::*;
 use teki_common::utils::pad::{Key, Pad, PadBit};
 use teki_common::utils::FpsCalc;
@@ -47,11 +46,8 @@ impl<A: Audio, T: Timer> EcsApp<A, T> {
 
 impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
     fn init(&mut self, renderer: &mut R) {
-        renderer.load_sprite(NEKO_SPRITE, VRect::new(5, 5, 40, 40));
-        renderer.load_sprite(CORGI_SPRITE, VRect::new(5, 5, 40, 40));
-        renderer.load_sprite(HEART_SPRITE, VRect::new(0, 0, 20, 20));
-        renderer.load_sprite(FONTS, VRect::new(0, 0, 20, 20));
-        renderer.load_sprite(WATER_TEXTURE, VRect::new(0, 0, 32, 32));
+        renderer.load_textures("assets", &["sprites.png", "font.png"]);
+        renderer.load_sprite_sheet("assets/sprites.json");
     }
 
     fn on_key(&mut self, key: Key, down: bool) {
@@ -95,7 +91,7 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
 
     fn draw(&mut self, renderer: &mut R) {
         renderer.clear();
-        renderer.set_draw_gradient();
+        renderer.draw_bg(BG_TEXTURE, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
         match &self.state {
             AppState::Title(title) => title.draw(renderer),
             AppState::Game(game) => game.draw(renderer),
@@ -105,7 +101,7 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
 
         renderer.draw_str(
             FONTS,
-            WINDOW_WIDTH - 6 * 8,
+            WINDOW_WIDTH - 6 * 16,
             WINDOW_HEIGHT - 20,
             &format!("FPS{:2}", self.fps_calc.fps()),
             255,
@@ -129,8 +125,8 @@ impl Title {
         let title = "TEKI";
         renderer.draw_str(
             FONTS,
-            (WINDOW_WIDTH / 2) - (title.len() as i32 / 2) * 8,
-            8 * 8,
+            (WINDOW_WIDTH / 2) - (title.len() as i32 / 2) * 16,
+            8 * 16,
             title,
             255,
             255,
@@ -140,8 +136,8 @@ impl Title {
         let msg = "PRESS SPACE KEY TO START";
         renderer.draw_str(
             FONTS,
-            (WINDOW_WIDTH / 2) - (msg.len() as i32 / 2) * 8,
-            25 * 8,
+            (WINDOW_WIDTH / 2) - (msg.len() as i32 / 2) * 16,
+            25 * 16,
             msg,
             255,
             255,
@@ -191,7 +187,7 @@ impl Game {
     }
 
     fn draw<R: Renderer>(&self, renderer: &mut R) {
-        renderer.draw_bg(WATER_TEXTURE);
+        renderer.draw_bg(GAME_TEXTURE, GAME_WIDTH, GAME_HEIGHT, PADDING);
 
         for (position, drawable) in <(&Position, &SpriteDrawable)>::query().iter(&self.world) {
             renderer.draw_sprite(drawable.sprite_name, &position.0);

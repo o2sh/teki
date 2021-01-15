@@ -108,10 +108,10 @@ impl GameInfo {
     }
 
     pub fn draw<R: Renderer>(&self, renderer: &mut R) {
-        renderer.draw_str(FONTS, GAME_WIDTH + 25, 35, "SCORE", 255, 0, 0);
+        renderer.draw_str(FONTS, GAME_WIDTH + 25, 35, "SCORE", 25, 158, 88);
         renderer.draw_str(
             FONTS,
-            GAME_WIDTH + 25 + 8 * 6,
+            GAME_WIDTH + 25 + 16 * 6,
             35,
             &format!("{}", self.score),
             255,

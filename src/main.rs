@@ -26,20 +26,9 @@ fn main() -> Result<(), String> {
         .version(crate_version!())
         .about(crate_description!())
         .arg(Arg::with_name("full").help("Use fullscreen").short("f").long("fullscreen"))
-        .arg(
-            Arg::with_name("scale")
-                .help("Specify window scale (default: 3)")
-                .short("s")
-                .long("scale")
-                .takes_value(true),
-        )
         .get_matches();
     let fullscreen = matches.is_present("full");
-    let scale = if let Some(scale) = matches.value_of("scale") {
-        String::from(scale).parse().unwrap()
-    } else {
-        3
-    };
+
     let audio = SdlAudio::new(CHANNEL_COUNT, BASE_VOLUME);
 
     let frequency = 44_100;
@@ -53,7 +42,7 @@ fn main() -> Result<(), String> {
     let timer = StdTimer::new();
     let mut app = SdlApp::new(EcsApp::new(audio, timer))?;
 
-    app.run(scale, fullscreen)?;
+    app.run(1, fullscreen)?;
 
     Ok(())
 }
