@@ -5,7 +5,7 @@ use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
 use teki_common::utils::consts::*;
-use teki_common::EnemyType;
+use teki_common::{EnemyType, FormationIndex};
 use vector2d::Vector2D;
 
 lazy_static! {
@@ -20,12 +20,18 @@ pub fn spawn_enemy(#[resource] enemy_formation: &mut EnemyFormation, commands: &
     let mut enemies: Vec<Enemy> = Vec::new();
 
     for x in 0..X_COUNT {
-        enemies.push(Enemy { enemy_type: EnemyType::Corgi, formation_index: x as u8 });
+        for y in 0..Y_COUNT {
+            enemies.push(Enemy {
+                enemy_type: EnemyType::Corgi,
+                formation_index: FormationIndex(x, y),
+            });
+        }
     }
 
     for enemy in enemies {
-        let drawable = SpriteDrawable { sprite_name: ENEMY_SPRITE };
-        let hit_box = HitBox { size: Vector2D::new(35, 35) };
+        let drawable =
+            SpriteDrawable { sprite_name: ENEMY_SPRITE, offset: Vector2D::new(-16, -16) };
+        let hit_box = HitBox { size: Vector2D::new(32, 32) };
         commands.push((enemy, *POSITION_ZERO, hit_box, drawable));
     }
     enemy_formation.done_appearance = true;

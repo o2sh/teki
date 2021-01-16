@@ -34,7 +34,7 @@ impl Audio for SdlAudio {
         self.play(channel, filename, i32::MAX)
     }
 
-    fn stop(&mut self, channel: u32) {
+    fn stop(&mut self, _channel: u32) {
         sdl2::mixer::Channel::all().fade_out(100);
     }
 }

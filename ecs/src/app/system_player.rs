@@ -5,6 +5,7 @@ use legion::world::SubWorld;
 use legion::*;
 use teki_common::utils::collision::CollBox;
 use teki_common::utils::consts::*;
+use teki_common::utils::math::*;
 use teki_common::utils::pad::{Pad, PadBit};
 use vector2d::Vector2D;
 
@@ -21,7 +22,7 @@ pub fn player_hit_box() -> HitBox {
 }
 
 pub fn player_sprite() -> SpriteDrawable {
-    SpriteDrawable { sprite_name: PLAYER_SPRITE }
+    SpriteDrawable { sprite_name: PLAYER_SPRITE, offset: Vector2D::new(-16, -16) }
 }
 
 #[system(for_each)]
@@ -35,14 +36,14 @@ pub fn do_move_player(pad: &Pad, entity: Entity, world: &mut SubWorld) {
     let pos = &mut position.0;
     if pad.is_pressed(PadBit::L) {
         pos.x -= PLAYER_SPEED;
-        let left = PADDING + 15;
+        let left = (16 + PADDING) * ONE;
         if pos.x < left {
             pos.x = left;
         }
     }
     if pad.is_pressed(PadBit::R) {
         pos.x += PLAYER_SPEED;
-        let right = GAME_WIDTH - 10;
+        let right = (GAME_WIDTH + PADDING - 16) * ONE;
         if pos.x > right {
             pos.x = right;
         }
@@ -50,14 +51,14 @@ pub fn do_move_player(pad: &Pad, entity: Entity, world: &mut SubWorld) {
 
     if pad.is_pressed(PadBit::U) {
         pos.y -= PLAYER_SPEED;
-        let top = PADDING + 20;
+        let top = (16 + PADDING) * ONE;
         if pos.y < top {
             pos.y = top;
         }
     }
     if pad.is_pressed(PadBit::D) {
         pos.y += PLAYER_SPEED;
-        let bottom = GAME_HEIGHT - 10;
+        let bottom = (GAME_HEIGHT + PADDING - 16) * ONE;
         if pos.y > bottom {
             pos.y = bottom;
         }
@@ -93,12 +94,12 @@ pub fn do_fire_myshot(
     commands: &mut CommandBuffer,
 ) {
     if can_player_fire(player) {
-        let pos = Position(Vector2D::new(position.0.x, position.0.y - 20));
+        let pos = Position(Vector2D::new(position.0.x, position.0.y - 16 * ONE));
         commands.push((
             MyShot { player_entity: entity },
             pos,
-            HitBox { size: Vector2D::new(20, 20) },
-            SpriteDrawable { sprite_name: BULLET_SPRITE },
+            HitBox { size: Vector2D::new(10, 20) },
+            SpriteDrawable { sprite_name: BULLET_SPRITE, offset: Vector2D::new(-5, -10) },
         ));
     }
 }
@@ -131,12 +132,9 @@ pub fn do_move_myshot(entity: Entity, world: &mut SubWorld, commands: &mut Comma
 }
 
 fn out_of_screen(pos: &Vector2D<i32>) -> bool {
-    const MARGIN: i32 = 5;
-    const TOP: i32 = MARGIN + PADDING;
-    const LEFT: i32 = MARGIN + PADDING;
-    const RIGHT: i32 = GAME_WIDTH;
-    const BOTTOM: i32 = GAME_HEIGHT - PADDING;
-    pos.y < TOP || pos.x < LEFT || pos.x > RIGHT || pos.y > BOTTOM
+    const MARGIN: i32 = 10;
+    const TOP: i32 = (MARGIN + PADDING) * ONE;
+    pos.y < TOP
 }
 
 pub fn delete_entity(entity: Entity, commands: &mut CommandBuffer) {
@@ -163,7 +161,8 @@ pub fn collision_check(
         for (_enemy, enemy_pos, enemy_hit_box, enemy_entity) in
             <(&Enemy, &Position, &HitBox, Entity)>::query().iter(world)
         {
-            let enemy_collbox = CollBox { top_left: enemy_pos.0, size: enemy_hit_box.size };
+            let enemy_collbox =
+                CollBox { top_left: round_vec(&enemy_pos.0), size: enemy_hit_box.size };
             if shot_coll_box.check_collision(&enemy_collbox) {
                 delete_entity(*shot_entity, commands);
                 delete_entity(*enemy_entity, commands);
@@ -175,5 +174,5 @@ pub fn collision_check(
 }
 
 fn pos_to_coll_box(pos: &Vector2D<i32>, coll_rect: &HitBox) -> CollBox {
-    CollBox { top_left: *pos, size: coll_rect.size }
+    CollBox { top_left: round_vec(pos), size: coll_rect.size }
 }

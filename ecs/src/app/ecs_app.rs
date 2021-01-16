@@ -5,6 +5,7 @@ use teki_common::traits::Audio;
 use teki_common::traits::Renderer;
 use teki_common::traits::Timer;
 use teki_common::utils::consts::*;
+use teki_common::utils::math::*;
 use teki_common::utils::pad::{Key, Pad, PadBit};
 use teki_common::utils::FpsCalc;
 use vector2d::Vector2D;
@@ -190,7 +191,8 @@ impl Game {
         renderer.draw_bg(GAME_TEXTURE, GAME_WIDTH, GAME_HEIGHT, PADDING);
 
         for (position, drawable) in <(&Position, &SpriteDrawable)>::query().iter(&self.world) {
-            renderer.draw_sprite(drawable.sprite_name, &position.0);
+            let pos = round_vec(&position.0) + drawable.offset;
+            renderer.draw_sprite(drawable.sprite_name, &pos);
         }
 
         if let Some(game_info) = self.get_game_info() {

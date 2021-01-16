@@ -3,8 +3,6 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use vector2d::Vector2D;
-
 #[derive(Default)]
 pub struct SpriteSheet {
     sprite_sheets: Vec<Rc<SpriteSheet1>>,
