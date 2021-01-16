@@ -22,8 +22,8 @@ pub const PLAYER_SPEED: i32 = 8 * ONE / 2;
 pub const MYSHOT_SPEED: i32 = 12 * ONE;
 pub const FPS: u32 = 60;
 
-pub const X_COUNT: usize = 10;
-pub const Y_COUNT: usize = 6;
+pub const X_COUNT: usize = 4;
+pub const Y_COUNT: usize = 3;
 
 pub const BASE_Y: i32 = 50;
 
@@ -33,7 +33,7 @@ pub const GAME_TEXTURE: &str = "ground";
 pub const BG_TEXTURE: &str = "grass";
 
 pub const PLAYER_SPRITE: &str = "hero";
-pub const ENEMY_SPRITE: &str = "enemy";
+pub const ENEMY_SPRITE: &str = "ghost1";
 pub const BULLET_SPRITE: &str = "orb";
 
 pub const BUBBLE_SOUND: &str = "./assets/audio/bubble";

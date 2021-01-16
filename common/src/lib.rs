@@ -1,8 +1,9 @@
 pub mod traits;
 pub mod utils;
 
+#[derive(Clone, Copy, PartialEq)]
 pub enum EnemyType {
-    Corgi,
+    Ghost,
 }
 
 pub struct FormationIndex(pub usize, pub usize);

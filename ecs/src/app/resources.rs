@@ -105,11 +105,16 @@ lazy_static! {
 #[derive(Default)]
 pub struct GameInfo {
     pub score: u32,
+    pub frame_count: u32,
 }
 
 impl GameInfo {
     pub fn add_score(&mut self, add: u32) {
         self.score += add;
+    }
+
+    pub fn update(&mut self) {
+        self.frame_count = self.frame_count.wrapping_add(1);
     }
 
     pub fn draw<R: Renderer>(&self, renderer: &mut R) {

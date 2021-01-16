@@ -1,5 +1,6 @@
 use crate::app::components::*;
 use crate::app::resources::EnemyFormation;
+use crate::app::resources::GameInfo;
 use lazy_static::lazy_static;
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
@@ -7,6 +8,8 @@ use legion::*;
 use teki_common::utils::consts::*;
 use teki_common::{EnemyType, FormationIndex};
 use vector2d::Vector2D;
+
+const GHOST_SPRITE: [&str; 2] = ["ghost1", "ghost2"];
 
 lazy_static! {
     pub static ref POSITION_ZERO: Position = Position(Vector2D::new(0, 0));
@@ -22,7 +25,7 @@ pub fn spawn_enemy(#[resource] enemy_formation: &mut EnemyFormation, commands: &
     for x in 0..X_COUNT {
         for y in 0..Y_COUNT {
             enemies.push(Enemy {
-                enemy_type: EnemyType::Corgi,
+                enemy_type: EnemyType::Ghost,
                 formation_index: FormationIndex(x, y),
             });
         }
@@ -52,4 +55,20 @@ pub fn move_enemy_formation(
 ) {
     let position = <&mut Position>::query().get_mut(world, *entity).unwrap();
     position.0 = enemy_formation.pos(&enemy.formation_index);
+}
+
+#[system(for_each)]
+pub fn animate_enemy(
+    enemy: &mut Enemy,
+    sprite: &mut SpriteDrawable,
+    #[resource] game_info: &mut GameInfo,
+) {
+    do_animate_enemy(enemy.enemy_type, sprite, game_info.frame_count);
+}
+
+pub fn do_animate_enemy(enemy_type: EnemyType, sprite: &mut SpriteDrawable, frame_count: u32) {
+    let pat = ((frame_count >> 5) & 1) as usize;
+    sprite.sprite_name = match enemy_type {
+        EnemyType::Ghost => GHOST_SPRITE[pat],
+    };
 }

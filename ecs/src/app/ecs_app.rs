@@ -1,4 +1,4 @@
-use crate::app::{components::*, resources::*, system_enemy::*, system_player::*};
+use crate::app::{components::*, resources::*, system_enemy::*, system_game::*, system_player::*};
 use legion::*;
 use teki_common::traits::App;
 use teki_common::traits::Audio;
@@ -156,11 +156,13 @@ struct Game {
 impl Game {
     fn new() -> Self {
         let schedule = Schedule::builder()
+            .add_system(update_game_info_system())
             .add_system(move_player_system())
             .add_system(fire_myshot_system())
             .add_system(move_myshot_system())
             .add_system(spawn_enemy_system())
             .add_system(update_enemy_formation_system())
+            .add_system(animate_enemy_system())
             .flush()
             .add_system(move_enemy_formation_system())
             .add_system(collision_check_system())
