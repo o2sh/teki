@@ -98,7 +98,6 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
     }
 
     fn draw(&mut self, renderer: &mut R) {
-        renderer.clear();
         renderer.draw_bg(BG_TEXTURE, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
         match &self.state {
             AppState::Title(title) => title.draw(renderer),

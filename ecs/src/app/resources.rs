@@ -35,7 +35,6 @@ pub struct EnemyFormation {
     y_indices: [i32; Y_COUNT],
     to_left: bool,
     pub done_appearance: bool,
-    pub frame_count: u32,
 }
 
 impl Default for EnemyFormation {
@@ -45,7 +44,6 @@ impl Default for EnemyFormation {
             y_indices: Default::default(),
             done_appearance: false,
             to_left: false,
-            frame_count: 0,
         };
         formation.init();
         formation
@@ -64,10 +62,7 @@ impl EnemyFormation {
         }
     }
 
-    pub fn update(&mut self, frame_count: u32) {
-        if frame_count % 5 == 0 {
-            self.frame_count = self.frame_count.wrapping_add(1);
-        }
+    pub fn update(&mut self) {
         let space = GAME_WIDTH - X_COUNT as i32 * 32;
         let dx = space * ONE / 256;
 
@@ -111,6 +106,8 @@ lazy_static! {
 pub struct GameInfo {
     pub score: u32,
     pub frame_count: u32,
+    pub frame_count_over_2: u32,
+    pub frame_count_over_5: u32,
 }
 
 impl GameInfo {
@@ -120,6 +117,14 @@ impl GameInfo {
 
     pub fn update(&mut self) {
         self.frame_count = self.frame_count.wrapping_add(1);
+
+        if self.frame_count % 5 == 0 {
+            self.frame_count_over_5 = self.frame_count_over_5.wrapping_add(1);
+        }
+
+        if self.frame_count % 2 == 0 {
+            self.frame_count_over_2 = self.frame_count_over_2.wrapping_add(1);
+        }
     }
 
     pub fn draw<R: Renderer>(&self, renderer: &mut R) {

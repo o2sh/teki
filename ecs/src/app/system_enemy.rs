@@ -41,11 +41,8 @@ pub fn spawn_enemy(#[resource] enemy_formation: &mut EnemyFormation, commands: &
 }
 
 #[system]
-pub fn update_enemy_formation(
-    #[resource] enemy_formation: &mut EnemyFormation,
-    #[resource] game_info: &mut GameInfo,
-) {
-    enemy_formation.update(game_info.frame_count);
+pub fn update_enemy_formation(#[resource] enemy_formation: &mut EnemyFormation) {
+    enemy_formation.update();
 }
 
 #[system(for_each)]
@@ -64,9 +61,9 @@ pub fn move_enemy_formation(
 pub fn animate_enemy(
     enemy: &mut Enemy,
     sprite: &mut SpriteDrawable,
-    #[resource] enemy_formation: &mut EnemyFormation,
+    #[resource] game_info: &mut GameInfo,
 ) {
-    do_animate_enemy(enemy.enemy_type, sprite, enemy_formation.frame_count);
+    do_animate_enemy(enemy.enemy_type, sprite, game_info.frame_count_over_5);
 }
 
 pub fn do_animate_enemy(enemy_type: EnemyType, sprite: &mut SpriteDrawable, frame_count: u32) {

@@ -3,19 +3,20 @@ use std::collections::HashMap;
 use std::path::Path;
 use std::rc::Rc;
 use teki_common::traits::Renderer;
-use teki_common::utils::collision::VRect;
 use teki_common::utils::consts::*;
+use teki_common::utils::SpriteSheet;
 use vector2d::Vector2D;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use web_sys::{HtmlCanvasElement, HtmlImageElement};
+use wasm_bindgen_futures::JsFuture;
+use web_sys::{HtmlCanvasElement, HtmlImageElement, Request, RequestInit, RequestMode, Response};
 
 #[wasm_bindgen]
 pub struct WasmRenderer {
     canvas: HtmlCanvasElement,
     context: web_sys::CanvasRenderingContext2d,
     images: Rc<RefCell<HashMap<String, HtmlImageElement>>>,
-    sprite_sheet: Rc<RefCell<HashMap<String, VRect>>>,
+    sprite_sheet: Rc<RefCell<SpriteSheet>>,
 }
 
 #[wasm_bindgen]
@@ -36,47 +37,61 @@ impl WasmRenderer {
             canvas,
             context,
             images: Rc::new(RefCell::new(HashMap::new())),
-            sprite_sheet: Rc::new(RefCell::new(HashMap::new())),
+            sprite_sheet: Rc::new(RefCell::new(SpriteSheet::default())),
         }
     }
 }
 
 impl Renderer for WasmRenderer {
-    fn load_sprite(&mut self, path: &str, vrect: VRect) {
-        let image = Rc::new(RefCell::new(HtmlImageElement::new().unwrap()));
-
-        let filename = String::from(Path::new(path).file_stem().unwrap().to_str().unwrap());
-        {
-            let filename = filename.clone();
-            let images = self.images.clone();
-            let sprite_sheet = self.sprite_sheet.clone();
-            let image_dup = image.clone();
-            let closure = Closure::once_into_js(move |_event: JsValue| {
-                image_dup.borrow_mut().set_onerror(None);
-                image_dup.borrow_mut().set_onload(None);
-
-                let image = Rc::try_unwrap(image_dup).unwrap().into_inner();
-                let filename_dup = filename.clone();
-                images.borrow_mut().insert(filename, image);
-                sprite_sheet.borrow_mut().insert(filename_dup, vrect);
-            });
-            let cb = closure.as_ref().unchecked_ref();
-            image.borrow_mut().set_onload(Some(cb));
-        }
-        image.borrow_mut().set_src(&path);
+    fn load_sprite_sheet(&mut self, filename: &str) {
+        let filename = String::from(filename);
+        let sprite_sheet = self.sprite_sheet.clone();
+        wasm_bindgen_futures::spawn_local(async move {
+            match request(filename).await {
+                Ok(text) => {
+                    sprite_sheet.borrow_mut().load_sprite_sheet(&text);
+                }
+                Err(error) => {
+                    web_sys::console::error_1(&format!("error: {}", &error).into());
+                }
+            }
+        });
     }
 
-    fn set_draw_gradient(&mut self) {
-        let gradient = self.context.create_linear_gradient(50.0, 0.0, 340.0, 0.0);
+    fn load_textures(&mut self, base_path: &str, filenames: &[&str]) {
+        for &filename in filenames.iter() {
+            let image = Rc::new(RefCell::new(HtmlImageElement::new().unwrap()));
+
+            let path: String = format!("{}/{}", base_path, filename);
+            let basename = String::from(Path::new(filename).file_stem().unwrap().to_str().unwrap());
+            {
+                let basename = basename.clone();
+                let images = self.images.clone();
+                let image_dup = image.clone();
+                let closure = Closure::once_into_js(move |_event: JsValue| {
+                    image_dup.borrow_mut().set_onerror(None);
+                    image_dup.borrow_mut().set_onload(None);
+
+                    let image = Rc::try_unwrap(image_dup).unwrap().into_inner();
+                    images.borrow_mut().insert(basename, image);
+                });
+                let cb = closure.as_ref().unchecked_ref();
+                image.borrow_mut().set_onload(Some(cb));
+            }
+            image.borrow_mut().set_src(&path);
+        }
+    }
+
+    fn draw_gradient(&mut self, width: i32, height: i32, padding: i32) {
+        let gradient = self.context.create_linear_gradient(50.0, 20.0, 340.0, 90.0);
 
         // Add three color stops
-        gradient.add_color_stop(0.0, "cyan").unwrap();
-        gradient.add_color_stop(0.5, "pink").unwrap();
-        gradient.add_color_stop(1.0, "orange").unwrap();
+        gradient.add_color_stop(0.0, "red").unwrap();
+        gradient.add_color_stop(1.0, "blue").unwrap();
 
         // Set the fill style and draw a rectangle
         self.context.set_fill_style(&JsValue::from(gradient));
-        self.context.fill_rect(0.0, 0.0, self.canvas.width() as f64, self.canvas.height() as f64);
+        self.context.fill_rect(padding as f64, padding as f64, width as f64, height as f64);
     }
 
     fn clear(&mut self) {
@@ -89,61 +104,102 @@ impl Renderer for WasmRenderer {
         if let Some(image) = images.get(&filename) {
             let mut x = x as f64;
             let y = y as f64;
-            let w = 8.0;
-            let h = 8.0;
+            let w = 16.0;
+            let h = 16.0;
+
             for c in text.chars() {
                 let u: i32 = ((c as i32) - (' ' as i32)) % 16 * 8;
                 let v: i32 = ((c as i32) - (' ' as i32)) / 16 * 8;
                 self.context
                     .draw_image_with_html_image_element_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
-                        &image, u as f64, v as f64, w, h, x, y, w, h,
+                        &image, u as f64, v as f64, 8.0, 8.0, x, y, w, h,
                     )
                     .expect("draw_image_with... failed");
                 x += w;
             }
         }
     }
-    fn draw_sprite(&mut self, path: &str, pos: &Vector2D<i32>) {
-        let images = self.images.borrow();
+    fn draw_sprite(&mut self, sprite_name: &str, pos: &Vector2D<i32>) {
         let sprite_sheet = self.sprite_sheet.borrow();
-        let filename = String::from(Path::new(path).file_stem().unwrap().to_str().unwrap());
-        let rect = sprite_sheet.get(&filename).expect("No sprite_sheet");
-        if let Some(image) = images.get(&filename) {
+        let (sheet, tex_name) = sprite_sheet.get(sprite_name).expect("No sprite_sheet");
+        let image = self.images.borrow();
+        if let Some(image) = image.get(tex_name) {
             self.context
                 .draw_image_with_html_image_element_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
                     &image,
-                    rect.x as f64,
-                    rect.y as f64,
-                    rect.w as f64,
-                    rect.h as f64,
+                    sheet.frame.x as f64,
+                    sheet.frame.y as f64,
+                    sheet.frame.w as f64,
+                    sheet.frame.h as f64,
                     pos.x as f64,
                     pos.y as f64,
-                    rect.w as f64,
-                    rect.h as f64,
+                    sheet.frame.w as f64,
+                    sheet.frame.h as f64,
                 )
                 .expect("draw_image_with... failed");
         }
     }
 
-    fn draw_bg(&mut self, path: &str) {
-        let images = self.images.borrow();
-        let filename = String::from(Path::new(path).file_stem().unwrap().to_str().unwrap());
-        let sprite_sheet = self.sprite_sheet.borrow();
-        let rect = sprite_sheet.get(&filename).expect("No sprite_sheet");
-        if let Some(image) = images.get(&filename) {
-            self.context
+    fn draw_bg(&mut self, sprite_name: &str, width: i32, height: i32, padding: i32) {
+        self.context.set_fill_style(&JsValue::from(format!("rgb({},{},{})", 11, 22, 99)));
+        self.context.fill_rect(0.0, 0.0, self.canvas.width() as f64, self.canvas.height() as f64);
+        /*let sprite_sheet = self.sprite_sheet.borrow();
+        let (sheet, tex_name) = sprite_sheet.get(sprite_name).expect("No sprite_sheet");
+        let image = self.images.borrow();
+
+        let repeat_x = width / sheet.frame.w as i32;
+        let repeat_y = height / sheet.frame.h as i32;
+        web_sys::console::log_1(&format!("x:{}, y:{}",repeat_x, repeat_y).into());
+        for x in 0..repeat_x {
+            for y in 0..repeat_y {
+                if let Some(image) = image.get(tex_name) {
+                    self.context
                 .draw_image_with_html_image_element_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
                     &image,
-                    0 as f64,
-                    0 as f64,
-                    rect.w as f64,
-                    rect.h as f64,
-                    PADDING as f64,
-                    PADDING as f64,
-                    GAME_WIDTH as f64,
-                    GAME_HEIGHT as f64,
+                    sheet.frame.x as f64,
+                    sheet.frame.y as f64,
+                    sheet.frame.w as f64,
+                    sheet.frame.h as f64,
+                    (padding + x * sheet.frame.w as i32) as f64,
+                    (padding + y * sheet.frame.h as i32) as f64,
+                    width as f64,
+                    height as f64,
                 )
                 .expect("draw_image_with... failed");
-        }
+                }
+            }
+        }*/
     }
+
+    fn set_draw_color(&mut self, r: u8, g: u8, b: u8) {
+        self.context.set_fill_style(&JsValue::from(format!("rgb({},{},{})", r, g, b)));
+    }
+}
+
+async fn request(url: String) -> Result<String, String> {
+    let mut opts = RequestInit::new();
+    opts.method("GET");
+    opts.mode(RequestMode::Cors);
+
+    let request = Request::new_with_str_and_init(&url, &opts)
+        .or_else(|_| Err(String::from("request init failed")))?;
+
+    request
+        .headers()
+        .set("Accept", "text/plain")
+        .or_else(|_| Err(String::from("request header error")))?;
+
+    let window = web_sys::window().unwrap();
+    let resp_value =
+        JsFuture::from(window.fetch_with_request(&request)).await.expect("future failed");
+
+    // `resp_value` is a `Response` object.
+    assert!(resp_value.is_instance_of::<Response>());
+    let resp: Response = resp_value.dyn_into().unwrap();
+
+    // Convert this other `Promise` into a rust `Future`.
+    let text =
+        JsFuture::from(resp.text().expect("text")).await.expect("await").as_string().unwrap();
+
+    Ok(text)
 }

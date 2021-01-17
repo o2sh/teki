@@ -4,7 +4,7 @@ import { audioManager } from './audio'
 const CHANNEL_COUNT = 3
 
 const AUDIO_ASSETS = [
-  'assets/audio/8bit',
+  'assets/audio/loop',
   'assets/audio/bubble',
   'assets/audio/pop'
 ]
