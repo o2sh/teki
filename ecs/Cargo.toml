@@ -1,8 +1,12 @@
 [package]
 name = "teki-ecs"
 version = "0.3.0"
+description = "Touhou-style shoot'em up"
 authors = ["o2sh <ossama-hjaji@live.fr>"]
 edition = "2018"
+readme = "../README.md"
+license = "MIT"
+repository = "https://github.com/o2sh/teki/tree/main/ecs"
 
 [dependencies]
 legion = { version = "0.3.1", default-features = false, features = ["codegen"] }
@@ -10,7 +14,7 @@ vector2d = "2.2.0"
 lazy_static = "1.4.0"
 array-macro = "1.0.5"
 
-teki-common = {path = "../common" }
+teki-common = {path = "../common", version = "0.3.0"}
 
 [features]
 wasm = ["legion/wasm-bindgen"]
