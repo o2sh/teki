@@ -2,7 +2,7 @@ class AudioManager {
   constructor(channelCount) {
     this.audios = {}
     this.audioLoadings = {}
-    this.enabled = false
+    this.enabled = true
   }
 
   createContext(channelCount) {
