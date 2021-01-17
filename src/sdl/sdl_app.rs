@@ -118,5 +118,5 @@ lazy_static! {
 }
 
 fn map_key(keycode: Keycode) -> Option<Key> {
-    KEY_MAP.get(&keycode).map(|x| *x)
+    KEY_MAP.get(&keycode).copied()
 }

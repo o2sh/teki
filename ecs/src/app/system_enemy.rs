@@ -9,7 +9,7 @@ use teki_common::utils::consts::*;
 use teki_common::{EnemyType, FormationIndex};
 use vector2d::Vector2D;
 
-const GHOST_SPRITE: [&str; 2] = ["ghost1", "ghost2"];
+const GHOST_SPRITES: [&str; 4] = ["enemy1", "enemy2", "enemy3", "enemy4"];
 
 lazy_static! {
     pub static ref POSITION_ZERO: Position = Position(Vector2D::new(0, 0));
@@ -41,8 +41,11 @@ pub fn spawn_enemy(#[resource] enemy_formation: &mut EnemyFormation, commands: &
 }
 
 #[system]
-pub fn update_enemy_formation(#[resource] enemy_formation: &mut EnemyFormation) {
-    enemy_formation.update();
+pub fn update_enemy_formation(
+    #[resource] enemy_formation: &mut EnemyFormation,
+    #[resource] game_info: &mut GameInfo,
+) {
+    enemy_formation.update(game_info.frame_count);
 }
 
 #[system(for_each)]
@@ -61,14 +64,14 @@ pub fn move_enemy_formation(
 pub fn animate_enemy(
     enemy: &mut Enemy,
     sprite: &mut SpriteDrawable,
-    #[resource] game_info: &mut GameInfo,
+    #[resource] enemy_formation: &mut EnemyFormation,
 ) {
-    do_animate_enemy(enemy.enemy_type, sprite, game_info.frame_count);
+    do_animate_enemy(enemy.enemy_type, sprite, enemy_formation.frame_count);
 }
 
 pub fn do_animate_enemy(enemy_type: EnemyType, sprite: &mut SpriteDrawable, frame_count: u32) {
-    let pat = ((frame_count >> 5) & 1) as usize;
+    let pat = frame_count % 4;
     sprite.sprite_name = match enemy_type {
-        EnemyType::Ghost => GHOST_SPRITE[pat],
+        EnemyType::Ghost => GHOST_SPRITES[pat as usize],
     };
 }

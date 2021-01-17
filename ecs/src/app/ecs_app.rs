@@ -47,8 +47,15 @@ impl<A: Audio, T: Timer> EcsApp<A, T> {
 
 impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
     fn init(&mut self, renderer: &mut R) {
-        renderer.load_textures("assets", &["sprites.png", "font.png"]);
+        renderer.load_textures(
+            "assets",
+            &["sprites.png", "font.png", "hero.png", "tileset.png", "enemy.png", "orbs.png"],
+        );
         renderer.load_sprite_sheet("assets/sprites.json");
+        renderer.load_sprite_sheet("assets/hero.json");
+        renderer.load_sprite_sheet("assets/tileset.json");
+        renderer.load_sprite_sheet("assets/enemy.json");
+        renderer.load_sprite_sheet("assets/orbs.json");
     }
 
     fn on_key(&mut self, key: Key, down: bool) {
@@ -102,9 +109,9 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
 
         renderer.draw_str(
             FONTS,
-            WINDOW_WIDTH - 6 * 16,
-            WINDOW_HEIGHT - 20,
-            &format!("FPS{:2}", self.fps_calc.fps()),
+            WINDOW_WIDTH - 7 * 16,
+            WINDOW_HEIGHT - 30,
+            &format!("FPS {:2}", self.fps_calc.fps()),
             255,
             255,
             255,
@@ -163,6 +170,7 @@ impl Game {
             .add_system(spawn_enemy_system())
             .add_system(update_enemy_formation_system())
             .add_system(animate_enemy_system())
+            .add_system(animate_player_system())
             .flush()
             .add_system(move_enemy_formation_system())
             .add_system(collision_check_system())
@@ -190,7 +198,7 @@ impl Game {
     }
 
     fn draw<R: Renderer>(&self, renderer: &mut R) {
-        renderer.draw_bg(GAME_TEXTURE, GAME_WIDTH, GAME_HEIGHT, PADDING);
+        renderer.draw_gradient(GAME_WIDTH, GAME_HEIGHT, PADDING);
 
         for (position, drawable) in <(&Position, &SpriteDrawable)>::query().iter(&self.world) {
             let pos = round_vec(&position.0) + drawable.offset;

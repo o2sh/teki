@@ -7,8 +7,8 @@ pub struct CollBox {
 
 impl CollBox {
     pub fn check_collision(&self, target: &CollBox) -> bool {
-        let br1 = &self.top_left + &self.size;
-        let br2 = &target.top_left + &target.size;
+        let br1 = self.top_left + self.size;
+        let br2 = target.top_left + target.size;
 
         self.top_left.x < br2.x
             && self.top_left.y < br2.y

@@ -35,6 +35,7 @@ pub struct EnemyFormation {
     y_indices: [i32; Y_COUNT],
     to_left: bool,
     pub done_appearance: bool,
+    pub frame_count: u32,
 }
 
 impl Default for EnemyFormation {
@@ -44,6 +45,7 @@ impl Default for EnemyFormation {
             y_indices: Default::default(),
             done_appearance: false,
             to_left: false,
+            frame_count: 0,
         };
         formation.init();
         formation
@@ -62,7 +64,10 @@ impl EnemyFormation {
         }
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self, frame_count: u32) {
+        if frame_count % 5 == 0 {
+            self.frame_count = self.frame_count.wrapping_add(1);
+        }
         let space = GAME_WIDTH - X_COUNT as i32 * 32;
         let dx = space * ONE / 256;
 
@@ -72,8 +77,8 @@ impl EnemyFormation {
             self.x_indices[i] += dx;
         }
 
-        if self.x_indices[0] < (PADDING + MARGIN + 16) * ONE
-            || self.x_indices[X_COUNT - 1] > (GAME_WIDTH - MARGIN - 16) * ONE
+        if self.x_indices[0] < (PADDING + MARGIN + 24) * ONE
+            || self.x_indices[X_COUNT - 1] > (GAME_WIDTH - MARGIN - 24) * ONE
         {
             self.to_left = !self.to_left;
         }
@@ -87,14 +92,14 @@ impl EnemyFormation {
 lazy_static! {
     pub static ref BASE_X_TABLE: [i32; X_COUNT] = {
         let cx = GAME_WIDTH / 2;
-        let w = 32;
+        let w = 48;
 
         array![|j|
             cx - ((X_COUNT - 1) as i32) * w / 2 + (j as i32) * w
         ; X_COUNT]
     };
     pub static ref BASE_Y_TABLE: [i32; Y_COUNT] = {
-        let h = 32;
+        let h = 50;
 
         array![|i|
             BASE_Y + (i as i32) * h
@@ -118,11 +123,13 @@ impl GameInfo {
     }
 
     pub fn draw<R: Renderer>(&self, renderer: &mut R) {
-        renderer.draw_str(FONTS, GAME_WIDTH + 25, 35, "SCORE", 25, 158, 88);
+        let left_padding = 50;
+        let top_padding = 80;
+        renderer.draw_str(FONTS, GAME_WIDTH + left_padding, top_padding, "SCORE", 25, 158, 88);
         renderer.draw_str(
             FONTS,
-            GAME_WIDTH + 25 + 16 * 6,
-            35,
+            GAME_WIDTH + left_padding + 16 * 6,
+            top_padding,
             &format!("{}", self.score),
             255,
             255,

@@ -9,6 +9,9 @@ use teki_common::utils::math::*;
 use teki_common::utils::pad::{Pad, PadBit};
 use vector2d::Vector2D;
 
+const HERO_SPRITES: [&str; 8] =
+    ["hero1", "hero2", "hero3", "hero4", "hero5", "hero6", "hero7", "hero8"];
+
 pub struct Player {
     pub shot_enable: bool,
 }
@@ -51,14 +54,14 @@ pub fn do_move_player(pad: &Pad, entity: Entity, world: &mut SubWorld) {
 
     if pad.is_pressed(PadBit::U) {
         pos.y -= PLAYER_SPEED;
-        let top = (16 + PADDING) * ONE;
+        let top = (22 + PADDING) * ONE;
         if pos.y < top {
             pos.y = top;
         }
     }
     if pad.is_pressed(PadBit::D) {
         pos.y += PLAYER_SPEED;
-        let bottom = (GAME_HEIGHT + PADDING - 16) * ONE;
+        let bottom = (GAME_HEIGHT - 22) * ONE;
         if pos.y > bottom {
             pos.y = bottom;
         }
@@ -117,7 +120,7 @@ pub fn move_myshot(
 
 pub fn do_move_myshot(entity: Entity, world: &mut SubWorld, commands: &mut CommandBuffer) {
     let mut cont = false;
-    for e in [Some(entity)].iter().flat_map(|x| x) {
+    for e in [Some(entity)].iter().flatten() {
         let position = <&mut Position>::query().get_mut(world, *e).unwrap();
         let pos = &mut position.0;
 
@@ -175,4 +178,18 @@ pub fn collision_check(
 
 fn pos_to_coll_box(pos: &Vector2D<i32>, coll_rect: &HitBox) -> CollBox {
     CollBox { top_left: round_vec(pos), size: coll_rect.size }
+}
+
+#[system(for_each)]
+pub fn animate_player(
+    _player: &Player,
+    sprite: &mut SpriteDrawable,
+    #[resource] game_info: &mut GameInfo,
+) {
+    do_animate_player(sprite, game_info.frame_count);
+}
+
+pub fn do_animate_player(sprite: &mut SpriteDrawable, frame_count: u32) {
+    let pat = frame_count % 8;
+    sprite.sprite_name = HERO_SPRITES[pat as usize];
 }
