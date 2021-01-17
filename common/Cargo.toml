@@ -4,7 +4,7 @@ version = "0.3.0"
 description = "Touhou-style shoot'em up"
 authors = ["o2sh <ossama-hjaji@live.fr>"]
 edition = "2018"
-readme = "README.md"
+readme = "../README.md"
 license = "MIT"
 repository = "https://github.com/o2sh/teki/tree/main/common"
 
