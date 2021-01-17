@@ -7,7 +7,6 @@ edition = "2018"
 readme = "README.md"
 license = "MIT"
 repository = "https://github.com/o2sh/teki"
-exclude = ["resources/*"]
 
 [dependencies]
 clap = "2.33.3"

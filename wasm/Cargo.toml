@@ -1,12 +1,8 @@
 [package]
 name = "teki-wasm"
 version = "0.3.0"
-description = "Touhou-style shoot'em up"
 authors = ["o2sh <ossama-hjaji@live.fr>"]
 edition = "2018"
-readme = "../README.md"
-license = "MIT"
-repository = "https://github.com/o2sh/teki/tree/main/wasm"
 
 [lib]
 crate-type = ["cdylib"]
@@ -22,8 +18,8 @@ vector2d = "2.2.0"
 console_error_panic_hook = { version = "0.1.6", optional = true }
 js-sys = "0.3.41"
 
-teki-ecs = {path = "../ecs", version = "0.3.0", features = ["wasm"]}
-teki-common = {path = "../common", version = "0.3.0"}
+teki-ecs = {path = "../ecs", features = ["wasm"]}
+teki-common = {path = "../common" }
 
 [dependencies.web-sys]
 version = "0.3.46"
