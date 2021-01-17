@@ -10,7 +10,7 @@ Touhou-style shoot'em up written in Rust using [legion](https://github.com/ameth
 
 <h3 align="center"><img src="resources/teki.gif" height="450px"></h3>
 
-p align="center"><a href="https://o2sh.github.io/teki/">Play online!</a></p>
+<p align="center"><a href="https://o2sh.github.io/teki/">Play online!</a></p>
 
 ### Building
 
