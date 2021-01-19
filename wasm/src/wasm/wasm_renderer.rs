@@ -17,6 +17,7 @@ pub struct WasmRenderer {
     context: web_sys::CanvasRenderingContext2d,
     images: Rc<RefCell<HashMap<String, HtmlImageElement>>>,
     sprite_sheet: Rc<RefCell<SpriteSheet>>,
+    scrolling_offset: i32,
 }
 
 #[wasm_bindgen]
@@ -38,6 +39,7 @@ impl WasmRenderer {
             context,
             images: Rc::new(RefCell::new(HashMap::new())),
             sprite_sheet: Rc::new(RefCell::new(SpriteSheet::default())),
+            scrolling_offset: 0,
         }
     }
 }
@@ -82,18 +84,6 @@ impl Renderer for WasmRenderer {
         }
     }
 
-    fn draw_gradient(&mut self, width: i32, height: i32, padding: i32) {
-        let gradient = self.context.create_linear_gradient(50.0, 20.0, 340.0, 90.0);
-
-        // Add three color stops
-        gradient.add_color_stop(0.0, "red").unwrap();
-        gradient.add_color_stop(1.0, "blue").unwrap();
-
-        // Set the fill style and draw a rectangle
-        self.context.set_fill_style(&JsValue::from(gradient));
-        self.context.fill_rect(padding as f64, padding as f64, width as f64, height as f64);
-    }
-
     fn clear(&mut self) {
         self.context.fill_rect(0.0, 0.0, self.canvas.width() as f64, self.canvas.height() as f64)
     }
@@ -108,11 +98,11 @@ impl Renderer for WasmRenderer {
             let h = 16.0;
 
             for c in text.chars() {
-                let u: i32 = ((c as i32) - (' ' as i32)) % 16 * 8;
-                let v: i32 = ((c as i32) - (' ' as i32)) / 16 * 8;
+                let u: i32 = ((c as i32) - (' ' as i32)) % 16 * 16;
+                let v: i32 = ((c as i32) - (' ' as i32)) / 16 * 16;
                 self.context
                     .draw_image_with_html_image_element_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
-                        &image, u as f64, v as f64, 8.0, 8.0, x, y, w, h,
+                        &image, u as f64, v as f64, 16.0, 16.0, x, y, w, h,
                     )
                     .expect("draw_image_with... failed");
                 x += w;
@@ -140,39 +130,38 @@ impl Renderer for WasmRenderer {
         }
     }
 
-    fn draw_bg(&mut self, sprite_name: &str, width: i32, height: i32, padding: i32) {
-        self.context.set_fill_style(&JsValue::from(format!("rgb({},{},{})", 11, 22, 99)));
-        self.context.fill_rect(0.0, 0.0, self.canvas.width() as f64, self.canvas.height() as f64);
-        /*let sprite_sheet = self.sprite_sheet.borrow();
-        let (sheet, tex_name) = sprite_sheet.get(sprite_name).expect("No sprite_sheet");
-        let image = self.images.borrow();
+    fn set_draw_color(&mut self, r: u8, g: u8, b: u8) {
+        self.context.set_fill_style(&JsValue::from(format!("rgb({},{},{})", r, g, b)));
+    }
 
-        let repeat_x = width / sheet.frame.w as i32;
-        let repeat_y = height / sheet.frame.h as i32;
-        web_sys::console::log_1(&format!("x:{}, y:{}",repeat_x, repeat_y).into());
-        for x in 0..repeat_x {
-            for y in 0..repeat_y {
-                if let Some(image) = image.get(tex_name) {
-                    self.context
+    fn draw_scrolling_bg(&mut self, sprite_name: &str, width: i32, height: i32){
+
+        let sprite_sheet = self.sprite_sheet.borrow_mut();
+        let (sheet, tex_name) = sprite_sheet.get(sprite_name).expect("No sprite_sheet");
+
+        self.scrolling_offset -= 1 * SCROLLING_BG_VEL;
+        if self.scrolling_offset < -height {
+            self.scrolling_offset = 0;
+        }
+
+        let image = self.images.borrow();
+        if let Some(image) = image.get(tex_name) {
+            self.context
                 .draw_image_with_html_image_element_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
                     &image,
                     sheet.frame.x as f64,
                     sheet.frame.y as f64,
                     sheet.frame.w as f64,
                     sheet.frame.h as f64,
-                    (padding + x * sheet.frame.w as i32) as f64,
-                    (padding + y * sheet.frame.h as i32) as f64,
-                    width as f64,
-                    height as f64,
+                    0.0,
+                    self.scrolling_offset as f64,
+                    sheet.frame.w as f64,
+                    sheet.frame.h as f64,
                 )
                 .expect("draw_image_with... failed");
-                }
-            }
-        }*/
-    }
-
-    fn set_draw_color(&mut self, r: u8, g: u8, b: u8) {
-        self.context.set_fill_style(&JsValue::from(format!("rgb({},{},{})", r, g, b)));
+        }
+        self.context.set_fill_style(&JsValue::from(format!("rgb({},{},{})", 255, 255, 255)));
+        self.context.fill_rect(width as f64, 0.0, 2.0, self.canvas.height() as f64)
     }
 }
 

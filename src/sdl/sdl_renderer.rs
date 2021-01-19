@@ -1,6 +1,5 @@
 use crate::sdl::SdlTextureManager;
 use sdl2::pixels::Color;
-use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 use teki_common::traits::Renderer;
@@ -77,59 +76,8 @@ impl Renderer for SdlRenderer {
             .expect("copy failed");
 
         self.set_draw_color(255, 255, 255);
-        let rect = Rect::new(512, 0, 2, height as u32);
+        let rect = Rect::new(width, 0, 2, height as u32);
         self.canvas.fill_rect(rect).expect("");
-    }
-
-    fn draw_bg(&mut self, sprite_name: &str, width: i32, height: i32) {
-        let (sheet, tex_name) = self.sprite_sheet.get(sprite_name).expect("No sprite");
-
-        let texture = self.texture_manager.get_mut(tex_name).expect("No texture");
-
-        let repeat_x = width / sheet.frame.w as i32;
-        let repeat_y = height / sheet.frame.h as i32;
-
-        for x in 0..repeat_x {
-            for y in 0..repeat_y {
-                self.canvas
-                    .copy(
-                        &texture,
-                        Some(Rect::new(sheet.frame.x, sheet.frame.y, sheet.frame.w, sheet.frame.h)),
-                        Some(Rect::new(
-                            x * sheet.frame.w as i32,
-                            y * sheet.frame.h as i32,
-                            sheet.frame.w as u32,
-                            sheet.frame.h as u32,
-                        )),
-                    )
-                    .expect("copy failed");
-            }
-        }
-    }
-
-    fn draw_gradient(&mut self, width: i32, height: i32, padding: i32) {
-        let texture_creator = self.canvas.texture_creator();
-        let mut texture = texture_creator
-            .create_texture_streaming(PixelFormatEnum::RGB24, 256, 256)
-            .map_err(|e| e.to_string())
-            .expect("");
-        // Create a red-green gradient
-        texture
-            .with_lock(None, |buffer: &mut [u8], pitch: usize| {
-                for y in 0..256 {
-                    for x in 0..256 {
-                        let offset = y * pitch + x * 3;
-                        buffer[offset + 2] = x as u8;
-                        buffer[offset] = y as u8;
-                        buffer[offset + 1] = 0;
-                    }
-                }
-            })
-            .expect("");
-
-        self.canvas
-            .copy(&texture, None, Some(Rect::new(padding, padding, width as u32, height as u32)))
-            .expect("copy failed");
     }
 
     fn draw_str(&mut self, tex_name: &str, x: i32, y: i32, text: &str, r: u8, g: u8, b: u8) {
