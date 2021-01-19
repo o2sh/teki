@@ -20,4 +20,4 @@ cargo run
 ### How to play (Control)
 
   * Arrow key : Move left, right, up or down
-  * Z: Shoot a bullet
+  * Z: Shoot
