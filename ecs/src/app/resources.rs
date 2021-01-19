@@ -72,7 +72,7 @@ impl EnemyFormation {
             self.x_indices[i] += dx;
         }
 
-        if self.x_indices[0] < (PADDING + MARGIN + 24) * ONE
+        if self.x_indices[0] < (MARGIN + 24) * ONE
             || self.x_indices[X_COUNT - 1] > (GAME_WIDTH - MARGIN - 24) * ONE
         {
             self.to_left = !self.to_left;
@@ -128,9 +128,9 @@ impl GameInfo {
     }
 
     pub fn draw<R: Renderer>(&self, renderer: &mut R) {
-        let left_padding = 50;
-        let top_padding = 80;
-        renderer.draw_str(FONTS, GAME_WIDTH + left_padding, top_padding, "SCORE", 25, 158, 88);
+        let left_padding = 25;
+        let top_padding = 35;
+        renderer.draw_str(FONTS, GAME_WIDTH + left_padding, top_padding, "Score", 25, 158, 88);
         renderer.draw_str(
             FONTS,
             GAME_WIDTH + left_padding + 16 * 6,

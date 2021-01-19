@@ -9,15 +9,28 @@ use teki_common::utils::math::*;
 use teki_common::utils::pad::{Pad, PadBit};
 use vector2d::Vector2D;
 
-const HERO_SPRITES: [&str; 8] =
-    ["hero1", "hero2", "hero3", "hero4", "hero5", "hero6", "hero7", "hero8"];
+const STILL: [&str; 8] =
+    ["sanae0", "sanae1", "sanae2", "sanae3", "sanae4", "sanae5", "sanae6", "sanae7"];
+const TO_THE_LEFT: [&str; 8] =
+    ["sanae8", "sanae9", "sanae10", "sanae11", "sanae12", "sanae13", "sanae14", "sanae15"];
+const TO_THE_RIGHT: [&str; 8] =
+    ["sanae16", "sanae17", "sanae18", "sanae19", "sanae20", "sanae21", "sanae22", "sanae23"];
+
+#[derive(Copy, Clone, PartialEq)]
+pub enum Direction {
+    Left,
+    Right,
+}
 
 pub struct Player {
     pub shot_enable: bool,
+    pub prev_direction: Option<Direction>,
+    pub curr_direction: Option<Direction>,
+    pub curr_frame: usize,
 }
 
 pub fn new_player() -> Player {
-    Player { shot_enable: true }
+    Player { shot_enable: true, prev_direction: None, curr_direction: None, curr_frame: 0 }
 }
 
 pub fn player_hit_box() -> HitBox {
@@ -30,31 +43,51 @@ pub fn player_sprite() -> SpriteDrawable {
 
 #[system(for_each)]
 #[write_component(Position)]
-pub fn move_player(_: &mut Player, entity: &Entity, #[resource] pad: &Pad, world: &mut SubWorld) {
-    do_move_player(pad, *entity, world);
+pub fn move_player(
+    player: &mut Player,
+    entity: &Entity,
+    #[resource] pad: &Pad,
+    world: &mut SubWorld,
+    #[resource] game_info: &mut GameInfo,
+) {
+    do_move_player(player, pad, *entity, world, game_info);
 }
 
-pub fn do_move_player(pad: &Pad, entity: Entity, world: &mut SubWorld) {
+pub fn do_move_player(
+    player: &mut Player,
+    pad: &Pad,
+    entity: Entity,
+    world: &mut SubWorld,
+    game_info: &mut GameInfo,
+) {
     let position = <&mut Position>::query().get_mut(world, entity).unwrap();
     let pos = &mut position.0;
+    player.prev_direction = player.curr_direction.clone();
+    player.curr_direction = None;
+    if game_info.frame_count % 5 == 0 {
+        player.curr_frame += 1
+    }
     if pad.is_pressed(PadBit::L) {
         pos.x -= PLAYER_SPEED;
-        let left = (16 + PADDING) * ONE;
+        let left = 16 * ONE;
         if pos.x < left {
             pos.x = left;
         }
+        player.curr_direction = Some(Direction::Left)
     }
     if pad.is_pressed(PadBit::R) {
         pos.x += PLAYER_SPEED;
-        let right = (GAME_WIDTH + PADDING - 16) * ONE;
+        let right = (GAME_WIDTH - 16) * ONE;
         if pos.x > right {
             pos.x = right;
         }
+
+        player.curr_direction = Some(Direction::Right)
     }
 
     if pad.is_pressed(PadBit::U) {
         pos.y -= PLAYER_SPEED;
-        let top = (22 + PADDING) * ONE;
+        let top = 22 * ONE;
         if pos.y < top {
             pos.y = top;
         }
@@ -65,6 +98,12 @@ pub fn do_move_player(pad: &Pad, entity: Entity, world: &mut SubWorld) {
         if pos.y > bottom {
             pos.y = bottom;
         }
+    }
+
+    match (player.prev_direction, player.curr_direction) {
+        (Some(_), Some(_)) => (),
+        (None, None) => (),
+        _ => player.curr_frame = 0,
     }
 }
 
@@ -78,7 +117,7 @@ pub fn fire_myshot(
     #[resource] sound_queue: &mut SoundQueue,
     commands: &mut CommandBuffer,
 ) {
-    if pad.is_trigger(PadBit::A) {
+    if pad.is_pressed(PadBit::Z) {
         sound_queue.push_play(CH_SHOT, BUBBLE_SOUND);
         do_fire_myshot(player, position, *entity, commands)
     }
@@ -136,7 +175,7 @@ pub fn do_move_myshot(entity: Entity, world: &mut SubWorld, commands: &mut Comma
 
 fn out_of_screen(pos: &Vector2D<i32>) -> bool {
     const MARGIN: i32 = 10;
-    const TOP: i32 = (MARGIN + PADDING) * ONE;
+    const TOP: i32 = (MARGIN) * ONE;
     pos.y < TOP
 }
 
@@ -182,14 +221,31 @@ fn pos_to_coll_box(pos: &Vector2D<i32>, coll_rect: &HitBox) -> CollBox {
 
 #[system(for_each)]
 pub fn animate_player(
-    _player: &Player,
+    player: &mut Player,
     sprite: &mut SpriteDrawable,
     #[resource] game_info: &mut GameInfo,
 ) {
-    do_animate_player(sprite, game_info.frame_count_over_2);
+    do_animate_player(player, sprite, game_info.frame_count_over_5);
 }
 
-pub fn do_animate_player(sprite: &mut SpriteDrawable, frame_count: u32) {
-    let pat = frame_count % 8;
-    sprite.sprite_name = HERO_SPRITES[pat as usize];
+pub fn do_animate_player(player: &mut Player, sprite: &mut SpriteDrawable, frame_count: u32) {
+    sprite.sprite_name = match player.curr_direction {
+        Some(Direction::Left) => {
+            let idx = if player.curr_frame >= TO_THE_LEFT.len() {
+                TO_THE_LEFT.len() - 1
+            } else {
+                player.curr_frame
+            };
+            TO_THE_LEFT[idx]
+        }
+        Some(Direction::Right) => {
+            let idx = if player.curr_frame >= TO_THE_RIGHT.len() {
+                TO_THE_RIGHT.len() - 1
+            } else {
+                player.curr_frame
+            };
+            TO_THE_RIGHT[idx]
+        }
+        None => STILL[(frame_count % 7) as usize],
+    };
 }

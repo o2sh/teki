@@ -8,6 +8,7 @@ pub enum Key {
     Right,
     Up,
     Down,
+    Z,
 }
 
 bitflags! {
@@ -18,6 +19,7 @@ bitflags! {
         const U = 0b00000100;
         const D = 0b00001000;
         const A = 0b00010000;
+        const Z = 0b00100000;
     }
 }
 
@@ -60,6 +62,7 @@ fn get_key_bit(key: Key) -> PadBit {
         Key::Right => PadBit::R,
         Key::Up => PadBit::U,
         Key::Down => PadBit::D,
+        Key::Z => PadBit::Z,
         Key::Space => PadBit::A,
         _ => PadBit::empty(),
     }

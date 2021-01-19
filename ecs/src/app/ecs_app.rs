@@ -49,13 +49,13 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
     fn init(&mut self, renderer: &mut R) {
         renderer.load_textures(
             "assets",
-            &["sprites.png", "font.png", "hero.png", "tileset.png", "enemy.png", "orbs.png"],
+            &["font.png", "sanae.png", "tileset.png", "enemy.png", "orbs.png", "bg.png"],
         );
-        renderer.load_sprite_sheet("assets/sprites.json");
-        renderer.load_sprite_sheet("assets/hero.json");
+        renderer.load_sprite_sheet("assets/sanae.json");
         renderer.load_sprite_sheet("assets/tileset.json");
         renderer.load_sprite_sheet("assets/enemy.json");
         renderer.load_sprite_sheet("assets/orbs.json");
+        renderer.load_sprite_sheet("assets/bg.json");
     }
 
     fn on_key(&mut self, key: Key, down: bool) {
@@ -98,7 +98,8 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
     }
 
     fn draw(&mut self, renderer: &mut R) {
-        renderer.draw_bg(BG_TEXTURE, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+        renderer.set_draw_color(0, 0, 0);
+        renderer.clear();
         match &self.state {
             AppState::Title(title) => title.draw(renderer),
             AppState::Game(game) => game.draw(renderer),
@@ -108,9 +109,9 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
 
         renderer.draw_str(
             FONTS,
-            WINDOW_WIDTH - 7 * 16,
-            WINDOW_HEIGHT - 30,
-            &format!("FPS {:2}", self.fps_calc.fps()),
+            WINDOW_WIDTH - 6 * 16,
+            WINDOW_HEIGHT - 28,
+            &format!("{:2}fps", self.fps_calc.fps()),
             255,
             255,
             255,
@@ -129,7 +130,7 @@ impl Title {
     }
 
     fn draw<R: Renderer>(&self, renderer: &mut R) {
-        let title = "TEKI";
+        let title = "Teki";
         renderer.draw_str(
             FONTS,
             (WINDOW_WIDTH / 2) - (title.len() as i32 / 2) * 16,
@@ -140,11 +141,11 @@ impl Title {
             255,
         );
 
-        let msg = "PRESS SPACE KEY TO START";
+        let msg = "Press space key to start";
         renderer.draw_str(
             FONTS,
             (WINDOW_WIDTH / 2) - (msg.len() as i32 / 2) * 16,
-            25 * 16,
+            15 * 16,
             msg,
             255,
             255,
@@ -197,7 +198,7 @@ impl Game {
     }
 
     fn draw<R: Renderer>(&self, renderer: &mut R) {
-        renderer.draw_gradient(GAME_WIDTH, GAME_HEIGHT, PADDING);
+        renderer.draw_scrolling_bg(BG1_TEXTURE, GAME_WIDTH, GAME_HEIGHT);
 
         for (position, drawable) in <(&Position, &SpriteDrawable)>::query().iter(&self.world) {
             let pos = round_vec(&position.0) + drawable.offset;

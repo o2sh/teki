@@ -4,6 +4,7 @@ use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 use teki_common::traits::Renderer;
+use teki_common::utils::consts::*;
 use teki_common::utils::SpriteSheet;
 use vector2d::Vector2D;
 
@@ -11,6 +12,7 @@ pub struct SdlRenderer {
     canvas: WindowCanvas,
     texture_manager: SdlTextureManager,
     sprite_sheet: SpriteSheet,
+    scrolling_offset: i32,
 }
 
 impl SdlRenderer {
@@ -21,6 +23,7 @@ impl SdlRenderer {
             canvas,
             texture_manager: SdlTextureManager::new(),
             sprite_sheet: SpriteSheet::default(),
+            scrolling_offset: 0,
         }
     }
 
@@ -42,7 +45,8 @@ impl Renderer for SdlRenderer {
     }
 
     fn draw_sprite(&mut self, sprite_name: &str, pos: &Vector2D<i32>) {
-        let (sheet, tex_name) = self.sprite_sheet.get(sprite_name).expect("No sprite");
+        let (sheet, tex_name) =
+            self.sprite_sheet.get(sprite_name).expect(&format!("No sprite named: {}", sprite_name));
 
         let texture = self.texture_manager.get(tex_name).expect("No texture");
         self.canvas
@@ -52,6 +56,55 @@ impl Renderer for SdlRenderer {
                 Some(Rect::new(pos.x, pos.y, sheet.frame.w as u32, sheet.frame.h as u32)),
             )
             .expect("copy failed");
+    }
+
+    fn draw_scrolling_bg(&mut self, sprite_name: &str, width: i32, height: i32) {
+        let (sheet, tex_name) = self.sprite_sheet.get(sprite_name).expect("No sprite");
+        let texture = self.texture_manager.get_mut(tex_name).expect("No texture");
+
+        self.scrolling_offset -= 1 * SCROLLING_BG_VEL;
+        if self.scrolling_offset < -height {
+            self.scrolling_offset = 0;
+        }
+
+        texture.set_alpha_mod(BG_ALPHA);
+        self.canvas
+            .copy(
+                &texture,
+                Some(Rect::new(sheet.frame.x, sheet.frame.y, sheet.frame.w, sheet.frame.h)),
+                Some(Rect::new(0, self.scrolling_offset, width as u32, sheet.frame.h)),
+            )
+            .expect("copy failed");
+
+        self.set_draw_color(255, 255, 255);
+        let rect = Rect::new(512, 0, 2, height as u32);
+        self.canvas.fill_rect(rect).expect("");
+    }
+
+    fn draw_bg(&mut self, sprite_name: &str, width: i32, height: i32) {
+        let (sheet, tex_name) = self.sprite_sheet.get(sprite_name).expect("No sprite");
+
+        let texture = self.texture_manager.get_mut(tex_name).expect("No texture");
+
+        let repeat_x = width / sheet.frame.w as i32;
+        let repeat_y = height / sheet.frame.h as i32;
+
+        for x in 0..repeat_x {
+            for y in 0..repeat_y {
+                self.canvas
+                    .copy(
+                        &texture,
+                        Some(Rect::new(sheet.frame.x, sheet.frame.y, sheet.frame.w, sheet.frame.h)),
+                        Some(Rect::new(
+                            x * sheet.frame.w as i32,
+                            y * sheet.frame.h as i32,
+                            sheet.frame.w as u32,
+                            sheet.frame.h as u32,
+                        )),
+                    )
+                    .expect("copy failed");
+            }
+        }
     }
 
     fn draw_gradient(&mut self, width: i32, height: i32, padding: i32) {
@@ -79,32 +132,6 @@ impl Renderer for SdlRenderer {
             .expect("copy failed");
     }
 
-    fn draw_bg(&mut self, sprite_name: &str, width: i32, height: i32, padding: i32) {
-        let (sheet, tex_name) = self.sprite_sheet.get(sprite_name).expect("No sprite");
-
-        let texture = self.texture_manager.get_mut(tex_name).expect("No texture");
-
-        let repeat_x = width / sheet.frame.w as i32;
-        let repeat_y = height / sheet.frame.h as i32;
-
-        for x in 0..repeat_x {
-            for y in 0..repeat_y {
-                self.canvas
-                    .copy(
-                        &texture,
-                        Some(Rect::new(sheet.frame.x, sheet.frame.y, sheet.frame.w, sheet.frame.h)),
-                        Some(Rect::new(
-                            padding + x * sheet.frame.w as i32,
-                            padding + y * sheet.frame.h as i32,
-                            sheet.frame.w as u32,
-                            sheet.frame.h as u32,
-                        )),
-                    )
-                    .expect("copy failed");
-            }
-        }
-    }
-
     fn draw_str(&mut self, tex_name: &str, x: i32, y: i32, text: &str, r: u8, g: u8, b: u8) {
         let texture = self.texture_manager.get_mut(tex_name).expect("No texture");
         texture.set_color_mod(r, g, b);
@@ -113,10 +140,10 @@ impl Renderer for SdlRenderer {
         let mut x = x;
 
         for c in text.chars() {
-            let u: i32 = ((c as i32) - (' ' as i32)) % 16 * 8;
-            let v: i32 = ((c as i32) - (' ' as i32)) / 16 * 8;
+            let u: i32 = ((c as i32) - (' ' as i32)) % 16 * 16;
+            let v: i32 = ((c as i32) - (' ' as i32)) / 16 * 16;
             self.canvas
-                .copy(&texture, Some(Rect::new(u, v, 8, 8)), Some(Rect::new(x, y, w, h)))
+                .copy(&texture, Some(Rect::new(u, v, 16, 16)), Some(Rect::new(x, y, w, h)))
                 .expect("copy failed");
             x += w as i32;
         }
