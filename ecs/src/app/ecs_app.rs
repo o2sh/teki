@@ -1,4 +1,7 @@
-use crate::app::{components::*, resources::*, system_enemy::*, system_game::*, system_player::*};
+use crate::app::{
+    components::*, resources::*, system_avatar::*, system_effect::*, system_enemy::*,
+    system_game::*, system_player::*,
+};
 use legion::*;
 use teki_common::traits::App;
 use teki_common::traits::Audio;
@@ -54,19 +57,23 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
                 "sanae.png",
                 "marisa.png",
                 "reimu.png",
-                "tileset.png",
                 "enemy.png",
-                "orbs.png",
+                //"orbs.png",
                 "bg.png",
+                "spells.png",
+                "shockwave.png",
+                "a_reimu.png",
             ],
         );
         renderer.load_sprite_sheet("assets/sanae.json");
         renderer.load_sprite_sheet("assets/marisa.json");
         renderer.load_sprite_sheet("assets/reimu.json");
-        renderer.load_sprite_sheet("assets/tileset.json");
         renderer.load_sprite_sheet("assets/enemy.json");
-        renderer.load_sprite_sheet("assets/orbs.json");
+        //renderer.load_sprite_sheet("assets/orbs.json");
         renderer.load_sprite_sheet("assets/bg.json");
+        renderer.load_sprite_sheet("assets/spells.json");
+        renderer.load_sprite_sheet("assets/shockwave.json");
+        renderer.load_sprite_sheet("assets/a_reimu.json");
     }
 
     fn on_key(&mut self, key: Key, down: bool) {
@@ -182,9 +189,11 @@ impl Game {
             .add_system(update_enemy_formation_system())
             .add_system(animate_enemy_system())
             .add_system(animate_player_system())
+            .add_system(animate_avatar_system())
             .flush()
             .add_system(move_enemy_formation_system())
             .add_system(collision_check_system())
+            .add_system(move_sequential_anime_system())
             .build();
         let mut world = World::default();
         world.push((
@@ -192,6 +201,15 @@ impl Game {
             Position(Vector2D::new(CENTER_X, PLAYER_Y)),
             player_hit_box(),
             player_sprite(),
+        ));
+
+        world.push((
+            Avatar,
+            Position(Vector2D::new(
+                (GAME_WIDTH + (WINDOW_WIDTH - GAME_WIDTH) / 2) * ONE,
+                PLAYER_Y - 25 * ONE,
+            )),
+            avatar_sprite(),
         ));
         let mut resources = Resources::default();
         resources.insert(SoundQueue::new());

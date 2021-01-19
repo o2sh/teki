@@ -1,5 +1,6 @@
 use crate::app::components::*;
 use crate::app::resources::{GameInfo, SoundQueue};
+use crate::app::system_effect::create_enemy_explosion_effect;
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
@@ -24,13 +25,20 @@ pub enum Direction {
 
 pub struct Player {
     pub shot_enable: bool,
+    pub next_shoot_time: u32,
     pub prev_direction: Option<Direction>,
     pub curr_direction: Option<Direction>,
     pub curr_frame: usize,
 }
 
 pub fn new_player() -> Player {
-    Player { shot_enable: true, prev_direction: None, curr_direction: None, curr_frame: 0 }
+    Player {
+        shot_enable: true,
+        next_shoot_time: 0,
+        prev_direction: None,
+        curr_direction: None,
+        curr_frame: 0,
+    }
 }
 
 pub fn player_hit_box() -> HitBox {
@@ -110,16 +118,20 @@ pub fn do_move_player(
 #[system(for_each)]
 #[read_component(MyShot)]
 pub fn fire_myshot(
-    player: &Player,
+    player: &mut Player,
     position: &Position,
     entity: &Entity,
     #[resource] pad: &Pad,
     #[resource] sound_queue: &mut SoundQueue,
+    #[resource] game_info: &mut GameInfo,
     commands: &mut CommandBuffer,
 ) {
     if pad.is_pressed(PadBit::Z) {
-        sound_queue.push_play(CH_SHOT, BUBBLE_SOUND);
-        do_fire_myshot(player, position, *entity, commands)
+        if player.next_shoot_time < game_info.frame_count {
+            sound_queue.push_play(CH_SHOT, SE_SHOT);
+            do_fire_myshot(player, position, *entity, commands);
+            player.next_shoot_time = game_info.frame_count + SHOT_DELAY;
+        }
     }
 }
 
@@ -141,7 +153,7 @@ pub fn do_fire_myshot(
             MyShot { player_entity: entity },
             pos,
             HitBox { size: Vector2D::new(10, 20) },
-            SpriteDrawable { sprite_name: BULLET_SPRITE, offset: Vector2D::new(-5, -10) },
+            SpriteDrawable { sprite_name: BULLET_SPRITE, offset: Vector2D::new(-8, -32) },
         ));
     }
 }
@@ -208,6 +220,7 @@ pub fn collision_check(
             if shot_coll_box.check_collision(&enemy_collbox) {
                 delete_entity(*shot_entity, commands);
                 delete_entity(*enemy_entity, commands);
+                create_enemy_explosion_effect(&enemy_pos.0, 1, commands);
                 sound_queue.push_play(CH_KILL, SE_KILL);
                 game_info.add_score(20);
             }

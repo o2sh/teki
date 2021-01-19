@@ -1,91 +1,91 @@
 {
   "meta": {
-    "image": "tileset.png",
+    "image": "spells.png",
     "size": {
-      "w": 128,
-      "h": 32
+      "w": 64,
+      "h": 64
     },
     "scale": "1"
   },
   "frames": {
-    "red.png": {
+    "spell0.png": {
       "frame": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 16,
+        "h": 64
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 16,
+        "h": 64
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 16,
+        "h": 64
       }
     },
-    "blue.png": {
+    "spell1.png": {
+      "frame": {
+        "x": 16,
+        "y": 0,
+        "w": 16,
+        "h": 64
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 64
+      },
+      "sourceSize": {
+        "w": 16,
+        "h": 64
+      }
+    },
+    "spell2.png": {
       "frame": {
         "x": 32,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 16,
+        "h": 64
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 16,
+        "h": 64
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 16,
+        "h": 64
       }
     },
-    "gold.png": {
+    "spell3.png": {
       "frame": {
-        "x": 64,
+        "x": 48,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 16,
+        "h": 64
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 16,
+        "h": 64
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
-      }
-    },
-    "grey.png": {
-      "frame": {
-        "x": 96,
-        "y": 0,
-        "w": 32,
-        "h": 32
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 32,
-        "h": 32
-      },
-      "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 16,
+        "h": 64
       }
     }
   }

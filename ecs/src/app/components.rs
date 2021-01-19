@@ -22,3 +22,11 @@ pub struct Enemy {
 pub struct HitBox {
     pub size: Vector2D<i32>,
 }
+
+pub struct SequentialSpriteAnime {
+    pub sprites: &'static [&'static str],
+    pub frame_wait: u32,
+    pub delay: u32,
+    pub offset: Vector2D<i32>,
+    pub count: u32,
+}

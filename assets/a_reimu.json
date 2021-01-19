@@ -1,91 +1,91 @@
 {
   "meta": {
-    "image": "tileset.png",
+    "image": "a_reimu.png",
     "size": {
-      "w": 128,
-      "h": 32
+      "w": 400,
+      "h": 100
     },
     "scale": "1"
   },
   "frames": {
-    "red.png": {
+    "a_reimu0.png": {
       "frame": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 100,
+        "h": 100
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 100,
+        "h": 100
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 100,
+        "h": 100
       }
     },
-    "blue.png": {
+    "a_reimu1.png": {
       "frame": {
-        "x": 32,
+        "x": 100,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 100,
+        "h": 100
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 100,
+        "h": 100
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 100,
+        "h": 100
       }
     },
-    "gold.png": {
+    "a_reimu2.png": {
       "frame": {
-        "x": 64,
+        "x": 200,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 100,
+        "h": 100
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 100,
+        "h": 100
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 100,
+        "h": 100
       }
     },
-    "grey.png": {
+    "a_reimu3.png": {
       "frame": {
-        "x": 96,
+        "x": 300,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 100,
+        "h": 100
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 100,
+        "h": 100
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 100,
+        "h": 100
       }
     }
   }

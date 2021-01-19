@@ -6,7 +6,7 @@ pub const CH_SHOT: u32 = 0;
 pub const CH_BG_MUSIC: u32 = 1;
 pub const CH_KILL: u32 = 2;
 
-pub const WINDOW_WIDTH: i32 = 256 * 3;
+pub const WINDOW_WIDTH: i32 = 700;
 pub const WINDOW_HEIGHT: i32 = 256 * 2;
 
 pub const GAME_WIDTH: i32 = 512;
@@ -18,6 +18,7 @@ pub const PLAYER_Y: i32 = (GAME_HEIGHT - 96) * ONE;
 pub const APP_NAME: &str = "Teki";
 pub const PLAYER_SPEED: i32 = 7 * ONE;
 pub const MYSHOT_SPEED: i32 = 12 * ONE;
+pub const SHOT_DELAY: u32 = 4;
 pub const FPS: u32 = 60;
 
 pub const X_COUNT: usize = 4;
@@ -37,9 +38,10 @@ pub const BG1_TEXTURE: &str = "bg_ground";
 pub const BG2_TEXTURE: &str = "bg_water";
 
 pub const PLAYER_SPRITE: &str = "reimu0";
+pub const AVATAR_SPRITE: &str = "a_reimu0";
 pub const ENEMY_SPRITE: &str = "enemy1";
-pub const BULLET_SPRITE: &str = "orb_blue_full";
+pub const BULLET_SPRITE: &str = "spell0";
 
-pub const BUBBLE_SOUND: &str = "./assets/audio/bubble";
 pub const BG_MUSIC: &str = "./assets/audio/bgm";
-pub const SE_KILL: &str = "./assets/audio/pop";
+pub const SE_KILL: &str = "./assets/audio/kill";
+pub const SE_SHOT: &str = "./assets/audio/graze";
