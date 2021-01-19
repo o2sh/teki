@@ -38,7 +38,7 @@ pub fn player_hit_box() -> HitBox {
 }
 
 pub fn player_sprite() -> SpriteDrawable {
-    SpriteDrawable { sprite_name: PLAYER_SPRITE, offset: Vector2D::new(-16, -16) }
+    SpriteDrawable { sprite_name: PLAYER_SPRITE, offset: Vector2D::new(-16, -24) }
 }
 
 #[system(for_each)]

@@ -49,7 +49,16 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
     fn init(&mut self, renderer: &mut R) {
         renderer.load_textures(
             "assets",
-            &["font.png", "sanae.png", "marisa.png", "reimu.png","tileset.png", "enemy.png", "orbs.png", "bg.png"],
+            &[
+                "font.png",
+                "sanae.png",
+                "marisa.png",
+                "reimu.png",
+                "tileset.png",
+                "enemy.png",
+                "orbs.png",
+                "bg.png",
+            ],
         );
         renderer.load_sprite_sheet("assets/sanae.json");
         renderer.load_sprite_sheet("assets/marisa.json");
