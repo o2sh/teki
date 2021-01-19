@@ -10,11 +10,11 @@ use teki_common::utils::pad::{Pad, PadBit};
 use vector2d::Vector2D;
 
 const STILL: [&str; 8] =
-    ["sanae0", "sanae1", "sanae2", "sanae3", "sanae4", "sanae5", "sanae6", "sanae7"];
+    ["reimu0", "reimu1", "reimu2", "reimu3", "reimu4", "reimu5", "reimu6", "reimu7"];
 const TO_THE_LEFT: [&str; 8] =
-    ["sanae8", "sanae9", "sanae10", "sanae11", "sanae12", "sanae13", "sanae14", "sanae15"];
+    ["reimu8", "reimu9", "reimu10", "reimu11", "reimu12", "reimu13", "reimu14", "reimu15"];
 const TO_THE_RIGHT: [&str; 8] =
-    ["sanae16", "sanae17", "sanae18", "sanae19", "sanae20", "sanae21", "sanae22", "sanae23"];
+    ["reimu16", "reimu17", "reimu18", "reimu19", "reimu20", "reimu21", "reimu22", "reimu23"];
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum Direction {
@@ -64,7 +64,7 @@ pub fn do_move_player(
     let pos = &mut position.0;
     player.prev_direction = player.curr_direction.clone();
     player.curr_direction = None;
-    if game_info.frame_count % 5 == 0 {
+    if game_info.frame_count % 2 == 0 {
         player.curr_frame += 1
     }
     if pad.is_pressed(PadBit::L) {
@@ -225,7 +225,7 @@ pub fn animate_player(
     sprite: &mut SpriteDrawable,
     #[resource] game_info: &mut GameInfo,
 ) {
-    do_animate_player(player, sprite, game_info.frame_count_over_5);
+    do_animate_player(player, sprite, game_info.frame_count_over_2);
 }
 
 pub fn do_animate_player(player: &mut Player, sprite: &mut SpriteDrawable, frame_count: u32) {

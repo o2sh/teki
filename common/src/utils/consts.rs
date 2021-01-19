@@ -13,7 +13,7 @@ pub const GAME_WIDTH: i32 = 512;
 pub const GAME_HEIGHT: i32 = 256 * 2;
 
 pub const CENTER_X: i32 = GAME_WIDTH * ONE / 2;
-pub const PLAYER_Y: i32 = (GAME_HEIGHT - 16 - 8) * ONE;
+pub const PLAYER_Y: i32 = (GAME_HEIGHT - 96) * ONE;
 
 pub const APP_NAME: &str = "Teki";
 pub const PLAYER_SPEED: i32 = 7 * ONE;
@@ -36,7 +36,7 @@ pub const TILE_TEXTURE: &str = "blue";
 pub const BG1_TEXTURE: &str = "bg_ground";
 pub const BG2_TEXTURE: &str = "bg_water";
 
-pub const PLAYER_SPRITE: &str = "sanae0";
+pub const PLAYER_SPRITE: &str = "reimu0";
 pub const ENEMY_SPRITE: &str = "enemy1";
 pub const BULLET_SPRITE: &str = "orb_blue_full";
 

@@ -130,7 +130,7 @@ impl GameInfo {
     pub fn draw<R: Renderer>(&self, renderer: &mut R) {
         let left_padding = 25;
         let top_padding = 35;
-        renderer.draw_str(FONTS, GAME_WIDTH + left_padding, top_padding, "Score", 25, 158, 88);
+        renderer.draw_str(FONTS, GAME_WIDTH + left_padding, top_padding, "Score", 255, 0, 0);
         renderer.draw_str(
             FONTS,
             GAME_WIDTH + left_padding + 16 * 6,
