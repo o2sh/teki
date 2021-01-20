@@ -127,8 +127,9 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
 
         renderer.draw_str(
             FONTS,
-            WINDOW_WIDTH - 6 * 16,
-            WINDOW_HEIGHT - 28,
+            WINDOW_WIDTH - 7 * 8,
+            WINDOW_HEIGHT - 25,
+            16,
             &format!("{:2}fps", self.fps_calc.fps()),
             255,
             255,
@@ -151,8 +152,9 @@ impl Title {
         let title = "Teki";
         renderer.draw_str(
             FONTS,
-            (WINDOW_WIDTH / 2) - (title.len() as i32 / 2) * 16,
+            (WINDOW_WIDTH / 2) - (title.len() as i32 / 2) * 8,
             8 * 16,
+            16,
             title,
             255,
             255,
@@ -162,8 +164,9 @@ impl Title {
         let msg = "Press space key to start";
         renderer.draw_str(
             FONTS,
-            (WINDOW_WIDTH / 2) - (msg.len() as i32 / 2) * 16,
+            (WINDOW_WIDTH / 2) - (msg.len() as i32 / 2) * 8,
             15 * 16,
+            16,
             msg,
             255,
             255,

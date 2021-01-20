@@ -88,24 +88,30 @@ impl Renderer for WasmRenderer {
         self.context.fill_rect(0.0, 0.0, self.canvas.width() as f64, self.canvas.height() as f64)
     }
 
-    fn draw_str(&mut self, path: &str, x: i32, y: i32, text: &str, r: u8, g: u8, b: u8) {
+    fn draw_str(&mut self, path: &str, x: i32, y: i32, size: u32, text: &str, _: u8, _: u8, _: u8) {
         let images = self.images.borrow();
         let filename = String::from(Path::new(path).file_stem().unwrap().to_str().unwrap());
         if let Some(image) = images.get(&filename) {
             let mut x = x as f64;
             let y = y as f64;
-            let w = 16.0;
-            let h = 16.0;
 
             for c in text.chars() {
                 let u: i32 = ((c as i32) - (' ' as i32)) % 16 * 16;
                 let v: i32 = ((c as i32) - (' ' as i32)) / 16 * 16;
                 self.context
                     .draw_image_with_html_image_element_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
-                        &image, u as f64, v as f64, 16.0, 16.0, x, y, w, h,
+                        &image,
+                        u as f64,
+                        v as f64,
+                        16.0,
+                        16.0,
+                        x,
+                        y,
+                        size as f64,
+                        size as f64,
                     )
                     .expect("draw_image_with... failed");
-                x += w;
+                x += (size / 2) as f64 + 1.0;
             }
         }
     }

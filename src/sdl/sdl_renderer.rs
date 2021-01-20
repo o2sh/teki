@@ -67,7 +67,7 @@ impl Renderer for SdlRenderer {
         }
 
         texture.set_alpha_mod(BG_ALPHA);
-        
+
         self.canvas
             .copy(
                 &texture,
@@ -83,20 +83,28 @@ impl Renderer for SdlRenderer {
         self.canvas.fill_rect(rect).expect("");
     }
 
-    fn draw_str(&mut self, tex_name: &str, x: i32, y: i32, text: &str, r: u8, g: u8, b: u8) {
+    fn draw_str(
+        &mut self,
+        tex_name: &str,
+        x: i32,
+        y: i32,
+        size: u32,
+        text: &str,
+        r: u8,
+        g: u8,
+        b: u8,
+    ) {
         let texture = self.texture_manager.get_mut(tex_name).expect("No texture");
         texture.set_color_mod(r, g, b);
-        let w = 16;
-        let h = 16;
         let mut x = x;
 
         for c in text.chars() {
-            let u: i32 = ((c as i32) - (' ' as i32)) % 16 * 16;
-            let v: i32 = ((c as i32) - (' ' as i32)) / 16 * 16;
+            let u: i32 = ((c as i32) - (' ' as i32)) % 16 * size as i32;
+            let v: i32 = ((c as i32) - (' ' as i32)) / 16 * size as i32;
             self.canvas
-                .copy(&texture, Some(Rect::new(u, v, 16, 16)), Some(Rect::new(x, y, w, h)))
+                .copy(&texture, Some(Rect::new(u, v, 16, 16)), Some(Rect::new(x, y, size, size)))
                 .expect("copy failed");
-            x += w as i32;
+            x += (size / 2) as i32 + 1;
         }
     }
 
