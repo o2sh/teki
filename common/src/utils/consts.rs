@@ -26,7 +26,7 @@ pub const Y_COUNT: usize = 3;
 
 pub const SCROLLING_BG_VEL: i32 = 3;
 
-pub const BG_ALPHA: u8 = 230;
+pub const BG_ALPHA: u8 = 180;
 
 pub const BASE_Y: i32 = 75;
 

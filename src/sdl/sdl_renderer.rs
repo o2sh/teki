@@ -67,6 +67,7 @@ impl Renderer for SdlRenderer {
         }
 
         texture.set_alpha_mod(BG_ALPHA);
+        
         self.canvas
             .copy(
                 &texture,
@@ -74,7 +75,9 @@ impl Renderer for SdlRenderer {
                 Some(Rect::new(0, self.scrolling_offset, width as u32, sheet.frame.h)),
             )
             .expect("copy failed");
+    }
 
+    fn draw_vertical_separation(&mut self, width: i32, height: i32) {
         self.set_draw_color(255, 255, 255);
         let rect = Rect::new(width, 0, 2, height as u32);
         self.canvas.fill_rect(rect).expect("");

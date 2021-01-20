@@ -228,7 +228,7 @@ impl Game {
 
     fn draw<R: Renderer>(&self, renderer: &mut R) {
         renderer.draw_scrolling_bg(BG1_TEXTURE, GAME_WIDTH, GAME_HEIGHT);
-
+        renderer.draw_vertical_separation(GAME_WIDTH, GAME_HEIGHT);
         for (position, drawable) in <(&Position, &SpriteDrawable)>::query().iter(&self.world) {
             let pos = round_vec(&position.0) + drawable.offset;
             renderer.draw_sprite(drawable.sprite_name, &pos);
