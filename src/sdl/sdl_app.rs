@@ -4,16 +4,18 @@ use lazy_static::lazy_static;
 use sdl2::event::Event;
 use sdl2::image::{self, InitFlag};
 use sdl2::keyboard::Keycode;
+use sdl2::mixer::{AUDIO_S16LSB, DEFAULT_CHANNELS};
 use sdl2::Sdl;
 use std::collections::HashMap;
-use std::time::Duration;
+use std::thread;
+use std::time::{Duration, SystemTime};
 use teki_common::traits::App;
-use teki_common::utils::pad::Key;
-
 use teki_common::utils::consts::*;
+use teki_common::utils::pad::Key;
 
 pub struct SdlApp<A: App<SdlRenderer>> {
     sdl_context: Sdl,
+    last_update_time: SystemTime,
     app: A,
 }
 
@@ -21,7 +23,7 @@ impl<A: App<SdlRenderer>> SdlApp<A> {
     pub fn new(app: A) -> Result<Self, String> {
         let sdl_context = sdl2::init()?;
 
-        Ok(Self { sdl_context, app })
+        Ok(Self { sdl_context, last_update_time: SystemTime::now(), app })
     }
 
     pub fn run(&mut self, scale: u32, fullscreen: bool) -> Result<(), String> {
@@ -48,11 +50,30 @@ impl<A: App<SdlRenderer>> SdlApp<A> {
 
         let canvas = window.into_canvas().present_vsync().build().map_err(|e| e.to_string())?;
 
+        let _audio = self.sdl_context.audio()?;
+
+        let frequency = 44_100;
+        let format = AUDIO_S16LSB; // signed 16 bit samples, in little-endian byte order
+        let channels = DEFAULT_CHANNELS; // Stereo
+        let chunk_size = 1_024;
+        sdl2::mixer::open_audio(frequency, format, channels, chunk_size)?;
+        let _mixer_context = sdl2::mixer::init(
+            sdl2::mixer::InitFlag::MP3
+                | sdl2::mixer::InitFlag::FLAC
+                | sdl2::mixer::InitFlag::MOD
+                | sdl2::mixer::InitFlag::OGG,
+        )?;
+
+        // Number of mixing channels available for sound effect `Chunk`s to play
+        // simultaneously.
+        sdl2::mixer::allocate_channels(4);
+
         let mut renderer = SdlRenderer::new(canvas, (WINDOW_WIDTH as u32, WINDOW_HEIGHT as u32));
 
         self.app.init(&mut renderer);
 
-        let skip_count = 0;
+        self.last_update_time = SystemTime::now();
+        let mut skip_count = 0;
         'running: loop {
             if !self.pump_events()? {
                 break 'running;
@@ -67,7 +88,7 @@ impl<A: App<SdlRenderer>> SdlApp<A> {
             self.app.draw(&mut renderer);
             renderer.present();
 
-            ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / FPS));
+            skip_count = self.wait_frame(Duration::from_micros(1_000_000 / FPS as u64));
         }
 
         Ok(())
@@ -94,6 +115,26 @@ impl<A: App<SdlRenderer>> SdlApp<A> {
             }
         }
         Ok(true)
+    }
+    pub fn wait_frame(&mut self, duration: Duration) -> u32 {
+        let next_update_time = self.last_update_time + duration;
+        let now = SystemTime::now();
+        if now < next_update_time {
+            let wait = next_update_time.duration_since(now).expect("");
+            thread::sleep(wait);
+            self.last_update_time = next_update_time;
+            0
+        } else {
+            let late = now.duration_since(next_update_time).expect("");
+            let skip_count = (late.as_millis() as f32 / duration.as_millis() as f32).floor() as u32;
+            if skip_count <= FPS / MIN_FPS {
+                self.last_update_time = next_update_time + duration * skip_count;
+                skip_count
+            } else {
+                self.last_update_time = now;
+                FPS / MIN_FPS
+            }
+        }
     }
 }
 

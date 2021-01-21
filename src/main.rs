@@ -6,7 +6,6 @@ use clap::{crate_description, crate_name, crate_version, App, Arg};
 
 use crate::sdl::SdlAudio;
 use crate::std_timer::StdTimer;
-use sdl2::mixer::{AUDIO_S16LSB, DEFAULT_CHANNELS};
 use teki_common::utils::consts::*;
 use teki_ecs::app::EcsApp;
 
@@ -30,14 +29,6 @@ fn main() -> Result<(), String> {
     let fullscreen = matches.is_present("full");
 
     let audio = SdlAudio::new(CHANNEL_COUNT, BASE_VOLUME);
-
-    let frequency = 44_100;
-    let format = AUDIO_S16LSB; // signed 16 bit samples, in little-endian byte order
-    let channels = DEFAULT_CHANNELS; // Stereo
-    let chunk_size = 1_024;
-    sdl2::mixer::open_audio(frequency, format, channels, chunk_size)?;
-
-    sdl2::mixer::allocate_channels(4);
 
     let timer = StdTimer::new();
     let mut app = SdlApp::new(EcsApp::new(audio, timer))?;

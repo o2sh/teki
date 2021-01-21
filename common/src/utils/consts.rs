@@ -20,6 +20,7 @@ pub const PLAYER_SPEED: i32 = 7 * ONE;
 pub const MYSHOT_SPEED: i32 = 12 * ONE;
 pub const SHOT_DELAY: u32 = 4;
 pub const FPS: u32 = 60;
+pub const MIN_FPS: u32 = 15;
 
 pub const X_COUNT: usize = 4;
 pub const Y_COUNT: usize = 3;
