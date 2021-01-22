@@ -1,0 +1,32 @@
+{
+  "meta": {
+    "image": "title_bg.png",
+    "size": {
+      "w": 400,
+      "h": 512
+    },
+    "scale": "1"
+  },
+  "frames": {
+    "title_bg.png": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 400,
+        "h": 512
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 400,
+        "h": 512
+      },
+      "sourceSize": {
+        "w": 400,
+        "h": 512
+      }
+    }
+  }
+}

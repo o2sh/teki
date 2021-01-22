@@ -6,7 +6,7 @@ pub trait Renderer {
     fn clear(&mut self);
     fn draw_str(
         &mut self,
-        sprite_name: &str,
+        tex_name: &str,
         x: i32,
         y: i32,
         size: u32,
@@ -19,4 +19,5 @@ pub trait Renderer {
     fn draw_scrolling_bg(&mut self, sprite_name: &str, width: i32, height: i32);
     fn set_draw_color(&mut self, r: u8, g: u8, b: u8);
     fn draw_vertical_separation(&mut self, width: i32, height: i32);
+    fn draw_gradient(&mut self, width: i32, height: i32);
 }

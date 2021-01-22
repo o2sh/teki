@@ -43,6 +43,8 @@ pub const AVATAR_SPRITE: &str = "a_reimu0";
 pub const ENEMY_SPRITE: &str = "enemy1";
 pub const BULLET_SPRITE: &str = "spell0";
 
-pub const BG_MUSIC: &str = "./assets/audio/bgm";
+pub const BG_MUSIC: &str = "bgm";
+pub const TITLE_MUSIC: &str = "title";
+
 pub const SE_KILL: &str = "./assets/audio/kill";
 pub const SE_SHOT: &str = "./assets/audio/graze";

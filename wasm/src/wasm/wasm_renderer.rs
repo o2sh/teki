@@ -175,6 +175,18 @@ impl Renderer for WasmRenderer {
         self.context.set_fill_style(&JsValue::from(format!("rgb({},{},{})", 255, 255, 255)));
         self.context.fill_rect(width as f64, 0.0, 2.0, height as f64)
     }
+
+    fn draw_gradient(&mut self, width: i32, height: i32) {
+        let gradient = self.context.create_linear_gradient(50.0, 20.0, 340.0, 90.0);
+
+        // Add three color stops
+        gradient.add_color_stop(0.0, "red").unwrap();
+        gradient.add_color_stop(1.0, "blue").unwrap();
+
+        // Set the fill style and draw a rectangle
+        self.context.set_fill_style(&JsValue::from(gradient));
+        self.context.fill_rect(0.0, 0.0, width as f64, height as f64);
+    }
 }
 
 async fn request(url: String) -> Result<String, String> {

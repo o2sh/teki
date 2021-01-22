@@ -1,5 +1,6 @@
 use crate::sdl::SdlTextureManager;
 use sdl2::pixels::Color;
+use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 use teki_common::traits::Renderer;
@@ -81,6 +82,31 @@ impl Renderer for SdlRenderer {
         self.set_draw_color(255, 255, 255);
         let rect = Rect::new(width, 0, 2, height as u32);
         self.canvas.fill_rect(rect).expect("");
+    }
+
+    fn draw_gradient(&mut self, width: i32, height: i32) {
+        let texture_creator = self.canvas.texture_creator();
+        let mut texture = texture_creator
+            .create_texture_streaming(PixelFormatEnum::RGB24, 256, 256)
+            .map_err(|e| e.to_string())
+            .expect("");
+        // Create a red-green gradient
+        texture
+            .with_lock(None, |buffer: &mut [u8], pitch: usize| {
+                for y in 0..256 {
+                    for x in 0..256 {
+                        let offset = y * pitch + x * 3;
+                        buffer[offset + 2] = x as u8;
+                        buffer[offset] = y as u8;
+                        buffer[offset + 1] = 0;
+                    }
+                }
+            })
+            .expect("");
+
+        self.canvas
+            .copy(&texture, None, Some(Rect::new(0, 0, width as u32, height as u32)))
+            .expect("copy failed");
     }
 
     fn draw_str(

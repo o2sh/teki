@@ -39,12 +39,12 @@ impl<A: Audio, T: Timer> EcsApp<A, T> {
 
     fn start_game(&mut self) {
         self.state = AppState::Game(Game::new());
-        self.audio.play_loop(CH_BG_MUSIC, BG_MUSIC);
+        self.audio.play_music(CH_BG_MUSIC, BG_MUSIC);
     }
 
     fn back_to_title(&mut self) {
-        self.audio.stop(CH_BG_MUSIC);
         self.state = AppState::Title(Title);
+        self.audio.play_music(CH_BG_MUSIC, TITLE_MUSIC);
     }
 }
 
@@ -63,6 +63,7 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
                 "spells.png",
                 "shockwave.png",
                 "a_reimu.png",
+                "title_bg.png",
             ],
         );
         renderer.load_sprite_sheet("assets/sanae.json");
@@ -74,6 +75,10 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
         renderer.load_sprite_sheet("assets/spells.json");
         renderer.load_sprite_sheet("assets/shockwave.json");
         renderer.load_sprite_sheet("assets/a_reimu.json");
+        renderer.load_sprite_sheet("assets/title_bg.json");
+
+        self.audio.load_musics("assets/audio", &["bgm.mp3", "title.mp3"]).expect("");
+        self.audio.play_music(CH_BG_MUSIC, TITLE_MUSIC);
     }
 
     fn on_key(&mut self, key: Key, down: bool) {
@@ -149,10 +154,12 @@ impl Title {
     }
 
     fn draw<R: Renderer>(&self, renderer: &mut R) {
+        renderer.draw_gradient(WINDOW_WIDTH, WINDOW_HEIGHT);
+        renderer.draw_sprite("title_bg", &Vector2D::new(0, 0));
         let title = "Teki";
         renderer.draw_str(
             FONTS,
-            (WINDOW_WIDTH / 2) - (title.len() as i32 / 2) * 8,
+            300 + ((WINDOW_WIDTH - 300) / 2) - (title.len() as i32 / 2) * 8,
             8 * 16,
             16,
             title,
@@ -164,7 +171,7 @@ impl Title {
         let msg = "Press space key to start";
         renderer.draw_str(
             FONTS,
-            (WINDOW_WIDTH / 2) - (msg.len() as i32 / 2) * 8,
+            300 + ((WINDOW_WIDTH - 300) / 2) - (msg.len() as i32 / 2) * 8,
             15 * 16,
             16,
             msg,

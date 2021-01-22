@@ -6,7 +6,8 @@ const CHANNEL_COUNT = 3
 const AUDIO_ASSETS = [
   'assets/audio/bgm',
   'assets/audio/graze',
-  'assets/audio/kill'
+  'assets/audio/kill',
+  'assets/audio/title'
 ]
 const ENABLE_AUDIO = 'assets/audio/toggle_sound'
 
@@ -21,10 +22,6 @@ window.play_se = function play_se(channel, filename) {
 
 window.play_loop = function play_loop(channel, filename) {
   audioManager.playLoop(channel, filename)
-}
-
-window.stop = function stop(channel) {
-  audioManager.stop(channel)
 }
 
 function fitCanvas() {
