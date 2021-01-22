@@ -1,6 +1,6 @@
 use crate::utils::math::*;
 
-pub const BASE_VOLUME: f32 = 1.0 / 4.0;
+pub const BASE_VOLUME: f32 = 1.0 / 6.0;
 pub const CHANNEL_COUNT: u32 = 3;
 pub const CH_SHOT: u32 = 0;
 pub const CH_BG_MUSIC: u32 = 1;

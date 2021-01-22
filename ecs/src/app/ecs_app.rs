@@ -77,7 +77,7 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
         renderer.load_sprite_sheet("assets/a_reimu.json");
         renderer.load_sprite_sheet("assets/title_bg.json");
 
-        self.audio.load_musics("assets/audio", &["bgm.mp3", "title.mp3"]).expect("");
+        self.audio.load_musics("assets/audio", &["bgm.ogg", "title.ogg"]).expect("");
         self.audio.play_music(CH_BG_MUSIC, TITLE_MUSIC);
     }
 

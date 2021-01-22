@@ -19,5 +19,6 @@ cargo run
 
 ### How to play (Control)
 
-  * Arrow key : Move left, right, up or down
-  * Z: Shoot
+  * The Arrow Keys move the character around
+  * Z causes a short barrage of shots to be fired; it may be held down for rapidfire
+  * Esc pauses the game and brings you to the in-game menu
