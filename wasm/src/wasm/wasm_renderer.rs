@@ -3,8 +3,7 @@ use std::collections::HashMap;
 use std::path::Path;
 use std::rc::Rc;
 use teki_common::traits::Renderer;
-use teki_common::utils::consts::*;
-use teki_common::utils::SpriteSheet;
+use teki_common::utils::{consts::*, SpriteSheet};
 use vector2d::Vector2D;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -103,12 +102,12 @@ impl Renderer for WasmRenderer {
     ) {
         self.context.save();
         self.context.set_global_alpha(a as f64 / 255.0);
-        self.set_draw_color(r,g,b);
-        let b = if bold {"bold "}else {""};
+        self.set_draw_color(r, g, b);
+        let b = if bold { "bold " } else { "" };
         self.context.set_font(&format!("{}{}px Arial", b, size));
         self.context
-        .fill_text_with_max_width(text, x as f64, y as f64 + 10.0, self.canvas.width() as f64)
-        .expect("draw_image_with... failed");
+            .fill_text_with_max_width(text, x as f64, y as f64 + 10.0, self.canvas.width() as f64)
+            .expect("draw_image_with... failed");
 
         self.context.restore();
     }

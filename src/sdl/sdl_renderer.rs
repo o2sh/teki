@@ -1,13 +1,10 @@
 use crate::sdl::SdlTextureManager;
-use sdl2::pixels::Color;
-use sdl2::pixels::PixelFormatEnum;
+use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::rect::Rect;
-use sdl2::render::BlendMode;
-use sdl2::render::WindowCanvas;
+use sdl2::render::{BlendMode, WindowCanvas};
 use sdl2::ttf::*;
 use teki_common::traits::Renderer;
-use teki_common::utils::consts::*;
-use teki_common::utils::SpriteSheet;
+use teki_common::utils::{consts::*, SpriteSheet};
 use vector2d::Vector2D;
 
 pub struct SdlRenderer {

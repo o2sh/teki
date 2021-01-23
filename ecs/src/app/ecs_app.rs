@@ -3,14 +3,13 @@ use crate::app::{
     system_game::*, system_player::*,
 };
 use legion::*;
-use teki_common::traits::App;
-use teki_common::traits::Audio;
-use teki_common::traits::Renderer;
-use teki_common::traits::Timer;
-use teki_common::utils::consts::*;
-use teki_common::utils::math::*;
-use teki_common::utils::pad::{Key, Pad, PadBit};
-use teki_common::utils::FpsCalc;
+use teki_common::traits::{App, Audio, Renderer, Timer};
+use teki_common::utils::{
+    consts::*,
+    math::*,
+    pad::{Key, Pad, PadBit},
+    FpsCalc,
+};
 use vector2d::Vector2D;
 
 enum AppState {
@@ -233,6 +232,7 @@ impl Game {
         resources.insert(SoundQueue::new());
         resources.insert(EnemyFormation::default());
         resources.insert(GameInfo::new());
+        resources.insert(StageIndicator::default());
         Self { world, resources, schedule }
     }
 
@@ -258,57 +258,9 @@ impl Game {
 
             match game_info.game_state {
                 GameState::StartStage => {
-                    let gradient = (180.0 - game_info.count as f32) / 180.0;
-                    let rect_alpha_gradient = (RECT_STAGE_ALPHA as f32 * gradient).floor() as u8;
-                    let text_alpha_gradient = (TEXT_STAGE_ALPHA as f32 * gradient).floor() as u8;
-
-                    renderer.draw_rect(
-                        &Vector2D::new(0, GAME_HEIGHT / 2 - 50),
-                        GAME_WIDTH,
-                        100,
-                        0,
-                        0,
-                        0,
-                        rect_alpha_gradient,
-                    );
-                    renderer.draw_str(
-                        IM_FONT,
-                        GAME_WIDTH / 2 - 4 * 7,
-                        GAME_HEIGHT / 2 - 30,
-                        16,
-                        &format!("Stage {}", game_info.stage + 1),
-                        255,
-                        255,
-                        255,
-                        text_alpha_gradient,
-                        false,
-                    );
-
-                    renderer.draw_str(
-                        IM_FONT,
-                        GAME_WIDTH / 2 - 7 * 8,
-                        GAME_HEIGHT / 2 + 15,
-                        16,
-                        &format!("From the Ashes"),
-                        255,
-                        255,
-                        255,
-                        text_alpha_gradient,
-                        false,
-                    );
-
-                    renderer.draw_str(
-                        RE_FONT,
-                        GAME_WIDTH - 8 * 38 - 15,
-                        GAME_HEIGHT - 28,
-                        16,
-                        &format!("BGM: Thirty-three Heavenly War Maidens"),
-                        255,
-                        255,
-                        255,
-                        text_alpha_gradient,
-                        false,
-                    );
+                    if let Some(stage_indicator) = self.get_stage_indicator() {
+                        stage_indicator.draw(renderer, game_info.count);
+                    }
                 }
                 _ => {}
             }
@@ -317,5 +269,9 @@ impl Game {
 
     fn get_game_info(&self) -> Option<legion::systems::Fetch<'_, GameInfo>> {
         self.resources.get::<GameInfo>()
+    }
+
+    fn get_stage_indicator(&self) -> Option<legion::systems::Fetch<'_, StageIndicator>> {
+        self.resources.get::<StageIndicator>()
     }
 }

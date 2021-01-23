@@ -4,10 +4,12 @@ use crate::app::system_effect::create_enemy_explosion_effect;
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
-use teki_common::utils::collision::CollBox;
-use teki_common::utils::consts::*;
-use teki_common::utils::math::*;
-use teki_common::utils::pad::{Pad, PadBit};
+use teki_common::utils::{
+    collision::CollBox,
+    consts::*,
+    math::*,
+    pad::{Pad, PadBit},
+};
 use vector2d::Vector2D;
 
 const STILL: [&str; 8] =

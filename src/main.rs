@@ -1,11 +1,10 @@
 mod sdl;
 mod std_timer;
 
-use crate::sdl::SdlApp;
-use clap::{crate_description, crate_name, crate_version, App, Arg};
-
-use crate::sdl::SdlAudio;
+use crate::sdl::{SdlApp, SdlAudio};
 use crate::std_timer::StdTimer;
+use clap::{crate_description, crate_name, crate_version, App};
+
 use teki_common::utils::consts::*;
 use teki_ecs::app::EcsApp;
 
@@ -21,19 +20,14 @@ pub enum VKey {
 }
 
 fn main() -> Result<(), String> {
-    let matches = App::new(crate_name!())
-        .version(crate_version!())
-        .about(crate_description!())
-        .arg(Arg::with_name("full").help("Use fullscreen").short("f").long("fullscreen"))
-        .get_matches();
-    let fullscreen = matches.is_present("full");
+    App::new(crate_name!()).version(crate_version!()).about(crate_description!());
 
     let audio = SdlAudio::new(CHANNEL_COUNT, BASE_VOLUME);
 
     let timer = StdTimer::new();
     let mut app = SdlApp::new(EcsApp::new(audio, timer))?;
 
-    app.run(1, fullscreen)?;
+    app.run()?;
 
     Ok(())
 }

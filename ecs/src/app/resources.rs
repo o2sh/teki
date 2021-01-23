@@ -1,9 +1,7 @@
 use array_macro::*;
 use lazy_static::lazy_static;
-use teki_common::traits::Audio;
-use teki_common::traits::Renderer;
-use teki_common::utils::consts::*;
-use teki_common::utils::math::*;
+use teki_common::traits::{Audio, Renderer};
+use teki_common::utils::{consts::*, math::*};
 use teki_common::FormationIndex;
 use vector2d::Vector2D;
 
@@ -109,7 +107,6 @@ lazy_static! {
 }
 
 pub struct GameInfo {
-    pub stage: u16,
     pub score: u32,
     pub count: u32,
     pub frame_count: u32,
@@ -120,10 +117,7 @@ pub struct GameInfo {
 
 impl GameInfo {
     pub fn new() -> Self {
-        let stage = 0;
-
         GameInfo {
-            stage,
             score: 0,
             count: 0,
             game_state: GameState::StartStage,
@@ -137,7 +131,7 @@ impl GameInfo {
         self.score += add;
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self, stage_indicator: &mut StageIndicator) {
         self.frame_count = self.frame_count.wrapping_add(1);
 
         if self.frame_count % 5 == 0 {
@@ -150,6 +144,9 @@ impl GameInfo {
 
         match self.game_state {
             GameState::StartStage => {
+                if self.count == 0 {
+                    stage_indicator.set_stage();
+                }
                 self.count += 1;
                 if self.count >= 180 as u32 {
                     self.game_state = GameState::Playing;
@@ -184,6 +181,71 @@ impl GameInfo {
             255,
             255,
             255,
+            false,
+        );
+    }
+}
+
+#[derive(Default)]
+pub struct StageIndicator {
+    stage: u16,
+}
+
+impl StageIndicator {
+    pub fn set_stage(&mut self) {
+        self.stage += 1;
+    }
+
+    pub fn draw<R: Renderer>(&self, renderer: &mut R, count: u32) {
+        let gradient = (180.0 - count as f32) / 180.0;
+        let rect_alpha_gradient = (RECT_STAGE_ALPHA as f32 * gradient).floor() as u8;
+        let text_alpha_gradient = (TEXT_STAGE_ALPHA as f32 * gradient).floor() as u8;
+
+        renderer.draw_rect(
+            &Vector2D::new(0, GAME_HEIGHT / 2 - 50),
+            GAME_WIDTH,
+            100,
+            0,
+            0,
+            0,
+            rect_alpha_gradient,
+        );
+        renderer.draw_str(
+            IM_FONT,
+            GAME_WIDTH / 2 - 4 * 7,
+            GAME_HEIGHT / 2 - 30,
+            16,
+            &format!("Stage {}", self.stage),
+            255,
+            255,
+            255,
+            text_alpha_gradient,
+            false,
+        );
+
+        renderer.draw_str(
+            IM_FONT,
+            GAME_WIDTH / 2 - 7 * 8,
+            GAME_HEIGHT / 2 + 15,
+            16,
+            &format!("From the Ashes"),
+            255,
+            255,
+            255,
+            text_alpha_gradient,
+            false,
+        );
+
+        renderer.draw_str(
+            RE_FONT,
+            GAME_WIDTH - 8 * 38 - 15,
+            GAME_HEIGHT - 28,
+            16,
+            &format!("BGM: Thirty-three Heavenly War Maidens"),
+            255,
+            255,
+            255,
+            text_alpha_gradient,
             false,
         );
     }

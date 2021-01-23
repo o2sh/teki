@@ -1,7 +1,9 @@
 use crate::app::components::*;
 use legion::*;
-use teki_common::utils::consts::*;
-use teki_common::utils::pad::{Pad, PadBit};
+use teki_common::utils::{
+    consts::*,
+    pad::{Pad, PadBit},
+};
 use vector2d::Vector2D;
 
 const REIMU_SPRITES: [&str; 2] = ["a_reimu0", "a_reimu1"];

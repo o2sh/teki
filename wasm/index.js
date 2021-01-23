@@ -24,6 +24,24 @@ window.play_loop = function play_loop(channel, filename) {
   audioManager.playLoop(channel, filename)
 }
 
+
+function fitCanvas() {
+  const canvas = document.getElementById(CANVAS_ID)
+  if (canvas.width >= window.innerWidth || canvas.height >= window.innerHeight) {
+    if (canvas.width >= window.innerWidth) {
+      canvas.style.width = `100%`
+      canvas.style.height = `${canvas.height * window.innerWidth / canvas.width}px`
+    }
+    if (canvas.height >= window.innerHeight) {
+      canvas.style.height = `100%`
+      canvas.style.width = `${canvas.width * window.innerHeight / canvas.height}px`
+    }
+  } else {
+    canvas.style.width = `${canvas.width}px`
+    canvas.style.height = `${canvas.height}px`
+  }
+}
+
 function setupSoundButton() {
   const toggleSound = () => {
     audioManager.toggleEnabled()
@@ -35,12 +53,18 @@ function setupSoundButton() {
   soundIconHolder.addEventListener('click', toggleSound)
 }
 
+function setupResizeListener() {
+  window.addEventListener('resize', (_) => {
+    fitCanvas()
+  })
+}
+
 function createCoverScreen(title) {
   const cover = document.createElement('div')
   cover.className = 'centering'
   cover.style.position = 'absolute'
   cover.style.left = cover.style.top = cover.style.right = cover.style.bottom = '0'
-  cover.style.backgroundColor = 'rgba(0,0,0,0.5)'
+  cover.style.backgroundColor = 'rgba(0,0,0,1)'
   cover.style.color = 'white'
   cover.style.textAlign = 'center'
   cover.innerText = title
@@ -48,6 +72,9 @@ function createCoverScreen(title) {
   document.body.appendChild(cover)
   return cover
 }
+
+fitCanvas()
+setupResizeListener()
 
 const renderer = WasmRenderer.new(CANVAS_ID)
 const app = WasmApp.new(renderer,

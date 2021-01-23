@@ -1,6 +1,5 @@
 use crate::app::components::*;
-use crate::app::resources::EnemyFormation;
-use crate::app::resources::GameInfo;
+use crate::app::resources::{EnemyFormation, GameInfo};
 use lazy_static::lazy_static;
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;

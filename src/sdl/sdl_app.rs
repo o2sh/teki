@@ -10,8 +10,7 @@ use std::collections::HashMap;
 use std::thread;
 use std::time::{Duration, SystemTime};
 use teki_common::traits::App;
-use teki_common::utils::consts::*;
-use teki_common::utils::pad::Key;
+use teki_common::utils::{consts::*, pad::Key};
 
 pub struct SdlApp<A: App<SdlRenderer>> {
     sdl_context: Sdl,
@@ -26,27 +25,16 @@ impl<A: App<SdlRenderer>> SdlApp<A> {
         Ok(Self { sdl_context, last_update_time: SystemTime::now(), app })
     }
 
-    pub fn run(&mut self, scale: u32, fullscreen: bool) -> Result<(), String> {
+    pub fn run(&mut self) -> Result<(), String> {
         let video_subsystem = self.sdl_context.video()?;
         let _image_context = image::init(InitFlag::PNG)?;
 
-        let mut window_builder = video_subsystem.window(
-            APP_NAME,
-            WINDOW_WIDTH as u32 * scale,
-            WINDOW_HEIGHT as u32 * scale,
-        );
+        let mut window_builder =
+            video_subsystem.window(APP_NAME, WINDOW_WIDTH as u32, WINDOW_HEIGHT as u32);
 
-        if fullscreen {
-            window_builder.fullscreen();
-        } else {
-            window_builder.position_centered().resizable();
-        }
+        window_builder.position_centered().resizable();
 
         let window = window_builder.opengl().build().map_err(|e| e.to_string())?;
-
-        if fullscreen {
-            self.sdl_context.mouse().show_cursor(false);
-        }
 
         let canvas = window.into_canvas().present_vsync().build().map_err(|e| e.to_string())?;
 
