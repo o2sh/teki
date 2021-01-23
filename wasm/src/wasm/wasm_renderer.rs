@@ -88,32 +88,29 @@ impl Renderer for WasmRenderer {
         self.context.fill_rect(0.0, 0.0, self.canvas.width() as f64, self.canvas.height() as f64)
     }
 
-    fn draw_str(&mut self, path: &str, x: i32, y: i32, size: u32, text: &str, _: u8, _: u8, _: u8) {
-        let images = self.images.borrow();
-        let filename = String::from(Path::new(path).file_stem().unwrap().to_str().unwrap());
-        if let Some(image) = images.get(&filename) {
-            let mut x = x as f64;
-            let y = y as f64;
+    fn draw_str(
+        &mut self,
+        _: &str,
+        x: i32,
+        y: i32,
+        size: u32,
+        text: &str,
+        r: u8,
+        g: u8,
+        b: u8,
+        a: u8,
+        bold: bool,
+    ) {
+        self.context.save();
+        self.context.set_global_alpha(a as f64 / 255.0);
+        self.set_draw_color(r,g,b);
+        let b = if bold {"bold "}else {""};
+        self.context.set_font(&format!("{}{}px Arial", b, size));
+        self.context
+        .fill_text_with_max_width(text, x as f64, y as f64 + 10.0, self.canvas.width() as f64)
+        .expect("draw_image_with... failed");
 
-            for c in text.chars() {
-                let u: i32 = ((c as i32) - (' ' as i32)) % 16 * 16;
-                let v: i32 = ((c as i32) - (' ' as i32)) / 16 * 16;
-                self.context
-                    .draw_image_with_html_image_element_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
-                        &image,
-                        u as f64,
-                        v as f64,
-                        16.0,
-                        16.0,
-                        x,
-                        y,
-                        size as f64,
-                        size as f64,
-                    )
-                    .expect("draw_image_with... failed");
-                x += (size / 2) as f64 + 1.0;
-            }
-        }
+        self.context.restore();
     }
     fn draw_sprite(&mut self, sprite_name: &str, pos: &Vector2D<i32>) {
         let sprite_sheet = self.sprite_sheet.borrow();
@@ -143,7 +140,6 @@ impl Renderer for WasmRenderer {
     fn draw_scrolling_bg(&mut self, sprite_name: &str, width: i32, height: i32) {
         let sprite_sheet = self.sprite_sheet.borrow_mut();
         let (sheet, tex_name) = sprite_sheet.get(sprite_name).expect("No sprite_sheet");
-
         self.scrolling_offset -= 1 * SCROLLING_BG_VEL;
         if self.scrolling_offset < -height {
             self.scrolling_offset = 0;
@@ -186,6 +182,23 @@ impl Renderer for WasmRenderer {
         // Set the fill style and draw a rectangle
         self.context.set_fill_style(&JsValue::from(gradient));
         self.context.fill_rect(0.0, 0.0, width as f64, height as f64);
+    }
+
+    fn draw_rect(
+        &mut self,
+        pos: &Vector2D<i32>,
+        width: i32,
+        height: i32,
+        r: u8,
+        g: u8,
+        b: u8,
+        a: u8,
+    ) {
+        self.context.save();
+        self.context.set_global_alpha(a as f64 / 255.0);
+        self.context.set_fill_style(&JsValue::from(format!("rgba({},{},{})", r, g, b)));
+        self.context.fill_rect(pos.x as f64, pos.y as f64, width as f64, height as f64);
+        self.context.restore();
     }
 }
 

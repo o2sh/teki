@@ -27,11 +27,11 @@ pub const Y_COUNT: usize = 3;
 
 pub const SCROLLING_BG_VEL: i32 = 3;
 
-pub const BG_ALPHA: u8 = 180;
+pub const BG_ALPHA: u8 = 190;
+pub const RECT_STAGE_ALPHA: u8 = 120;
+pub const TEXT_STAGE_ALPHA: u8 = 255;
 
 pub const BASE_Y: i32 = 75;
-
-pub const FONTS: &str = "font";
 
 pub const TILE_TEXTURE: &str = "blue";
 
@@ -48,3 +48,6 @@ pub const TITLE_MUSIC: &str = "title";
 
 pub const SE_KILL: &str = "./assets/audio/kill";
 pub const SE_SHOT: &str = "./assets/audio/graze";
+
+pub const RE_FONT: &str = "./assets/fonts/regular.ttf";
+pub const IM_FONT: &str = "./assets/fonts/immortal.ttf";

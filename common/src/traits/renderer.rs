@@ -14,10 +14,22 @@ pub trait Renderer {
         r: u8,
         g: u8,
         b: u8,
+        a: u8,
+        bold: bool,
     );
     fn draw_sprite(&mut self, sprite_name: &str, pos: &Vector2D<i32>);
     fn draw_scrolling_bg(&mut self, sprite_name: &str, width: i32, height: i32);
     fn set_draw_color(&mut self, r: u8, g: u8, b: u8);
     fn draw_vertical_separation(&mut self, width: i32, height: i32);
     fn draw_gradient(&mut self, width: i32, height: i32);
+    fn draw_rect(
+        &mut self,
+        pos: &Vector2D<i32>,
+        width: i32,
+        height: i32,
+        r: u8,
+        g: u8,
+        b: u8,
+        a: u8,
+    );
 }

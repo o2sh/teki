@@ -53,7 +53,6 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
         renderer.load_textures(
             "assets",
             &[
-                "font.png",
                 "sanae.png",
                 "marisa.png",
                 "reimu.png",
@@ -131,14 +130,16 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
         self.fps_calc.update();
 
         renderer.draw_str(
-            FONTS,
+            RE_FONT,
             WINDOW_WIDTH - 7 * 8,
-            WINDOW_HEIGHT - 25,
+            WINDOW_HEIGHT - 28,
             16,
             &format!("{:2}fps", self.fps_calc.fps()),
             255,
             255,
             255,
+            255,
+            false,
         );
     }
 }
@@ -154,30 +155,35 @@ impl Title {
     }
 
     fn draw<R: Renderer>(&self, renderer: &mut R) {
+        renderer.clear();
         renderer.draw_gradient(WINDOW_WIDTH, WINDOW_HEIGHT);
         renderer.draw_sprite("title_bg", &Vector2D::new(0, 0));
         let title = "Teki";
         renderer.draw_str(
-            FONTS,
+            IM_FONT,
             300 + ((WINDOW_WIDTH - 300) / 2) - (title.len() as i32 / 2) * 8,
             8 * 16,
-            16,
+            17,
             title,
             255,
             255,
             255,
+            255,
+            true,
         );
 
         let msg = "Press space key to start";
         renderer.draw_str(
-            FONTS,
+            IM_FONT,
             300 + ((WINDOW_WIDTH - 300) / 2) - (msg.len() as i32 / 2) * 8,
             15 * 16,
-            16,
+            17,
             msg,
             255,
             255,
             255,
+            255,
+            true,
         );
     }
 }
@@ -224,7 +230,7 @@ impl Game {
         let mut resources = Resources::default();
         resources.insert(SoundQueue::new());
         resources.insert(EnemyFormation::default());
-        resources.insert(GameInfo::default());
+        resources.insert(GameInfo::new());
         Self { world, resources, schedule }
     }
 
@@ -237,6 +243,7 @@ impl Game {
     }
 
     fn draw<R: Renderer>(&self, renderer: &mut R) {
+        renderer.clear();
         renderer.draw_scrolling_bg(BG1_TEXTURE, GAME_WIDTH, GAME_HEIGHT);
         renderer.draw_vertical_separation(GAME_WIDTH, GAME_HEIGHT);
         for (position, drawable) in <(&Position, &SpriteDrawable)>::query().iter(&self.world) {
@@ -246,6 +253,63 @@ impl Game {
 
         if let Some(game_info) = self.get_game_info() {
             game_info.draw(renderer);
+
+            match game_info.game_state {
+                GameState::StartStage => {
+                    let gradient = (180.0 - game_info.count as f32) / 180.0;
+                    let rect_alpha_gradient = (RECT_STAGE_ALPHA as f32 * gradient).floor() as u8;
+                    let text_alpha_gradient = (TEXT_STAGE_ALPHA as f32 * gradient).floor() as u8;
+
+                    renderer.draw_rect(
+                        &Vector2D::new(0, GAME_HEIGHT / 2 - 50),
+                        GAME_WIDTH,
+                        100,
+                        0,
+                        0,
+                        0,
+                        rect_alpha_gradient,
+                    );
+                    renderer.draw_str(
+                        IM_FONT,
+                        GAME_WIDTH / 2 - 4 * 7,
+                        GAME_HEIGHT / 2 - 30,
+                        16,
+                        &format!("Stage {}", game_info.stage + 1),
+                        255,
+                        255,
+                        255,
+                        text_alpha_gradient,
+                        false,
+                    );
+
+                    renderer.draw_str(
+                        IM_FONT,
+                        GAME_WIDTH / 2 - 7 * 8,
+                        GAME_HEIGHT / 2 + 15,
+                        16,
+                        &format!("From the Ashes"),
+                        255,
+                        255,
+                        255,
+                        text_alpha_gradient,
+                        false,
+                    );
+
+                    renderer.draw_str(
+                        RE_FONT,
+                        GAME_WIDTH - 8 * 38 - 15,
+                        GAME_HEIGHT - 28,
+                        16,
+                        &format!("BGM: Thirty-three Heavenly War Maidens"),
+                        255,
+                        255,
+                        255,
+                        text_alpha_gradient,
+                        false,
+                    );
+                }
+                _ => {}
+            }
         }
     }
 

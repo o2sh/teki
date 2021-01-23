@@ -68,7 +68,10 @@ impl<A: App<SdlRenderer>> SdlApp<A> {
         // simultaneously.
         sdl2::mixer::allocate_channels(4);
 
-        let mut renderer = SdlRenderer::new(canvas, (WINDOW_WIDTH as u32, WINDOW_HEIGHT as u32));
+        let ttf_context = sdl2::ttf::init().map_err(|e| e.to_string())?;
+
+        let mut renderer =
+            SdlRenderer::new(canvas, ttf_context, (WINDOW_WIDTH as u32, WINDOW_HEIGHT as u32));
 
         self.app.init(&mut renderer);
 

@@ -9,6 +9,12 @@ use vector2d::Vector2D;
 
 pub const MARGIN: i32 = 20;
 
+#[derive(PartialEq)]
+pub enum GameState {
+    StartStage,
+    Playing,
+}
+
 pub struct SoundQueue {
     queue: Vec<(u32, &'static str)>,
 }
@@ -102,15 +108,31 @@ lazy_static! {
     };
 }
 
-#[derive(Default)]
 pub struct GameInfo {
+    pub stage: u16,
     pub score: u32,
+    pub count: u32,
     pub frame_count: u32,
     pub frame_count_over_2: u32,
     pub frame_count_over_5: u32,
+    pub game_state: GameState,
 }
 
 impl GameInfo {
+    pub fn new() -> Self {
+        let stage = 0;
+
+        GameInfo {
+            stage,
+            score: 0,
+            count: 0,
+            game_state: GameState::StartStage,
+            frame_count: 0,
+            frame_count_over_2: 0,
+            frame_count_over_5: 0,
+        }
+    }
+
     pub fn add_score(&mut self, add: u32) {
         self.score += add;
     }
@@ -125,21 +147,44 @@ impl GameInfo {
         if self.frame_count % 2 == 0 {
             self.frame_count_over_2 = self.frame_count_over_2.wrapping_add(1);
         }
+
+        match self.game_state {
+            GameState::StartStage => {
+                self.count += 1;
+                if self.count >= 180 as u32 {
+                    self.game_state = GameState::Playing;
+                }
+            }
+            _ => {}
+        }
     }
 
     pub fn draw<R: Renderer>(&self, renderer: &mut R) {
         let left_padding = 20;
-        let top_padding = 35;
-        renderer.draw_str(FONTS, GAME_WIDTH + left_padding, top_padding, 16, "Score", 255, 0, 0);
+        let top_padding = 30;
         renderer.draw_str(
-            FONTS,
-            GAME_WIDTH + left_padding + 8 * 9,
+            RE_FONT,
+            GAME_WIDTH + left_padding,
+            top_padding,
+            16,
+            "Score",
+            255,
+            0,
+            0,
+            255,
+            false,
+        );
+        renderer.draw_str(
+            RE_FONT,
+            GAME_WIDTH + left_padding + 8 * 8,
             top_padding,
             16,
             &format!("{}", self.score),
             255,
             255,
             255,
+            255,
+            false,
         );
     }
 }

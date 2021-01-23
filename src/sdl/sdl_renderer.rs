@@ -2,7 +2,9 @@ use crate::sdl::SdlTextureManager;
 use sdl2::pixels::Color;
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Rect;
+use sdl2::render::BlendMode;
 use sdl2::render::WindowCanvas;
+use sdl2::ttf::*;
 use teki_common::traits::Renderer;
 use teki_common::utils::consts::*;
 use teki_common::utils::SpriteSheet;
@@ -10,17 +12,23 @@ use vector2d::Vector2D;
 
 pub struct SdlRenderer {
     canvas: WindowCanvas,
+    ttf_context: Sdl2TtfContext,
     texture_manager: SdlTextureManager,
     sprite_sheet: SpriteSheet,
     scrolling_offset: i32,
 }
 
 impl SdlRenderer {
-    pub fn new(mut canvas: WindowCanvas, logical_size: (u32, u32)) -> Self {
+    pub fn new(
+        mut canvas: WindowCanvas,
+        ttf_context: Sdl2TtfContext,
+        logical_size: (u32, u32),
+    ) -> Self {
         canvas.set_logical_size(logical_size.0, logical_size.1).expect("set_logical_size failed");
 
         Self {
             canvas,
+            ttf_context,
             texture_manager: SdlTextureManager::new(),
             sprite_sheet: SpriteSheet::default(),
             scrolling_offset: 0,
@@ -29,6 +37,10 @@ impl SdlRenderer {
 
     pub fn present(&mut self) {
         self.canvas.present();
+    }
+
+    fn set_draw_color_with_alpha(&mut self, r: u8, g: u8, b: u8, a: u8) {
+        self.canvas.set_draw_color(Color::RGBA(r, g, b, a));
     }
 }
 
@@ -111,7 +123,7 @@ impl Renderer for SdlRenderer {
 
     fn draw_str(
         &mut self,
-        tex_name: &str,
+        ttf_path: &str,
         x: i32,
         y: i32,
         size: u32,
@@ -119,19 +131,43 @@ impl Renderer for SdlRenderer {
         r: u8,
         g: u8,
         b: u8,
+        a: u8,
+        bold: bool,
     ) {
-        let texture = self.texture_manager.get_mut(tex_name).expect("No texture");
-        texture.set_color_mod(r, g, b);
-        let mut x = x;
-
-        for c in text.chars() {
-            let u: i32 = ((c as i32) - (' ' as i32)) % 16 * size as i32;
-            let v: i32 = ((c as i32) - (' ' as i32)) / 16 * size as i32;
-            self.canvas
-                .copy(&texture, Some(Rect::new(u, v, 16, 16)), Some(Rect::new(x, y, size, size)))
-                .expect("copy failed");
-            x += (size / 2) as i32 + 1;
+        // Load a font
+        let mut font = self.ttf_context.load_font(ttf_path, size as u16).expect("");
+        if bold {
+            font.set_style(sdl2::ttf::FontStyle::BOLD);
         }
+
+        // render a surface, and convert it to a texture bound to the canvas
+        let surface = font
+            .render(text)
+            .blended(Color::RGBA(r, g, b, a))
+            .map_err(|e| e.to_string())
+            .expect("");
+
+        let texture =
+            self.canvas.create_texture_from_surface(&surface).map_err(|e| e.to_string()).expect("");
+
+        self.canvas
+            .copy(&texture, None, Some(Rect::new(x, y, surface.width(), surface.height())))
+            .expect("");
+    }
+    fn draw_rect(
+        &mut self,
+        pos: &Vector2D<i32>,
+        width: i32,
+        height: i32,
+        r: u8,
+        g: u8,
+        b: u8,
+        a: u8,
+    ) {
+        self.canvas.set_blend_mode(BlendMode::Blend);
+        self.set_draw_color_with_alpha(r, g, b, a);
+        let rect = Rect::new(pos.x, pos.y, width as u32, height as u32);
+        self.canvas.fill_rect(rect).expect("");
     }
 
     fn set_draw_color(&mut self, r: u8, g: u8, b: u8) {

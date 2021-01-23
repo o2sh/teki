@@ -1,22 +1,45 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" />
-    <title>Teki</title>
-    <link rel="stylesheet" type="text/css" href="index.css">
-  </head>
-  <body>
-    <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
 
-    <div class="canvas-container full-size">
-      <canvas id="mycanvas" class="mycanvas" width="700" height="512"></canvas>
-    </div>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" />
+  <title>Teki</title>
+  <link rel="stylesheet" type="text/css" href="index.css">
+</head>
 
-    <div id="sound-icon-holder">
-      <img id="sound-icon" src="assets/images/sound_on.svg" width="28" height="28" style="display:block">
-    </div>
+<body>
+  <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
 
-    <script src="./bootstrap.js"></script>
-  </body>
+  <div class="canvas-container full-size">
+    <canvas id="mycanvas" class="mycanvas" width="700" height="512"></canvas>
+  </div>
+
+  <div id="sound-icon-holder">
+    <img id="sound-icon" src="assets/images/sound_on.svg" width="28" height="28" style="display:block">
+  </div>
+
+  <script src="./bootstrap.js"></script>
+
+  <div id="info">
+    <p>
+      How to play
+    </p>
+    <ul>
+      <li>The Arrow Keys move the character around</li>
+      <li>Z causes a short barrage of shots to be fired; it may be held down for rapidfire</li>
+      <li>Esc pauses the game and brings you to the in-game menu</li>
+    </ul>
+
+    <p>
+      Presented by <a target="_blank" href="https://github.com/o2sh">@o2sh</a>
+    </p>
+
+    <p>
+      <a target="_blank" href="https://github.com/o2sh/teki">Source code</a>
+    </p>
+  </div>
+</body>
+
 </html>

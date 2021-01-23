@@ -24,17 +24,6 @@ window.play_loop = function play_loop(channel, filename) {
   audioManager.playLoop(channel, filename)
 }
 
-function fitCanvas() {
-  const canvas = document.getElementById(CANVAS_ID)
-  if (canvas.width / canvas.height >= window.innerWidth / window.innerHeight) {
-    canvas.style.width = `100%`
-    canvas.style.height = `${canvas.height * window.innerWidth / canvas.width}px`
-  } else {
-    canvas.style.height = `100%`
-    canvas.style.width = `${canvas.width * window.innerHeight / canvas.height}px`
-  }
-}
-
 function setupSoundButton() {
   const toggleSound = () => {
     audioManager.toggleEnabled()
@@ -44,12 +33,6 @@ function setupSoundButton() {
   }
   const soundIconHolder = document.getElementById('sound-icon-holder')
   soundIconHolder.addEventListener('click', toggleSound)
-}
-
-function setupResizeListener() {
-  window.addEventListener('resize', (_) => {
-    fitCanvas()
-  })
 }
 
 function createCoverScreen(title) {
@@ -65,9 +48,6 @@ function createCoverScreen(title) {
   document.body.appendChild(cover)
   return cover
 }
-
-fitCanvas()
-setupResizeListener()
 
 const renderer = WasmRenderer.new(CANVAS_ID)
 const app = WasmApp.new(renderer,
