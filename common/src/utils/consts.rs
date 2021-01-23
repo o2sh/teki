@@ -39,7 +39,8 @@ pub const BG1_TEXTURE: &str = "bg_ground";
 pub const BG2_TEXTURE: &str = "bg_water";
 
 pub const PLAYER_SPRITE: &str = "reimu0";
-pub const AVATAR_SPRITE: &str = "a_reimu0";
+pub const REIMU_SPRITE: &str = "a_reimu0";
+pub const MARISA_SPRITE: &str = "a_marisa0";
 pub const ENEMY_SPRITE: &str = "enemy1";
 pub const BULLET_SPRITE: &str = "spell0";
 

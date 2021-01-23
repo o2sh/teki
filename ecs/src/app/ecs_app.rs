@@ -62,6 +62,7 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
                 "spells.png",
                 "shockwave.png",
                 "a_reimu.png",
+                "a_marisa.png",
                 "title_bg.png",
             ],
         );
@@ -74,6 +75,7 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
         renderer.load_sprite_sheet("assets/spells.json");
         renderer.load_sprite_sheet("assets/shockwave.json");
         renderer.load_sprite_sheet("assets/a_reimu.json");
+        renderer.load_sprite_sheet("assets/a_marisa.json");
         renderer.load_sprite_sheet("assets/title_bg.json");
 
         self.audio.load_musics("assets/audio", &["bgm.ogg", "title.ogg"]).expect("");
