@@ -119,6 +119,12 @@ audioManager.createContext(CHANNEL_COUNT)
 audioManager.loadAllAudios(AUDIO_ASSETS)
   .then(() => {
     document.body.removeChild(cover)
+    showInfoBlock()
     setupSoundButton()
     requestAnimationFrame(loop)
   })
+
+  function showInfoBlock() {
+    var element = document.getElementById("info");
+    element.style.display = 'block';
+  }
