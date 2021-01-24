@@ -3,6 +3,7 @@ class AudioManager {
     this.audios = {}
     this.audioLoadings = {}
     this.enabled = true
+    this.count = 0
   }
 
   createContext(channelCount) {
@@ -47,10 +48,9 @@ class AudioManager {
           source.loop = true
         }
       }
-    } else if (!(filename in this.audioLoadings)) {
-      this.loadAudio(filename)
-        .then(() => this.playSe(channel, filename))
-        .catch(err => console.error(`Audio eror: ${err}`))
+    }
+    else {
+      console.log(filename)
     }
   }
 
@@ -68,13 +68,13 @@ class AudioManager {
     }
   }
 
-  loadAllAudios(filenames) {
+  loadAllAudios(filenames, cover) {
     return Promise.all(filenames.map((filename) => {
-      return this.loadAudio(filename)
+      return this.loadAudio(filename, filenames.length, cover)
     }))
   }
 
-  loadAudio(filename) {
+  loadAudio(filename, length, cover) {
     return new Promise((resolve, reject) => {
       this.audioLoadings[filename] = true
 
@@ -87,6 +87,8 @@ class AudioManager {
         this.context.decodeAudioData(
           request.response,
           (buffer) => {
+            this.count++
+            cover.innerText = `Loading ${this.count}/${length}`
             this.audios[filename] = buffer
             resolve(true)
           },

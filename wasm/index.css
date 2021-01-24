@@ -19,6 +19,7 @@ html, body {
     align-items: center;
     -webkit-justify-content: center;
     justify-content: center;
+    position:absolute;
   }
   
   .canvas-container {
@@ -47,6 +48,6 @@ html, body {
     text-align: justify;
     margin: auto;
     width: 98%;
-    display: none;
+    display: block;
   }
   

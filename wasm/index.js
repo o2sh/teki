@@ -5,9 +5,10 @@ const CHANNEL_COUNT = 3
 
 const AUDIO_ASSETS = [
   'assets/audio/bgm',
+  'assets/audio/title',
   'assets/audio/graze',
   'assets/audio/kill',
-  'assets/audio/title'
+  'assets/audio/toggle_sound'
 ]
 const ENABLE_AUDIO = 'assets/audio/toggle_sound'
 
@@ -22,6 +23,10 @@ window.play_se = function play_se(channel, filename) {
 
 window.play_loop = function play_loop(channel, filename) {
   audioManager.playLoop(channel, filename)
+}
+
+window.wait_for_loading = function wait_for_loading(filename) {
+  audioManager.waitForLoading(filename)
 }
 
 
@@ -60,13 +65,11 @@ function setupResizeListener() {
 }
 
 function createCoverScreen(title) {
+  const canvas = document.getElementById(CANVAS_ID)
   const cover = document.createElement('div')
   cover.className = 'centering'
-  cover.style.position = 'absolute'
+  cover.style.height = canvas.style.height
   cover.style.left = cover.style.top = cover.style.right = cover.style.bottom = '0'
-  cover.style.backgroundColor = 'rgba(0,0,0,1)'
-  cover.style.color = 'white'
-  cover.style.textAlign = 'center'
   cover.innerText = title
 
   document.body.appendChild(cover)
@@ -114,17 +117,12 @@ const loop = (function () {
   }
 })()
 
-const cover = createCoverScreen('Loading...')
+const cover = createCoverScreen(`Loading 0/${AUDIO_ASSETS.length}`)
 audioManager.createContext(CHANNEL_COUNT)
-audioManager.loadAllAudios(AUDIO_ASSETS)
+audioManager.loadAllAudios(AUDIO_ASSETS, cover)
   .then(() => {
     document.body.removeChild(cover)
-    showInfoBlock()
     setupSoundButton()
+    app.start_title_song()
     requestAnimationFrame(loop)
   })
-
-  function showInfoBlock() {
-    var element = document.getElementById("info");
-    element.style.display = 'block';
-  }

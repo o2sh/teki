@@ -14,6 +14,7 @@ use vector2d::Vector2D;
 
 enum AppState {
     Title(Title),
+    CharacterSelect(CharacterSelect),
     Game(Game),
 }
 
@@ -34,6 +35,10 @@ impl<A: Audio, T: Timer> EcsApp<A, T> {
             fps_calc: FpsCalc::new(timer),
             audio,
         }
+    }
+
+    fn select_character(&mut self) {
+        self.state = AppState::CharacterSelect(CharacterSelect);
     }
 
     fn start_game(&mut self) {
@@ -78,9 +83,11 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
         renderer.load_sprite_sheet("assets/title_bg.json");
 
         self.audio.load_musics("assets/audio", &["bgm.ogg", "title.ogg"]).expect("");
-        self.audio.play_music(CH_BG_MUSIC, TITLE_MUSIC);
     }
 
+    fn start_title_song(&mut self) {
+        self.audio.play_music(CH_BG_MUSIC, TITLE_MUSIC);
+    }
     fn on_key(&mut self, key: Key, down: bool) {
         self.pad.on_key(key, down);
         if down {
@@ -104,6 +111,15 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
             AppState::Title(title) => {
                 if let Some(value) = title.update(&self.pad) {
                     if value {
+                        self.select_character();
+                    } else {
+                        return false;
+                    }
+                }
+            }
+            AppState::CharacterSelect(character_select) => {
+                if let Some(value) = character_select.update(&self.pad) {
+                    if value {
                         self.start_game();
                     } else {
                         return false;
@@ -125,6 +141,7 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
         renderer.clear();
         match &self.state {
             AppState::Title(title) => title.draw(renderer),
+            AppState::CharacterSelect(character_select) => character_select.draw(renderer),
             AppState::Game(game) => game.draw(renderer),
         }
 
@@ -174,6 +191,35 @@ impl Title {
         );
 
         let msg = "Press space key to start";
+        renderer.draw_str(
+            IM_FONT,
+            300 + ((WINDOW_WIDTH - 300) / 2) - (msg.len() as i32 / 2) * 8,
+            15 * 16,
+            17,
+            msg,
+            255,
+            255,
+            255,
+            255,
+            true,
+        );
+    }
+}
+
+struct CharacterSelect;
+
+impl CharacterSelect {
+    fn update(&mut self, pad: &Pad) -> Option<bool> {
+        if pad.is_trigger(PadBit::Z) {
+            return Some(true);
+        }
+        None
+    }
+
+    fn draw<R: Renderer>(&self, renderer: &mut R) {
+        renderer.clear();
+
+        let msg = "Character Select";
         renderer.draw_str(
             IM_FONT,
             300 + ((WINDOW_WIDTH - 300) / 2) - (msg.len() as i32 / 2) * 8,

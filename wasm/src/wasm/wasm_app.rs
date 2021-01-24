@@ -38,6 +38,9 @@ impl WasmApp {
         Self { app: Box::new(app), renderer }
     }
 
+    pub fn start_title_song(&mut self) {
+        self.app.start_title_song()
+    }
     pub fn on_key(&mut self, key_code: &str, down: bool) {
         if let Some(key) = to_key(key_code) {
             self.app.on_key(key, down);
