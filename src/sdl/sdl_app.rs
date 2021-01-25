@@ -32,7 +32,7 @@ impl<A: App<SdlRenderer>> SdlApp<A> {
         let mut window_builder =
             video_subsystem.window(APP_NAME, WINDOW_WIDTH as u32, WINDOW_HEIGHT as u32);
 
-        window_builder.position_centered().resizable();
+        window_builder.position_centered();
 
         let window = window_builder.opengl().build().map_err(|e| e.to_string())?;
 
@@ -45,12 +45,8 @@ impl<A: App<SdlRenderer>> SdlApp<A> {
         let channels = DEFAULT_CHANNELS; // Stereo
         let chunk_size = 1_024;
         sdl2::mixer::open_audio(frequency, format, channels, chunk_size)?;
-        let _mixer_context = sdl2::mixer::init(
-            sdl2::mixer::InitFlag::MP3
-                | sdl2::mixer::InitFlag::FLAC
-                | sdl2::mixer::InitFlag::MOD
-                | sdl2::mixer::InitFlag::OGG,
-        )?;
+        let _mixer_context =
+            sdl2::mixer::init(sdl2::mixer::InitFlag::MP3 | sdl2::mixer::InitFlag::OGG)?;
 
         // Number of mixing channels available for sound effect `Chunk`s to play
         // simultaneously.
@@ -62,6 +58,8 @@ impl<A: App<SdlRenderer>> SdlApp<A> {
             SdlRenderer::new(canvas, ttf_context, (WINDOW_WIDTH as u32, WINDOW_HEIGHT as u32));
 
         self.app.init(&mut renderer);
+
+        self.app.start_title_song();
 
         self.last_update_time = SystemTime::now();
         let mut skip_count = 0;

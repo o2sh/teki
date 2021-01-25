@@ -49,6 +49,8 @@ pub const TITLE_MUSIC: &str = "title";
 
 pub const SE_KILL: &str = "assets/audio/kill";
 pub const SE_SHOT: &str = "assets/audio/graze";
+pub const SE_SELECT: &str = "assets/audio/select";
+pub const SE_SELECT2: &str = "assets/audio/select2";
 
 pub const RE_FONT: &str = "assets/fonts/regular.ttf";
 pub const IM_FONT: &str = "assets/fonts/immortal.ttf";

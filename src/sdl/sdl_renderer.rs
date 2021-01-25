@@ -1,5 +1,5 @@
 use crate::sdl::SdlTextureManager;
-use sdl2::pixels::{Color, PixelFormatEnum};
+use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::{BlendMode, WindowCanvas};
 use sdl2::ttf::*;
@@ -93,26 +93,8 @@ impl Renderer for SdlRenderer {
         self.canvas.fill_rect(rect).expect("");
     }
 
-    fn draw_gradient(&mut self, width: i32, height: i32) {
-        let texture_creator = self.canvas.texture_creator();
-        let mut texture = texture_creator
-            .create_texture_streaming(PixelFormatEnum::RGB24, 256, 256)
-            .map_err(|e| e.to_string())
-            .expect("");
-        // Create a red-green gradient
-        texture
-            .with_lock(None, |buffer: &mut [u8], pitch: usize| {
-                for y in 0..256 {
-                    for x in 0..256 {
-                        let offset = y * pitch + x * 3;
-                        buffer[offset + 2] = x as u8;
-                        buffer[offset] = y as u8;
-                        buffer[offset + 1] = 0;
-                    }
-                }
-            })
-            .expect("");
-
+    fn draw_texture(&mut self, tex_name: &str, width: i32, height: i32) {
+        let texture = self.texture_manager.get_mut(tex_name).expect("No texture");
         self.canvas
             .copy(&texture, None, Some(Rect::new(0, 0, width as u32, height as u32)))
             .expect("copy failed");

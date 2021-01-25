@@ -106,7 +106,7 @@ impl Renderer for WasmRenderer {
         let b = if bold { "bold " } else { "" };
         self.context.set_font(&format!("{}{}px Arial", b, size));
         self.context
-            .fill_text_with_max_width(text, x as f64, y as f64 + 10.0, self.canvas.width() as f64)
+            .fill_text_with_max_width(text, x as f64, y as f64 + 20.0, self.canvas.width() as f64)
             .expect("draw_image_with... failed");
 
         self.context.restore();
@@ -128,6 +128,15 @@ impl Renderer for WasmRenderer {
                     sheet.frame.w as f64,
                     sheet.frame.h as f64,
                 )
+                .expect("draw_image_with... failed");
+        }
+    }
+
+    fn draw_texture(&mut self, tex_name: &str, width: i32, height: i32) {
+        let image = self.images.borrow();
+        if let Some(image) = image.get(tex_name) {
+            self.context
+                .draw_image_with_html_image_element_and_dw_and_dh(&image, 0.0, 0.0, width as f64, height as f64)
                 .expect("draw_image_with... failed");
         }
     }
@@ -169,18 +178,6 @@ impl Renderer for WasmRenderer {
     fn draw_vertical_separation(&mut self, width: i32, height: i32) {
         self.context.set_fill_style(&JsValue::from(format!("rgb({},{},{})", 255, 255, 255)));
         self.context.fill_rect(width as f64, 0.0, 2.0, height as f64)
-    }
-
-    fn draw_gradient(&mut self, width: i32, height: i32) {
-        let gradient = self.context.create_linear_gradient(50.0, 20.0, 340.0, 90.0);
-
-        // Add three color stops
-        gradient.add_color_stop(0.0, "red").unwrap();
-        gradient.add_color_stop(1.0, "blue").unwrap();
-
-        // Set the fill style and draw a rectangle
-        self.context.set_fill_style(&JsValue::from(gradient));
-        self.context.fill_rect(0.0, 0.0, width as f64, height as f64);
     }
 
     fn draw_rect(

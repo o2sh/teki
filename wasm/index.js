@@ -8,6 +8,8 @@ const AUDIO_ASSETS = [
   'assets/audio/title',
   'assets/audio/graze',
   'assets/audio/kill',
+  'assets/audio/select',
+  'assets/audio/select2',
   'assets/audio/toggle_sound'
 ]
 const ENABLE_AUDIO = 'assets/audio/toggle_sound'

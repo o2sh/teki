@@ -49,9 +49,6 @@ class AudioManager {
         }
       }
     }
-    else {
-      console.log(filename)
-    }
   }
 
   stopAll() {

@@ -12,6 +12,9 @@ use teki_common::utils::{
 };
 use vector2d::Vector2D;
 
+const CHARACTER_SELECT_PORTRAITS: [&str; 2] = ["player_select_reimu", "player_select_marisa"];
+const CHARACTER_SELECT_NAMES: [&str; 2] = ["Reimu Hakurei", "Marisa Kirisame"];
+
 enum AppState {
     Title(Title),
     CharacterSelect(CharacterSelect),
@@ -38,7 +41,7 @@ impl<A: Audio, T: Timer> EcsApp<A, T> {
     }
 
     fn select_character(&mut self) {
-        self.state = AppState::CharacterSelect(CharacterSelect);
+        self.state = AppState::CharacterSelect(CharacterSelect::default());
     }
 
     fn start_game(&mut self) {
@@ -46,9 +49,11 @@ impl<A: Audio, T: Timer> EcsApp<A, T> {
         self.audio.play_music(CH_BG_MUSIC, BG_MUSIC);
     }
 
-    fn back_to_title(&mut self) {
+    fn back_to_title(&mut self, play: bool) {
         self.state = AppState::Title(Title);
-        self.audio.play_music(CH_BG_MUSIC, TITLE_MUSIC);
+        if play {
+            self.audio.play_music(CH_BG_MUSIC, TITLE_MUSIC);
+        }
     }
 }
 
@@ -67,7 +72,8 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
                 "shockwave.png",
                 "a_reimu.png",
                 "a_marisa.png",
-                "title_bg.png",
+                "player_select.png",
+                "menu_bg.png",
             ],
         );
         renderer.load_sprite_sheet("assets/sanae.json");
@@ -80,7 +86,7 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
         renderer.load_sprite_sheet("assets/shockwave.json");
         renderer.load_sprite_sheet("assets/a_reimu.json");
         renderer.load_sprite_sheet("assets/a_marisa.json");
-        renderer.load_sprite_sheet("assets/title_bg.json");
+        renderer.load_sprite_sheet("assets/player_select.json");
 
         self.audio.load_musics("assets/audio", &["bgm.ogg", "title.ogg"]).expect("");
     }
@@ -103,13 +109,14 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
                     self.pressed_key = None;
                     return false;
                 }
-                _ => self.back_to_title(),
+                AppState::CharacterSelect(_character_select) => self.back_to_title(false),
+                _ => self.back_to_title(true),
             }
         }
 
         match &mut self.state {
             AppState::Title(title) => {
-                if let Some(value) = title.update(&self.pad) {
+                if let Some(value) = title.update(&self.pad, &mut self.audio) {
                     if value {
                         self.select_character();
                     } else {
@@ -118,7 +125,7 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
                 }
             }
             AppState::CharacterSelect(character_select) => {
-                if let Some(value) = character_select.update(&self.pad) {
+                if let Some(value) = character_select.update(&self.pad, &mut self.audio) {
                     if value {
                         self.start_game();
                     } else {
@@ -128,7 +135,7 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
             }
             AppState::Game(game) => {
                 if !game.update(&self.pad, &mut self.audio) {
-                    self.back_to_title();
+                    self.back_to_title(true);
                 }
             }
         };
@@ -165,72 +172,83 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
 struct Title;
 
 impl Title {
-    fn update(&mut self, pad: &Pad) -> Option<bool> {
-        if pad.is_pressed(PadBit::A) {
+    fn update<A: Audio>(&mut self, pad: &Pad, audio: &mut A) -> Option<bool> {
+        if pad.is_trigger(PadBit::Z) || pad.is_pressed(PadBit::A) {
+            audio.play_sound(CH_KILL, SE_SELECT);
             return Some(true);
         }
         None
     }
 
     fn draw<R: Renderer>(&self, renderer: &mut R) {
-        renderer.clear();
-        renderer.draw_gradient(WINDOW_WIDTH, WINDOW_HEIGHT);
-        renderer.draw_sprite("title_bg", &Vector2D::new(0, 0));
+        renderer.draw_texture("menu_bg", WINDOW_WIDTH, WINDOW_HEIGHT);
         let title = "Teki";
         renderer.draw_str(
             IM_FONT,
-            300 + ((WINDOW_WIDTH - 300) / 2) - (title.len() as i32 / 2) * 8,
-            8 * 16,
-            17,
+            300 + ((WINDOW_WIDTH - 300) / 2) - (title.len() as i32 / 2) * 25,
+            WINDOW_HEIGHT / 2 - 150,
+            50,
             title,
             255,
             255,
             255,
             255,
-            true,
+            false,
         );
 
-        let msg = "Press space key to start";
-        renderer.draw_str(
-            IM_FONT,
-            300 + ((WINDOW_WIDTH - 300) / 2) - (msg.len() as i32 / 2) * 8,
-            15 * 16,
-            17,
-            msg,
-            255,
-            255,
-            255,
-            255,
-            true,
-        );
+        let msg = "Press z to start";
+        renderer.draw_str(RE_FONT, 50, WINDOW_HEIGHT / 2 - 50, 18, msg, 255, 255, 255, 255, false);
     }
 }
 
-struct CharacterSelect;
+#[derive(Default)]
+struct CharacterSelect {
+    index: i32,
+    count: u32,
+}
 
 impl CharacterSelect {
-    fn update(&mut self, pad: &Pad) -> Option<bool> {
+    fn update<A: Audio>(&mut self, pad: &Pad, audio: &mut A) -> Option<bool> {
+        self.count += 1;
         if pad.is_trigger(PadBit::Z) {
+            audio.play_sound(CH_KILL, SE_SELECT);
             return Some(true);
+        }
+        if pad.is_trigger(PadBit::L) {
+            audio.play_sound(CH_KILL, SE_SELECT2);
+            self.index += 1;
+            if self.index > 1 {
+                self.index = 0;
+            }
+        }
+        if pad.is_trigger(PadBit::R) {
+            audio.play_sound(CH_KILL, SE_SELECT2);
+            self.index -= 1;
+            if self.index < 0 {
+                self.index = 1;
+            }
         }
         None
     }
 
     fn draw<R: Renderer>(&self, renderer: &mut R) {
-        renderer.clear();
+        renderer.draw_texture("menu_bg", WINDOW_WIDTH, WINDOW_HEIGHT);
+        renderer
+            .draw_sprite(CHARACTER_SELECT_PORTRAITS[self.index as usize], &Vector2D::new(-150, 50));
+        let msg = "Select Character";
+        renderer.draw_str(IM_FONT, 10, 10, 32, msg, 255, 255, 255, 255, false);
 
-        let msg = "Character Select";
         renderer.draw_str(
             IM_FONT,
-            300 + ((WINDOW_WIDTH - 300) / 2) - (msg.len() as i32 / 2) * 8,
-            15 * 16,
-            17,
-            msg,
+            330,
+            WINDOW_HEIGHT / 2 + 10,
+            32,
+            &format!("< {} >", CHARACTER_SELECT_NAMES[self.index as usize]),
             255,
             255,
             255,
             255,
-            true,
+            false,
         );
     }
 }
@@ -291,7 +309,6 @@ impl Game {
     }
 
     fn draw<R: Renderer>(&self, renderer: &mut R) {
-        renderer.clear();
         renderer.draw_scrolling_bg(BG1_TEXTURE, GAME_WIDTH, GAME_HEIGHT);
         renderer.draw_vertical_separation(GAME_WIDTH, GAME_HEIGHT);
         for (position, drawable) in <(&Position, &SpriteDrawable)>::query().iter(&self.world) {

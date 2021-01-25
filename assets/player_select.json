@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "image": "player_select.png",
+    "size": {
+      "w": 1172,
+      "h": 600
+    },
+    "scale": "1"
+  },
+  "frames": {
+    "player_select_marisa.png": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 586,
+        "h": 600
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 586,
+        "h": 600
+      },
+      "sourceSize": {
+        "w": 586,
+        "h": 600
+      }
+    },
+    "player_select_reimu.png": {
+      "frame": {
+        "x": 586,
+        "y": 0,
+        "w": 586,
+        "h": 600
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 549,
+        "h": 600
+      },
+      "sourceSize": {
+        "w": 549,
+        "h": 600
+      }
+    }
+  }
+}
