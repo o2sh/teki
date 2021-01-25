@@ -136,7 +136,13 @@ impl Renderer for WasmRenderer {
         let image = self.images.borrow();
         if let Some(image) = image.get(tex_name) {
             self.context
-                .draw_image_with_html_image_element_and_dw_and_dh(&image, 0.0, 0.0, width as f64, height as f64)
+                .draw_image_with_html_image_element_and_dw_and_dh(
+                    &image,
+                    0.0,
+                    0.0,
+                    width as f64,
+                    height as f64,
+                )
                 .expect("draw_image_with... failed");
         }
     }
