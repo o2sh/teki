@@ -30,6 +30,6 @@ impl Audio for WasmAudio {
     }
 
     fn play_music(&mut self, channel: u32, filename: &str) {
-        play_loop(channel, &format!("assets/audio/{}", filename));
+        play_loop(channel, &format!("assets/bgm/{}", filename));
     }
 }

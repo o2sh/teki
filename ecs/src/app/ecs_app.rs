@@ -13,7 +13,7 @@ use teki_common::utils::{
 use vector2d::Vector2D;
 
 const CHARACTER_SELECT_PORTRAITS: [&str; 2] = ["player_select_reimu", "player_select_marisa"];
-const CHARACTER_SELECT_NAMES: [&str; 2] = ["Reimu Hakurei", "Marisa Kirisame"];
+const CHARACTER_SELECT_DESCS: [&str; 2] = ["desc_char_reimu", "desc_char_marisa"];
 
 enum AppState {
     Title(Title),
@@ -60,7 +60,7 @@ impl<A: Audio, T: Timer> EcsApp<A, T> {
 impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
     fn init(&mut self, renderer: &mut R) {
         renderer.load_textures(
-            "assets",
+            "assets/gfx",
             &[
                 "sanae.png",
                 "marisa.png",
@@ -74,21 +74,23 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
                 "a_marisa.png",
                 "player_select.png",
                 "menu_bg.png",
+                "desc_char.png",
             ],
         );
-        renderer.load_sprite_sheet("assets/sanae.json");
-        renderer.load_sprite_sheet("assets/marisa.json");
-        renderer.load_sprite_sheet("assets/reimu.json");
-        renderer.load_sprite_sheet("assets/enemy.json");
-        //renderer.load_sprite_sheet("assets/orbs.json");
-        renderer.load_sprite_sheet("assets/bg.json");
-        renderer.load_sprite_sheet("assets/spells.json");
-        renderer.load_sprite_sheet("assets/shockwave.json");
-        renderer.load_sprite_sheet("assets/a_reimu.json");
-        renderer.load_sprite_sheet("assets/a_marisa.json");
-        renderer.load_sprite_sheet("assets/player_select.json");
+        renderer.load_sprite_sheet("assets/gfx/sanae.json");
+        renderer.load_sprite_sheet("assets/gfx/marisa.json");
+        renderer.load_sprite_sheet("assets/gfx/reimu.json");
+        renderer.load_sprite_sheet("assets/gfx/enemy.json");
+        //renderer.load_sprite_sheet("assets/gfx/orbs.json");
+        renderer.load_sprite_sheet("assets/gfx/bg.json");
+        renderer.load_sprite_sheet("assets/gfx/spells.json");
+        renderer.load_sprite_sheet("assets/gfx/shockwave.json");
+        renderer.load_sprite_sheet("assets/gfx/a_reimu.json");
+        renderer.load_sprite_sheet("assets/gfx/a_marisa.json");
+        renderer.load_sprite_sheet("assets/gfx/player_select.json");
+        renderer.load_sprite_sheet("assets/gfx/desc_char.json");
 
-        self.audio.load_musics("assets/audio", &["bgm.ogg", "title.ogg"]).expect("");
+        self.audio.load_musics("assets/bgm", &["stage01.ogg", "menu.ogg"]).expect("");
     }
 
     fn start_title_song(&mut self) {
@@ -174,7 +176,7 @@ struct Title;
 impl Title {
     fn update<A: Audio>(&mut self, pad: &Pad, audio: &mut A) -> Option<bool> {
         if pad.is_trigger(PadBit::Z) || pad.is_pressed(PadBit::A) {
-            audio.play_sound(CH_KILL, SE_SELECT);
+            audio.play_sound(CH_KILL, SE_OK);
             return Some(true);
         }
         None
@@ -211,18 +213,18 @@ impl CharacterSelect {
     fn update<A: Audio>(&mut self, pad: &Pad, audio: &mut A) -> Option<bool> {
         self.count += 1;
         if pad.is_trigger(PadBit::Z) {
-            audio.play_sound(CH_KILL, SE_SELECT);
+            audio.play_sound(CH_KILL, SE_OK);
             return Some(true);
         }
         if pad.is_trigger(PadBit::L) {
-            audio.play_sound(CH_KILL, SE_SELECT2);
+            audio.play_sound(CH_KILL, SE_SELECT);
             self.index += 1;
             if self.index > 1 {
                 self.index = 0;
             }
         }
         if pad.is_trigger(PadBit::R) {
-            audio.play_sound(CH_KILL, SE_SELECT2);
+            audio.play_sound(CH_KILL, SE_SELECT);
             self.index -= 1;
             if self.index < 0 {
                 self.index = 1;
@@ -237,19 +239,7 @@ impl CharacterSelect {
             .draw_sprite(CHARACTER_SELECT_PORTRAITS[self.index as usize], &Vector2D::new(-150, 50));
         let msg = "Select Character";
         renderer.draw_str(IM_FONT, 10, 10, 32, msg, 255, 255, 255, 255, false);
-
-        renderer.draw_str(
-            IM_FONT,
-            330,
-            WINDOW_HEIGHT / 2 + 10,
-            32,
-            &format!("< {} >", CHARACTER_SELECT_NAMES[self.index as usize]),
-            255,
-            255,
-            255,
-            255,
-            false,
-        );
+        renderer.draw_sprite(CHARACTER_SELECT_DESCS[self.index as usize], &Vector2D::new(400, 220));
     }
 }
 

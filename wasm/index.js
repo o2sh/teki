@@ -4,12 +4,12 @@ import { audioManager } from './audio'
 const CHANNEL_COUNT = 3
 
 const AUDIO_ASSETS = [
-  'assets/audio/bgm',
-  'assets/audio/title',
-  'assets/audio/graze',
-  'assets/audio/kill',
-  'assets/audio/select',
-  'assets/audio/select2',
+  'assets/bgm/menu',
+  'assets/bgm/stage01',
+  'assets/sfx/se_graze',
+  'assets/sfx/se_kill',
+  'assets/sfx/se_ok00',
+  'assets/sfx/se_select00',
   'assets/audio/toggle_sound'
 ]
 const ENABLE_AUDIO = 'assets/audio/toggle_sound'

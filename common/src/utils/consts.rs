@@ -35,7 +35,8 @@ pub const BASE_Y: i32 = 75;
 
 pub const TILE_TEXTURE: &str = "blue";
 
-pub const BG1_TEXTURE: &str = "bg_ground";
+pub const BG1_TEXTURE: &str = "bg_grass";
+pub const BG3_TEXTURE: &str = "bg_ground";
 pub const BG2_TEXTURE: &str = "bg_water";
 
 pub const PLAYER_SPRITE: &str = "reimu0";
@@ -44,13 +45,13 @@ pub const MARISA_SPRITE: &str = "a_marisa0";
 pub const ENEMY_SPRITE: &str = "enemy1";
 pub const BULLET_SPRITE: &str = "spell0";
 
-pub const BG_MUSIC: &str = "bgm";
-pub const TITLE_MUSIC: &str = "title";
+pub const BG_MUSIC: &str = "stage01";
+pub const TITLE_MUSIC: &str = "menu";
 
-pub const SE_KILL: &str = "assets/audio/kill";
-pub const SE_SHOT: &str = "assets/audio/graze";
-pub const SE_SELECT: &str = "assets/audio/select";
-pub const SE_SELECT2: &str = "assets/audio/select2";
+pub const SE_KILL: &str = "assets/sfx/se_kill";
+pub const SE_SHOT: &str = "assets/sfx/se_graze";
+pub const SE_OK: &str = "assets/sfx/se_ok00";
+pub const SE_SELECT: &str = "assets/sfx/se_select00";
 
 pub const RE_FONT: &str = "assets/fonts/regular.ttf";
 pub const IM_FONT: &str = "assets/fonts/immortal.ttf";
