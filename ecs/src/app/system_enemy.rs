@@ -11,7 +11,7 @@ use vector2d::Vector2D;
 const GHOST_SPRITES: [&str; 4] = ["enemy1", "enemy2", "enemy3", "enemy4"];
 
 lazy_static! {
-    pub static ref POSITION_ZERO: Position = Position(Vector2D::new(0, 0));
+    pub static ref POSITION_ZERO: Posture = Posture(Vector2D::new(0, 0), 0);
 }
 
 #[system]
@@ -45,14 +45,14 @@ pub fn update_enemy_formation(#[resource] enemy_formation: &mut EnemyFormation) 
 }
 
 #[system(for_each)]
-#[write_component(Position)]
+#[write_component(Posture)]
 pub fn move_enemy_formation(
     enemy: &mut Enemy,
     entity: &Entity,
     world: &mut SubWorld,
     #[resource] enemy_formation: &mut EnemyFormation,
 ) {
-    let position = <&mut Position>::query().get_mut(world, *entity).unwrap();
+    let position = <&mut Posture>::query().get_mut(world, *entity).unwrap();
     position.0 = enemy_formation.pos(&enemy.formation_index);
 }
 

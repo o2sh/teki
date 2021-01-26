@@ -1,6 +1,6 @@
 use crate::sdl::SdlTextureManager;
 use sdl2::pixels::Color;
-use sdl2::rect::Rect;
+use sdl2::rect::{Point, Rect};
 use sdl2::render::{BlendMode, WindowCanvas};
 use sdl2::ttf::*;
 use teki_common::traits::Renderer;
@@ -65,6 +65,30 @@ impl Renderer for SdlRenderer {
                 Some(Rect::new(pos.x, pos.y, sheet.frame.w as u32, sheet.frame.h as u32)),
             )
             .expect("copy failed");
+    }
+
+    fn draw_sprite_rot(
+        &mut self,
+        sprite_name: &str,
+        pos: &Vector2D<i32>,
+        angle: u8,
+        center: Option<&Vector2D<i32>>,
+    ) {
+        let (sheet, tex_name) = self.sprite_sheet.get(sprite_name).expect("No sprite");
+
+        let texture = self.texture_manager.get(tex_name).expect("No texture");
+        let center = center.map(|v| Point::new(v.x, v.y));
+        self.canvas
+            .copy_ex(
+                &texture,
+                Some(Rect::new(sheet.frame.x, sheet.frame.y, sheet.frame.w, sheet.frame.h)),
+                Some(Rect::new(pos.x, pos.y, sheet.frame.w as u32, sheet.frame.h as u32)),
+                (angle as f64) * (360.0 / 256.0),
+                center,
+                false,
+                false,
+            )
+            .expect("copy_ex failed");
     }
 
     fn draw_scrolling_bg(&mut self, sprite_name: &str, width: i32, height: i32) {

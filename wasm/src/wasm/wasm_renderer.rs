@@ -98,15 +98,19 @@ impl Renderer for WasmRenderer {
         g: u8,
         b: u8,
         a: u8,
-        bold: bool,
+        _: bool,
     ) {
         self.context.save();
         self.context.set_global_alpha(a as f64 / 255.0);
         self.set_draw_color(r, g, b);
-        let b = if bold { "bold " } else { "" };
-        self.context.set_font(&format!("{}{}px Arial", b, size));
+        self.context.set_font(&format!("{}px Arial", size));
         self.context
-            .fill_text_with_max_width(text, x as f64, y as f64 + 20.0, self.canvas.width() as f64)
+            .fill_text_with_max_width(
+                text,
+                x as f64,
+                y as f64 + size as f64,
+                self.canvas.width() as f64,
+            )
             .expect("draw_image_with... failed");
 
         self.context.restore();
@@ -129,6 +133,47 @@ impl Renderer for WasmRenderer {
                     sheet.frame.h as f64,
                 )
                 .expect("draw_image_with... failed");
+        }
+    }
+
+    fn draw_sprite_rot(
+        &mut self,
+        sprite_name: &str,
+        pos: &Vector2D<i32>,
+        angle: u8,
+        center: Option<&Vector2D<i32>>,
+    ) {
+        let sprite_sheet = self.sprite_sheet.borrow();
+        let (sheet, tex_name) = sprite_sheet.get(sprite_name).expect("No sprite_sheet");
+        let image = self.images.borrow();
+        if let Some(image) = image.get(tex_name) {
+            let center = center.map_or_else(
+                || Vector2D::new(sheet.frame.w as i32 / 2, sheet.frame.h as i32 / 2),
+                |v| *v,
+            );
+
+            self.context.save();
+            self.context
+                .translate((pos.x + center.x) as f64, (pos.y + center.y) as f64)
+                .expect("translate failed");
+            self.context
+                .rotate((angle as f64) * (2.0 * std::f64::consts::PI / 256.0))
+                .expect("rotate failed");
+            self.context.translate(-center.x as f64, -center.y as f64).expect("translate failed");
+            self.context
+                .draw_image_with_html_image_element_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
+                    &image,
+                    sheet.frame.x as f64,
+                    sheet.frame.y as f64,
+                    sheet.frame.w as f64,
+                    sheet.frame.h as f64,
+                    0.0,
+                    0.0,
+                    sheet.frame.w as f64,
+                    sheet.frame.h as f64,
+                )
+                .expect("draw_image_with... failed");
+            self.context.restore();
         }
     }
 

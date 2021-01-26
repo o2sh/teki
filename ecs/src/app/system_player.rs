@@ -1,6 +1,7 @@
 use crate::app::components::*;
 use crate::app::resources::{GameInfo, SoundQueue};
 use crate::app::system_effect::create_enemy_explosion_effect;
+use crate::app::system_item::spawn_item;
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
@@ -52,7 +53,7 @@ pub fn player_sprite() -> SpriteDrawable {
 }
 
 #[system(for_each)]
-#[write_component(Position)]
+#[write_component(Posture)]
 pub fn move_player(
     player: &mut Player,
     entity: &Entity,
@@ -70,7 +71,7 @@ pub fn do_move_player(
     world: &mut SubWorld,
     game_info: &mut GameInfo,
 ) {
-    let position = <&mut Position>::query().get_mut(world, entity).unwrap();
+    let position = <&mut Posture>::query().get_mut(world, entity).unwrap();
     let pos = &mut position.0;
     player.prev_direction = player.curr_direction.clone();
     player.curr_direction = None;
@@ -121,7 +122,7 @@ pub fn do_move_player(
 #[read_component(MyShot)]
 pub fn fire_myshot(
     player: &mut Player,
-    position: &Position,
+    position: &Posture,
     entity: &Entity,
     #[resource] pad: &Pad,
     #[resource] sound_queue: &mut SoundQueue,
@@ -145,12 +146,12 @@ pub fn can_player_fire(player: &Player) -> bool {
 }
 pub fn do_fire_myshot(
     player: &Player,
-    position: &Position,
+    position: &Posture,
     entity: Entity,
     commands: &mut CommandBuffer,
 ) {
     if can_player_fire(player) {
-        let pos = Position(Vector2D::new(position.0.x, position.0.y - 16 * ONE));
+        let pos = Posture(Vector2D::new(position.0.x, position.0.y - 16 * ONE), 0);
         commands.push((
             MyShot { player_entity: entity },
             pos,
@@ -161,7 +162,7 @@ pub fn do_fire_myshot(
 }
 
 #[system(for_each)]
-#[write_component(Position)]
+#[write_component(Posture)]
 pub fn move_myshot(
     _: &MyShot,
     entity: &Entity,
@@ -174,7 +175,7 @@ pub fn move_myshot(
 pub fn do_move_myshot(entity: Entity, world: &mut SubWorld, commands: &mut CommandBuffer) {
     let mut cont = false;
     for e in [Some(entity)].iter().flatten() {
-        let position = <&mut Position>::query().get_mut(world, *e).unwrap();
+        let position = <&mut Posture>::query().get_mut(world, *e).unwrap();
         let pos = &mut position.0;
 
         pos.y -= MYSHOT_SPEED;
@@ -199,7 +200,7 @@ pub fn delete_entity(entity: Entity, commands: &mut CommandBuffer) {
 
 #[system]
 #[read_component(MyShot)]
-#[read_component(Position)]
+#[read_component(Posture)]
 #[read_component(HitBox)]
 #[write_component(Enemy)]
 #[write_component(SpriteDrawable)]
@@ -210,12 +211,12 @@ pub fn collision_check(
     commands: &mut CommandBuffer,
 ) {
     for (_, shot_pos, shot_hit_box, shot_entity) in
-        <(&MyShot, &Position, &HitBox, Entity)>::query().iter(world)
+        <(&MyShot, &Posture, &HitBox, Entity)>::query().iter(world)
     {
         let shot_coll_box = pos_to_coll_box(&shot_pos.0, &shot_hit_box);
 
         for (_enemy, enemy_pos, enemy_hit_box, enemy_entity) in
-            <(&Enemy, &Position, &HitBox, Entity)>::query().iter(world)
+            <(&Enemy, &Posture, &HitBox, Entity)>::query().iter(world)
         {
             let enemy_collbox =
                 CollBox { top_left: round_vec(&enemy_pos.0), size: enemy_hit_box.size };
@@ -224,6 +225,7 @@ pub fn collision_check(
                 delete_entity(*enemy_entity, commands);
                 create_enemy_explosion_effect(&enemy_pos.0, 1, commands);
                 sound_queue.push_play(CH_KILL, SE_KILL);
+                spawn_item(&enemy_pos.0, commands);
                 game_info.add_score(20);
             }
         }

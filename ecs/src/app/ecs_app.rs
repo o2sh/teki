@@ -1,6 +1,6 @@
 use crate::app::{
     components::*, resources::*, system_avatar::*, system_effect::*, system_enemy::*,
-    system_game::*, system_player::*,
+    system_game::*, system_item::*, system_player::*,
 };
 use legion::*;
 use teki_common::traits::{App, Audio, Renderer, Timer};
@@ -75,6 +75,8 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
                 "player_select.png",
                 "menu_bg.png",
                 "desc_char.png",
+                "title.png",
+                "items.png",
             ],
         );
         renderer.load_sprite_sheet("assets/gfx/sanae.json");
@@ -89,6 +91,8 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
         renderer.load_sprite_sheet("assets/gfx/a_marisa.json");
         renderer.load_sprite_sheet("assets/gfx/player_select.json");
         renderer.load_sprite_sheet("assets/gfx/desc_char.json");
+        renderer.load_sprite_sheet("assets/gfx/title.json");
+        renderer.load_sprite_sheet("assets/gfx/items.json");
 
         self.audio.load_musics("assets/bgm", &["stage01.ogg", "menu.ogg"]).expect("");
     }
@@ -184,19 +188,9 @@ impl Title {
 
     fn draw<R: Renderer>(&self, renderer: &mut R) {
         renderer.draw_texture("menu_bg", WINDOW_WIDTH, WINDOW_HEIGHT);
+        renderer.draw_sprite("title", &Vector2D::new(WINDOW_WIDTH - 432, 0));
         let title = "Teki";
-        renderer.draw_str(
-            IM_FONT,
-            300 + ((WINDOW_WIDTH - 300) / 2) - (title.len() as i32 / 2) * 25,
-            WINDOW_HEIGHT / 2 - 150,
-            50,
-            title,
-            255,
-            255,
-            255,
-            255,
-            false,
-        );
+        renderer.draw_str(IM_FONT, 430, 180, 50, title, 255, 255, 255, 255, false);
 
         let msg = "Press z to start";
         renderer.draw_str(RE_FONT, 50, WINDOW_HEIGHT / 2 - 50, 18, msg, 255, 255, 255, 255, false);
@@ -261,25 +255,28 @@ impl Game {
             .add_system(animate_enemy_system())
             .add_system(animate_player_system())
             .add_system(animate_avatar_system())
-            .flush()
             .add_system(move_enemy_formation_system())
+            .add_system(move_item_system())
             .add_system(collision_check_system())
             .add_system(move_sequential_anime_system())
             .build();
         let mut world = World::default();
         world.push((
             new_player(),
-            Position(Vector2D::new(CENTER_X, PLAYER_Y)),
+            Posture(Vector2D::new(CENTER_X, PLAYER_Y), 0),
             player_hit_box(),
             player_sprite(),
         ));
 
         world.push((
             Avatar,
-            Position(Vector2D::new(
-                (GAME_WIDTH + (WINDOW_WIDTH - GAME_WIDTH) / 2) * ONE,
-                PLAYER_Y - 25 * ONE,
-            )),
+            Posture(
+                Vector2D::new(
+                    (GAME_WIDTH + (WINDOW_WIDTH - GAME_WIDTH) / 2) * ONE,
+                    PLAYER_Y - 25 * ONE,
+                ),
+                0,
+            ),
             avatar_sprite(),
         ));
         let mut resources = Resources::default();
@@ -299,32 +296,6 @@ impl Game {
     }
 
     fn draw<R: Renderer>(&self, renderer: &mut R) {
-        renderer.draw_scrolling_bg(BG1_TEXTURE, GAME_WIDTH, GAME_HEIGHT);
-        renderer.draw_vertical_separation(GAME_WIDTH, GAME_HEIGHT);
-        for (position, drawable) in <(&Position, &SpriteDrawable)>::query().iter(&self.world) {
-            let pos = round_vec(&position.0) + drawable.offset;
-            renderer.draw_sprite(drawable.sprite_name, &pos);
-        }
-
-        if let Some(game_info) = self.get_game_info() {
-            game_info.draw(renderer);
-
-            match game_info.game_state {
-                GameState::StartStage => {
-                    if let Some(stage_indicator) = self.get_stage_indicator() {
-                        stage_indicator.draw(renderer, game_info.count);
-                    }
-                }
-                _ => {}
-            }
-        }
-    }
-
-    fn get_game_info(&self) -> Option<legion::systems::Fetch<'_, GameInfo>> {
-        self.resources.get::<GameInfo>()
-    }
-
-    fn get_stage_indicator(&self) -> Option<legion::systems::Fetch<'_, StageIndicator>> {
-        self.resources.get::<StageIndicator>()
+        draw_game(&self.world, &self.resources, renderer);
     }
 }

@@ -8,6 +8,7 @@ pub const CH_KILL: u32 = 2;
 
 pub const WINDOW_WIDTH: i32 = 700;
 pub const WINDOW_HEIGHT: i32 = 256 * 2;
+pub const ANGLE_DIV: i32 = 24;
 
 pub const GAME_WIDTH: i32 = 512;
 pub const GAME_HEIGHT: i32 = 256 * 2;
@@ -18,6 +19,7 @@ pub const PLAYER_Y: i32 = (GAME_HEIGHT - 96) * ONE;
 pub const APP_NAME: &str = "Teki";
 pub const PLAYER_SPEED: i32 = 7 * ONE;
 pub const MYSHOT_SPEED: i32 = 12 * ONE;
+pub const ITEM_SPEED: i32 = 7 * ONE;
 pub const SHOT_DELAY: u32 = 4;
 pub const FPS: u32 = 60;
 pub const MIN_FPS: u32 = 15;

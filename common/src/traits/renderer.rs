@@ -18,6 +18,13 @@ pub trait Renderer {
         bold: bool,
     );
     fn draw_sprite(&mut self, sprite_name: &str, pos: &Vector2D<i32>);
+    fn draw_sprite_rot(
+        &mut self,
+        sprite_name: &str,
+        pos: &Vector2D<i32>,
+        angle: u8,
+        center: Option<&Vector2D<i32>>,
+    );
     fn draw_texture(&mut self, tex_name: &str, width: i32, height: i32);
     fn draw_scrolling_bg(&mut self, sprite_name: &str, width: i32, height: i32);
     fn set_draw_color(&mut self, r: u8, g: u8, b: u8);
