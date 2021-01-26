@@ -9,6 +9,7 @@ legion = { version = "0.3.1", default-features = false, features = ["codegen"] }
 vector2d = "2.2.0"
 lazy_static = "1.4.0"
 array-macro = "1.0.5"
+rand = {version = "0.7", features = ["wasm-bindgen"] }
 
 teki-common = {path = "../common" }
 

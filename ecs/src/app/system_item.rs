@@ -1,28 +1,38 @@
-use crate::app::components::*;
+use crate::app::{
+    components::*,
+    resources::*,
+    system_player::{pos_to_coll_box, Player},
+};
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
-use teki_common::utils::{consts::*, math::*};
+use rand::Rng;
+use teki_common::utils::{collision::CollBox, consts::*, math::*};
+use teki_common::ItemType;
 use vector2d::Vector2D;
 
 pub const ITEM_SPRITES: [&str; 2] = ["item0", "item1"];
 
 pub fn spawn_item(pos: &Vector2D<i32>, commands: &mut CommandBuffer) {
-    let drawable = SpriteDrawable { sprite_name: ITEM_SPRITES[0], offset: Vector2D::new(-6, -6) };
+    let mut rng = rand::thread_rng();
+    let i = rng.gen_range(0,2);
+    let drawable = SpriteDrawable { sprite_name: ITEM_SPRITES[i], offset: Vector2D::new(-6, -6) };
     let hit_box = HitBox { size: Vector2D::new(12, 12) };
-    commands.push((
-        Item { rel_pos: Vector2D::new(0, 0) },
-        Posture(pos.clone(), 0),
-        hit_box,
-        drawable,
-    ));
+
+    let item_type = match i {
+        0 => ItemType::Red,
+        1 => ItemType::Blue,
+        _ => {
+            panic!("Illegal");
+        }
+    };
+    commands.push((Item { item_type }, Posture(pos.clone(), 0), hit_box, drawable));
 }
 
 #[system(for_each)]
 #[write_component(Posture)]
-#[write_component(Item)]
 pub fn move_item(
-    item: &mut Item,
+    _: &mut Item,
     entity: &Entity,
     world: &mut SubWorld,
     commands: &mut CommandBuffer,
@@ -30,10 +40,45 @@ pub fn move_item(
     const DANGLE: i32 = ANGLE * ONE / ANGLE_DIV;
     let pos = <&mut Posture>::query().get_mut(world, *entity).unwrap();
     pos.0.y += ITEM_SPEED;
-    item.rel_pos.y += ITEM_SPEED;
     pos.1 += DANGLE;
 
     if pos.0.y > WINDOW_HEIGHT * ONE {
         commands.remove(*entity);
+    }
+}
+
+#[system]
+#[read_component(Item)]
+#[read_component(Posture)]
+#[read_component(HitBox)]
+#[write_component(Player)]
+pub fn item_collision_check(
+    world: &mut SubWorld,
+    #[resource] sound_queue: &mut SoundQueue,
+    #[resource] game_info: &mut GameInfo,
+    commands: &mut CommandBuffer,
+) {
+    for (_, player_pos, player_hit_box) in <(&Player, &Posture, &HitBox)>::query().iter(world) {
+        let player_coll_box = pos_to_coll_box(&player_pos.0, &player_hit_box);
+
+        for (item, item_pos, item_hit_box, item_entity) in
+            <(&Item, &Posture, &HitBox, Entity)>::query().iter(world)
+        {
+            let item_collbox =
+                CollBox { top_left: round_vec(&item_pos.0), size: item_hit_box.size };
+            if player_coll_box.check_collision(&item_collbox) {
+                commands.remove(*item_entity);
+                sound_queue.push_play(CH_KILL, SE_ITEM);
+                let points = match item.item_type {
+                    ItemType::Red => 100,
+                    ItemType::Blue => 200,
+                };
+                game_info.add_score(points);
+
+                let text = Text { msg: format!("+{}", points), offset: Vector2D::new(-32, -32), delay: 12 };
+
+                commands.push((text, player_pos.clone()));
+            }
+        }
     }
 }

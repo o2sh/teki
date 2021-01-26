@@ -19,7 +19,7 @@ pub const PLAYER_Y: i32 = (GAME_HEIGHT - 96) * ONE;
 pub const APP_NAME: &str = "Teki";
 pub const PLAYER_SPEED: i32 = 7 * ONE;
 pub const MYSHOT_SPEED: i32 = 12 * ONE;
-pub const ITEM_SPEED: i32 = 7 * ONE;
+pub const ITEM_SPEED: i32 = 3 * ONE;
 pub const SHOT_DELAY: u32 = 4;
 pub const FPS: u32 = 60;
 pub const MIN_FPS: u32 = 15;
@@ -54,6 +54,7 @@ pub const SE_KILL: &str = "assets/sfx/se_kill";
 pub const SE_SHOT: &str = "assets/sfx/se_graze";
 pub const SE_OK: &str = "assets/sfx/se_ok00";
 pub const SE_SELECT: &str = "assets/sfx/se_select00";
+pub const SE_ITEM: &str = "assets/sfx/se_item00";
 
 pub const RE_FONT: &str = "assets/fonts/regular.ttf";
 pub const IM_FONT: &str = "assets/fonts/immortal.ttf";

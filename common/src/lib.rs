@@ -6,4 +6,8 @@ pub enum EnemyType {
     Ghost,
 }
 
+pub enum ItemType {
+    Red,
+    Blue
+}
 pub struct FormationIndex(pub usize, pub usize);

@@ -26,6 +26,11 @@ pub fn draw_game<R: Renderer>(world: &World, resources: &Resources, renderer: &m
         }
     }
 
+    for (posture, text) in <(&Posture, &Text)>::query().iter(world) {
+        let pos = round_vec(&posture.0) + text.offset;
+        renderer.draw_str(RE_FONT, pos.x, pos.y, 10, &text.msg, 255, 215, 0, 255, false);
+    }
+
     if let Some(game_info) = get_game_info(resources) {
         game_info.draw(renderer);
 

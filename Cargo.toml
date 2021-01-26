@@ -10,7 +10,6 @@ repository = "https://github.com/o2sh/teki"
 
 [dependencies]
 clap = "2.33.3"
-rand = "0.8.0"
 vector2d = "2.2.0"
 lazy_static = "1.4.0"
 counted-array = "0.1.2"

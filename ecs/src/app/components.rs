@@ -1,5 +1,5 @@
 use legion::*;
-use teki_common::{EnemyType, FormationIndex};
+use teki_common::{EnemyType, FormationIndex, ItemType};
 use vector2d::Vector2D;
 
 #[derive(Clone, Copy)]
@@ -8,6 +8,12 @@ pub struct Posture(pub Vector2D<i32>, pub i32);
 pub struct SpriteDrawable {
     pub sprite_name: &'static str,
     pub offset: Vector2D<i32>,
+}
+
+pub struct Text {
+    pub msg: String,
+    pub offset: Vector2D<i32>,
+    pub delay: u32
 }
 
 pub struct MyShot {
@@ -20,7 +26,7 @@ pub struct Enemy {
 }
 
 pub struct Item {
-    pub rel_pos: Vector2D<i32>,
+    pub item_type: ItemType,
 }
 
 pub struct HitBox {

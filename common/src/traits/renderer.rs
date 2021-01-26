@@ -6,7 +6,7 @@ pub trait Renderer {
     fn clear(&mut self);
     fn draw_str(
         &mut self,
-        tex_name: &str,
+        font: &str,
         x: i32,
         y: i32,
         size: u32,

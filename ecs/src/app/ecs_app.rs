@@ -1,6 +1,6 @@
 use crate::app::{
     components::*, resources::*, system_avatar::*, system_effect::*, system_enemy::*,
-    system_game::*, system_item::*, system_player::*,
+    system_game::*, system_item::*, system_player::*, system_text::*
 };
 use legion::*;
 use teki_common::traits::{App, Audio, Renderer, Timer};
@@ -257,8 +257,10 @@ impl Game {
             .add_system(animate_avatar_system())
             .add_system(move_enemy_formation_system())
             .add_system(move_item_system())
-            .add_system(collision_check_system())
+            .add_system(shot_collision_check_system())
+            .add_system(item_collision_check_system())
             .add_system(move_sequential_anime_system())
+            .add_system(clear_text_system())
             .build();
         let mut world = World::default();
         world.push((

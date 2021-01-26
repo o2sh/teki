@@ -203,11 +203,9 @@ pub fn delete_entity(entity: Entity, commands: &mut CommandBuffer) {
 #[read_component(Posture)]
 #[read_component(HitBox)]
 #[write_component(Enemy)]
-#[write_component(SpriteDrawable)]
-pub fn collision_check(
+pub fn shot_collision_check(
     world: &mut SubWorld,
     #[resource] sound_queue: &mut SoundQueue,
-    #[resource] game_info: &mut GameInfo,
     commands: &mut CommandBuffer,
 ) {
     for (_, shot_pos, shot_hit_box, shot_entity) in
@@ -226,13 +224,12 @@ pub fn collision_check(
                 create_enemy_explosion_effect(&enemy_pos.0, 1, commands);
                 sound_queue.push_play(CH_KILL, SE_KILL);
                 spawn_item(&enemy_pos.0, commands);
-                game_info.add_score(20);
             }
         }
     }
 }
 
-fn pos_to_coll_box(pos: &Vector2D<i32>, coll_rect: &HitBox) -> CollBox {
+pub fn pos_to_coll_box(pos: &Vector2D<i32>, coll_rect: &HitBox) -> CollBox {
     CollBox { top_left: round_vec(pos), size: coll_rect.size }
 }
 
