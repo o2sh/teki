@@ -16,6 +16,7 @@ pub fn draw_game<R: Renderer>(world: &World, resources: &Resources, renderer: &m
     renderer.draw_scrolling_bg(BG1_TEXTURE, GAME_WIDTH, GAME_HEIGHT);
     renderer.draw_vertical_separation(GAME_WIDTH, GAME_HEIGHT);
     for (posture, drawable) in <(&Posture, &SpriteDrawable)>::query().iter(world) {
+        //std::println!("{}", drawable.sprite_name);
         let pos = round_vec(&posture.0) + drawable.offset;
         let angle = quantize_angle(posture.1, ANGLE_DIV);
 
@@ -28,7 +29,7 @@ pub fn draw_game<R: Renderer>(world: &World, resources: &Resources, renderer: &m
 
     for (posture, text) in <(&Posture, &Text)>::query().iter(world) {
         let pos = round_vec(&posture.0) + text.offset;
-        renderer.draw_str(RE_FONT, pos.x, pos.y, 10, &text.msg, 255, 215, 0, 255, false);
+        renderer.draw_str(RE_FONT, pos.x, pos.y, 10, &text.msg, &text.color, false);
     }
 
     if let Some(game_info) = get_game_info(resources) {

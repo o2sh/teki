@@ -4,6 +4,7 @@ use std::path::Path;
 use std::rc::Rc;
 use teki_common::traits::Renderer;
 use teki_common::utils::{consts::*, SpriteSheet};
+use teki_common::game::RGBA;
 use vector2d::Vector2D;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -87,22 +88,10 @@ impl Renderer for WasmRenderer {
         self.context.fill_rect(0.0, 0.0, self.canvas.width() as f64, self.canvas.height() as f64)
     }
 
-    fn draw_str(
-        &mut self,
-        _: &str,
-        x: i32,
-        y: i32,
-        size: u32,
-        text: &str,
-        r: u8,
-        g: u8,
-        b: u8,
-        a: u8,
-        _: bool,
-    ) {
+    fn draw_str(&mut self, _: &str, x: i32, y: i32, size: u32, text: &str, color: &RGBA, _: bool) {
         self.context.save();
-        self.context.set_global_alpha(a as f64 / 255.0);
-        self.set_draw_color(r, g, b);
+        self.context.set_global_alpha(color.a as f64 / 255.0);
+        self.set_draw_color(color.r, color.g, color.b);
         self.context.set_font(&format!("{}px Arial", size));
         self.context
             .fill_text_with_max_width(
@@ -231,19 +220,11 @@ impl Renderer for WasmRenderer {
         self.context.fill_rect(width as f64, 0.0, 2.0, height as f64)
     }
 
-    fn draw_rect(
-        &mut self,
-        pos: &Vector2D<i32>,
-        width: i32,
-        height: i32,
-        r: u8,
-        g: u8,
-        b: u8,
-        a: u8,
-    ) {
+    fn draw_rect(&mut self, pos: &Vector2D<i32>, width: i32, height: i32, color: RGBA) {
         self.context.save();
-        self.context.set_global_alpha(a as f64 / 255.0);
-        self.context.set_fill_style(&JsValue::from(format!("rgba({},{},{})", r, g, b)));
+        self.context.set_global_alpha(color.a as f64 / 255.0);
+        self.context
+            .set_fill_style(&JsValue::from(format!("rgba({},{},{})", color.r, color.g, color.b)));
         self.context.fill_rect(pos.x as f64, pos.y as f64, width as f64, height as f64);
         self.context.restore();
     }

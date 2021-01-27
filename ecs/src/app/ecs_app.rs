@@ -1,8 +1,9 @@
 use crate::app::{
     components::*, resources::*, system_avatar::*, system_effect::*, system_enemy::*,
-    system_game::*, system_item::*, system_player::*, system_text::*
+    system_game::*, system_item::*, system_player::*, system_text::*,
 };
 use legion::*;
+use teki_common::game::{AppearanceManager, RGBA};
 use teki_common::traits::{App, Audio, Renderer, Timer};
 use teki_common::utils::{
     consts::*,
@@ -166,10 +167,7 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
             WINDOW_HEIGHT - 28,
             16,
             &format!("{:2}fps", self.fps_calc.fps()),
-            255,
-            255,
-            255,
-            255,
+            &RGBA { r: 255, g: 255, b: 255, a: 255 },
             false,
         );
     }
@@ -190,10 +188,26 @@ impl Title {
         renderer.draw_texture("menu_bg", WINDOW_WIDTH, WINDOW_HEIGHT);
         renderer.draw_sprite("title", &Vector2D::new(WINDOW_WIDTH - 432, 0));
         let title = "Teki";
-        renderer.draw_str(IM_FONT, 430, 180, 50, title, 255, 255, 255, 255, false);
+        renderer.draw_str(
+            IM_FONT,
+            430,
+            180,
+            50,
+            title,
+            &RGBA { r: 255, g: 255, b: 255, a: 255 },
+            false,
+        );
 
         let msg = "Press z to start";
-        renderer.draw_str(RE_FONT, 50, WINDOW_HEIGHT / 2 - 50, 18, msg, 255, 255, 255, 255, false);
+        renderer.draw_str(
+            RE_FONT,
+            50,
+            WINDOW_HEIGHT / 2 - 50,
+            18,
+            msg,
+            &RGBA { r: 255, g: 255, b: 255, a: 255 },
+            false,
+        );
     }
 }
 
@@ -232,7 +246,15 @@ impl CharacterSelect {
         renderer
             .draw_sprite(CHARACTER_SELECT_PORTRAITS[self.index as usize], &Vector2D::new(-150, 50));
         let msg = "Select Character";
-        renderer.draw_str(IM_FONT, 10, 10, 32, msg, 255, 255, 255, 255, false);
+        renderer.draw_str(
+            IM_FONT,
+            10,
+            10,
+            32,
+            msg,
+            &RGBA { r: 255, g: 255, b: 255, a: 255 },
+            false,
+        );
         renderer.draw_sprite(CHARACTER_SELECT_DESCS[self.index as usize], &Vector2D::new(400, 220));
     }
 }
@@ -255,7 +277,7 @@ impl Game {
             .add_system(animate_enemy_system())
             .add_system(animate_player_system())
             .add_system(animate_avatar_system())
-            .add_system(move_enemy_formation_system())
+            .add_system(move_enemy_system())
             .add_system(move_item_system())
             .add_system(shot_collision_check_system())
             .add_system(item_collision_check_system())
@@ -283,7 +305,8 @@ impl Game {
         ));
         let mut resources = Resources::default();
         resources.insert(SoundQueue::new());
-        resources.insert(EnemyFormation::default());
+        resources.insert(AppearanceManager::default());
+        resources.insert(Formation::default());
         resources.insert(GameInfo::new());
         resources.insert(StageIndicator::default());
         Self { world, resources, schedule }

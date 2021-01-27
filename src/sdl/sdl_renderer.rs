@@ -3,6 +3,7 @@ use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
 use sdl2::render::{BlendMode, WindowCanvas};
 use sdl2::ttf::*;
+use teki_common::game::RGBA;
 use teki_common::traits::Renderer;
 use teki_common::utils::{consts::*, SpriteSheet};
 use vector2d::Vector2D;
@@ -131,10 +132,7 @@ impl Renderer for SdlRenderer {
         y: i32,
         size: u32,
         text: &str,
-        r: u8,
-        g: u8,
-        b: u8,
-        a: u8,
+        color: &RGBA,
         bold: bool,
     ) {
         // Load a font
@@ -146,7 +144,7 @@ impl Renderer for SdlRenderer {
         // render a surface, and convert it to a texture bound to the canvas
         let surface = font
             .render(text)
-            .blended(Color::RGBA(r, g, b, a))
+            .blended(Color::RGBA(color.r, color.g, color.b, color.a))
             .map_err(|e| e.to_string())
             .expect("");
 
@@ -157,18 +155,9 @@ impl Renderer for SdlRenderer {
             .copy(&texture, None, Some(Rect::new(x, y, surface.width(), surface.height())))
             .expect("");
     }
-    fn draw_rect(
-        &mut self,
-        pos: &Vector2D<i32>,
-        width: i32,
-        height: i32,
-        r: u8,
-        g: u8,
-        b: u8,
-        a: u8,
-    ) {
+    fn draw_rect(&mut self, pos: &Vector2D<i32>, width: i32, height: i32, color: RGBA) {
         self.canvas.set_blend_mode(BlendMode::Blend);
-        self.set_draw_color_with_alpha(r, g, b, a);
+        self.set_draw_color_with_alpha(color.r, color.g, color.b, color.a);
         let rect = Rect::new(pos.x, pos.y, width as u32, height as u32);
         self.canvas.fill_rect(rect).expect("");
     }

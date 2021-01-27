@@ -239,7 +239,7 @@ pub fn animate_player(
     sprite: &mut SpriteDrawable,
     #[resource] game_info: &mut GameInfo,
 ) {
-    do_animate_player(player, sprite, game_info.frame_count_over_2);
+    do_animate_player(player, sprite, game_info.frame_count_over_5);
 }
 
 pub fn do_animate_player(player: &mut Player, sprite: &mut SpriteDrawable, frame_count: u32) {

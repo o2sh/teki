@@ -1,9 +1,11 @@
 use legion::*;
-use teki_common::{EnemyType, FormationIndex, ItemType};
+use teki_common::game::{EnemyType, FormationIndex, ItemType, Traj, RGBA};
 use vector2d::Vector2D;
 
 #[derive(Clone, Copy)]
 pub struct Posture(pub Vector2D<i32>, pub i32);
+
+pub struct Speed(pub i32, pub i32);
 
 pub struct SpriteDrawable {
     pub sprite_name: &'static str,
@@ -12,17 +14,36 @@ pub struct SpriteDrawable {
 
 pub struct Text {
     pub msg: String,
+    pub color: RGBA,
     pub offset: Vector2D<i32>,
-    pub delay: u32
+    pub delay: u32,
 }
 
 pub struct MyShot {
     pub player_entity: Entity,
 }
 
+pub struct EnemyBase {
+    pub traj: Option<Traj>,
+    pub shot_wait: Option<u32>,
+    pub count: u32,
+    pub attack_frame_count: u32,
+    pub target_pos: Vector2D<i32>,
+}
+
+#[derive(PartialEq)]
+pub enum EnemyState {
+    Appearance,
+    MoveToFormation,
+    Formation,
+}
+
 pub struct Enemy {
     pub enemy_type: EnemyType,
     pub formation_index: FormationIndex,
+    pub state: EnemyState,
+    pub base: EnemyBase,
+    pub is_formation: bool,
 }
 
 pub struct Item {

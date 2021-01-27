@@ -7,15 +7,15 @@ use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
 use rand::Rng;
+use teki_common::game::{ItemType, RGBA};
 use teki_common::utils::{collision::CollBox, consts::*, math::*};
-use teki_common::ItemType;
 use vector2d::Vector2D;
 
 pub const ITEM_SPRITES: [&str; 2] = ["item0", "item1"];
 
 pub fn spawn_item(pos: &Vector2D<i32>, commands: &mut CommandBuffer) {
     let mut rng = rand::thread_rng();
-    let i = rng.gen_range(0,2);
+    let i = rng.gen_range(0, 2);
     let drawable = SpriteDrawable { sprite_name: ITEM_SPRITES[i], offset: Vector2D::new(-6, -6) };
     let hit_box = HitBox { size: Vector2D::new(12, 12) };
 
@@ -69,13 +69,18 @@ pub fn item_collision_check(
             if player_coll_box.check_collision(&item_collbox) {
                 commands.remove(*item_entity);
                 sound_queue.push_play(CH_KILL, SE_ITEM);
-                let points = match item.item_type {
-                    ItemType::Red => 100,
-                    ItemType::Blue => 200,
+                let (points, color) = match item.item_type {
+                    ItemType::Red => (100, RGBA { r: 255, g: 215, b: 0, a: 255 }),
+                    ItemType::Blue => (200, RGBA { r: 255, g: 255, b: 255, a: 255 }),
                 };
                 game_info.add_score(points);
 
-                let text = Text { msg: format!("+{}", points), offset: Vector2D::new(-32, -32), delay: 12 };
+                let text = Text {
+                    msg: format!("+{}", points),
+                    color,
+                    offset: Vector2D::new(-32, -32),
+                    delay: 12,
+                };
 
                 commands.push((text, player_pos.clone()));
             }

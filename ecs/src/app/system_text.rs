@@ -1,6 +1,6 @@
+use crate::app::components::*;
 use legion::systems::CommandBuffer;
 use legion::*;
-use crate::app::components::*;
 
 #[system(for_each)]
 pub fn clear_text(text: &mut Text, entity: &Entity, commands: &mut CommandBuffer) {

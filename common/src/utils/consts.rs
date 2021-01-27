@@ -13,6 +13,9 @@ pub const ANGLE_DIV: i32 = 24;
 pub const GAME_WIDTH: i32 = 512;
 pub const GAME_HEIGHT: i32 = 256 * 2;
 
+pub const X_COUNT: usize = 10;
+pub const Y_COUNT: usize = 6;
+
 pub const CENTER_X: i32 = GAME_WIDTH * ONE / 2;
 pub const PLAYER_Y: i32 = (GAME_HEIGHT - 96) * ONE;
 
@@ -23,9 +26,6 @@ pub const ITEM_SPEED: i32 = 3 * ONE;
 pub const SHOT_DELAY: u32 = 4;
 pub const FPS: u32 = 60;
 pub const MIN_FPS: u32 = 15;
-
-pub const X_COUNT: usize = 4;
-pub const Y_COUNT: usize = 3;
 
 pub const SCROLLING_BG_VEL: i32 = 3;
 
@@ -44,7 +44,7 @@ pub const BG2_TEXTURE: &str = "bg_water";
 pub const PLAYER_SPRITE: &str = "reimu0";
 pub const REIMU_SPRITE: &str = "a_reimu0";
 pub const MARISA_SPRITE: &str = "a_marisa0";
-pub const ENEMY_SPRITE: &str = "enemy1";
+pub const ENEMY_SPRITE: &str = "enemy0";
 pub const BULLET_SPRITE: &str = "spell0";
 
 pub const BG_MUSIC: &str = "stage01";
