@@ -11,7 +11,7 @@ counted_array!(pub const COMMAND_TABLE1: [TrajCommand; _] = [
     Speed(3 * ONE),
     Angle((ANGLE / 2) * ONE),
     VAngle(0),
-    Delay(5),
+    Delay(10),
     VAngle(2 * ONE),
     Delay(17),
     VAngle(0),

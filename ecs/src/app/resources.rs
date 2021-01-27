@@ -166,12 +166,9 @@ impl StageIndicator {
     }
 }
 
-pub const MARGIN: i32 = 20;
-
 pub struct Formation {
     x_indices: [i32; X_COUNT],
     y_indices: [i32; Y_COUNT],
-    to_left: bool,
     pub done_appearance: bool,
 }
 
@@ -181,7 +178,6 @@ impl Default for Formation {
             x_indices: Default::default(),
             y_indices: Default::default(),
             done_appearance: false,
-            to_left: false,
         };
         formation.init();
         formation
@@ -197,23 +193,6 @@ impl Formation {
         }
         for i in 0..Y_COUNT {
             self.y_indices[i] = BASE_Y_TABLE[i] * ONE;
-        }
-    }
-
-    pub fn update(&mut self) {
-        let space = GAME_WIDTH - X_COUNT as i32 * 32;
-        let dx = space * ONE / 256;
-
-        let dx = if self.to_left { -dx } else { dx };
-
-        for i in 0..X_COUNT {
-            self.x_indices[i] += dx;
-        }
-
-        if self.x_indices[0] < (MARGIN + 24) * ONE
-            || self.x_indices[X_COUNT - 1] > (GAME_WIDTH - MARGIN - 24) * ONE
-        {
-            self.to_left = !self.to_left;
         }
     }
 

@@ -44,7 +44,9 @@ impl EnemyBase {
         false
     }
 }
+
 struct SysAppearanceManagerAccessor<'a, 'b>(&'a mut SubWorld<'b>);
+
 impl<'a, 'b> AppearanceManagerAccessor for SysAppearanceManagerAccessor<'a, 'b> {
     fn is_stationary(&self) -> bool {
         <&Enemy>::query().iter(self.0).all(|x| x.is_formation)
@@ -91,7 +93,7 @@ impl<'a> TrajAccessor for TrajAccessorImpl<'a> {
 
 #[system]
 #[read_component(Enemy)]
-pub fn spawn_enemy(
+pub fn run_appearance_enemy(
     world: &mut SubWorld,
     #[resource] appearance_manager: &mut AppearanceManager,
     #[resource] enemy_formation: &mut Formation,
@@ -129,11 +131,6 @@ pub fn spawn_enemy(
     if appearance_manager.done {
         enemy_formation.done_appearance = true;
     }
-}
-
-#[system]
-pub fn update_enemy_formation(#[resource] enemy_formation: &mut Formation) {
-    enemy_formation.update();
 }
 
 #[system(for_each)]
@@ -176,8 +173,9 @@ fn do_move_enemy(
             }
         }
         EnemyState::Formation => {
-            let position = <&mut Posture>::query().get_mut(world, entity).unwrap();
-            position.0 = enemy_formation.pos(&enemy.formation_index);
+            let posture = <&mut Posture>::query().get_mut(world, entity).unwrap();
+            let ang = ANGLE * ONE / 128;
+            posture.1 -= clamp(posture.1, -ang, ang);
         }
     }
 }

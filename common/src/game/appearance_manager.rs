@@ -2,10 +2,10 @@ use crate::game::{appearance_table::*, EnemyType, FormationIndex, Traj, TrajComm
 use crate::utils::math::*;
 use vector2d::Vector2D;
 
-const UNIT_COUNT: u32 = 1;
-const STEP_WAIT: u32 = 16 / 3;
+const UNIT_COUNT: u32 = 2;
+const STEP_WAIT: u32 = 32 / 3;
 
-pub struct NewBorned {
+pub struct NewBorn {
     pub enemy_type: EnemyType,
     pub pos: Vector2D<i32>,
     pub angle: i32,
@@ -14,7 +14,7 @@ pub struct NewBorned {
     pub traj: Traj,
 }
 
-impl NewBorned {
+impl NewBorn {
     fn new(
         enemy_type: EnemyType,
         pos: Vector2D<i32>,
@@ -23,7 +23,7 @@ impl NewBorned {
         fi: FormationIndex,
         traj: Traj,
     ) -> Self {
-        Self { enemy_type, pos, angle, speed, fi, traj }
+        NewBorn { enemy_type, pos, angle, speed, fi, traj }
     }
 }
 
@@ -57,7 +57,6 @@ pub trait Accessor {
 
 pub struct AppearanceManager {
     stage: u16,
-    paused: bool,
     wait_stationary: bool,
     wait: u32,
     unit: u32,
@@ -70,9 +69,8 @@ impl Default for AppearanceManager {
     fn default() -> Self {
         Self {
             stage: 0,
-            paused: false,
             wait_stationary: false,
-            wait: 0,
+            wait: 30,
             unit: 0,
             time: 0,
             done: false,
@@ -82,7 +80,7 @@ impl Default for AppearanceManager {
 }
 
 impl AppearanceManager {
-    pub fn update<A: Accessor>(&mut self, accessor: &A) -> Option<Vec<NewBorned>> {
+    pub fn update<A: Accessor>(&mut self, accessor: &A) -> Option<Vec<NewBorn>> {
         if self.done {
             return None;
         }
@@ -90,42 +88,45 @@ impl AppearanceManager {
         self.update_main(accessor)
     }
 
-    fn update_main<A: Accessor>(&mut self, accessor: &A) -> Option<Vec<NewBorned>> {
+    fn update_main<A: Accessor>(&mut self, accessor: &A) -> Option<Vec<NewBorn>> {
         if self.wait > 0 {
             self.wait -= 1;
             return None;
         }
 
-        if !self.paused {
-            if self.wait_stationary {
-                if !accessor.is_stationary() {
-                    return None;
-                }
-                self.wait_stationary = false;
-            }
-            if self.unit >= UNIT_COUNT {
-                self.done = true;
+        if self.wait_stationary {
+            if !accessor.is_stationary() {
                 return None;
             }
+            self.wait_stationary = false;
+        }
+        if self.unit >= UNIT_COUNT {
+            self.done = true;
+            return None;
+        }
 
-            if self.orders.is_empty() {
-                self.set_orders();
-            }
+        if self.orders.is_empty() {
+            self.set_orders();
+            self.time = 0;
         }
 
         if self.orders.is_empty() {
             return None;
         }
 
-        let mut new_borns: Vec<NewBorned> = Vec::new();
-        while !self.orders.is_empty() {
+        let mut new_borns: Vec<NewBorn> = Vec::new();
+        while self.orders[0].time == self.time {
             let p = &self.orders[0];
             let traj = Traj::new(p.traj_table, &p.offset, p.flip_x, p.fi);
 
-            let enemy = NewBorned::new(p.enemy_type, Vector2D::new(0, 0), 0, 0, p.fi, traj);
+            let enemy = NewBorn::new(p.enemy_type, Vector2D::new(0, 0), 0, 0, p.fi, traj);
             new_borns.push(enemy);
 
             self.orders.remove(0);
+
+            if self.orders.is_empty() {
+                break;
+            }
         }
 
         self.time += 1;
@@ -133,7 +134,7 @@ impl AppearanceManager {
             self.orders.clear();
             self.unit += 1;
             self.wait_stationary = true;
-            self.wait = 10;
+            self.wait = 200;
             self.time = 0;
         }
 
@@ -145,27 +146,11 @@ impl AppearanceManager {
     }
 
     fn create_orders(&mut self) {
-        let base = self.unit * 8;
+        let base = self.unit * 4;
         let entry = &UNIT_TABLE[(self.stage as usize) % UNIT_TABLE.len()][self.unit as usize];
         match entry.pat {
-            0 => {
-                let flip = if entry.flip_x { 1 } else { 0 };
-                for count in 0..8 {
-                    let side = count & 1;
-                    let fi = ORDER[(base + (count / 2 + (side ^ flip) * 4)) as usize];
-                    let info = self.create_info(fi, count);
-                    self.orders.push(info);
-                }
-            }
-            1 => {
-                for count in 0..8 {
-                    let fi = ORDER[(base + (count / 2 + (count & 1) * 4)) as usize];
-                    let info = self.create_info(fi, count);
-                    self.orders.push(info);
-                }
-            }
-            2 => {
-                for count in 0..8 {
+            0 | 1 | 2 => {
+                for count in 0..4 {
                     let fi = ORDER[(base + count) as usize];
                     let info = self.create_info(fi, count);
                     self.orders.push(info);
@@ -173,7 +158,7 @@ impl AppearanceManager {
             }
             3 => {
                 let flip = if entry.flip_x { 1 } else { 0 };
-                for count in 0..8 {
+                for count in 0..4 {
                     let side = count & 1;
                     let fi = ORDER[(base + (count / 2 + (side ^ flip) * 4)) as usize];
                     let info = self.create_info(fi, count);
@@ -202,7 +187,7 @@ impl AppearanceManager {
                     time,
                     enemy_type,
                     fi,
-                    Vector2D::new(8 * ONE, 0),
+                    Vector2D::new(16 * ONE, 0),
                     entry.flip_x,
                     entry.table,
                 )
@@ -219,7 +204,7 @@ impl AppearanceManager {
                     time,
                     enemy_type,
                     fi,
-                    Vector2D::new(flag * 8 * ONE, 0),
+                    Vector2D::new(flag * 16 * ONE, 0),
                     entry.flip_x,
                     entry.table,
                 )
