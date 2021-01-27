@@ -15,11 +15,7 @@ const FAIRY_SPRITES: [&str; 4] = ["enemy0", "enemy1", "enemy2", "enemy3"];
 impl EnemyBase {
     pub fn new(traj: Option<Traj>) -> Self {
         Self {
-            traj,
-            shot_wait: None,
-            target_pos: Vector2D::new(0, 0),
-            count: 0,
-            attack_frame_count: 0,
+            traj
         }
     }
 
