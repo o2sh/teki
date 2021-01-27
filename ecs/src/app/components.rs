@@ -24,11 +24,7 @@ pub struct MyShot {
 }
 
 pub struct EnemyBase {
-    pub traj: Option<Traj>,
-    pub shot_wait: Option<u32>,
-    pub count: u32,
-    pub attack_frame_count: u32,
-    pub target_pos: Vector2D<i32>,
+    pub traj: Option<Traj>
 }
 
 #[derive(PartialEq)]
