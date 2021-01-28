@@ -5,7 +5,6 @@ use crate::app::system_item::spawn_item;
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
-use teki_common::game::Direction;
 use teki_common::utils::{
     collision::CollBox,
     consts::*,
@@ -14,21 +13,16 @@ use teki_common::utils::{
 };
 use vector2d::Vector2D;
 
-const STILL: [&str; 8] =
-    ["reimu0", "reimu1", "reimu2", "reimu3", "reimu4", "reimu5", "reimu6", "reimu7"];
-const TO_THE_LEFT: [&str; 8] =
-    ["reimu8", "reimu9", "reimu10", "reimu11", "reimu12", "reimu13", "reimu14", "reimu15"];
-const TO_THE_RIGHT: [&str; 8] =
-    ["reimu16", "reimu17", "reimu18", "reimu19", "reimu20", "reimu21", "reimu22", "reimu23"];
+pub const ANIMATION_SPAN: u32 = 5;
+
+pub const SPRITE_TABLE: [[&str; 8]; 3] = [
+    ["reimu0", "reimu1", "reimu2", "reimu3", "reimu4", "reimu5", "reimu6", "reimu7"],
+    ["reimu8", "reimu9", "reimu10", "reimu11", "reimu12", "reimu13", "reimu14", "reimu15"],
+    ["reimu16", "reimu17", "reimu18", "reimu19", "reimu20", "reimu21", "reimu22", "reimu23"],
+];
 
 pub fn new_player() -> Player {
-    Player {
-        shot_enable: false,
-        next_shoot_time: 0,
-        prev_direction: None,
-        curr_direction: None,
-        curr_frame: 0,
-    }
+    Player { shot_enable: false, next_shoot_time: 0, index_x: 0, index_y: 0 }
 }
 
 pub fn enable_player_shot(player: &mut Player, enable: bool) {
@@ -50,32 +44,22 @@ pub fn move_player(
     entity: &Entity,
     #[resource] pad: &Pad,
     world: &mut SubWorld,
-    #[resource] game_info: &mut GameInfo,
 ) {
-    do_move_player(player, pad, *entity, world, game_info);
+    do_move_player(player, pad, *entity, world);
 }
 
-pub fn do_move_player(
-    player: &mut Player,
-    pad: &Pad,
-    entity: Entity,
-    world: &mut SubWorld,
-    game_info: &mut GameInfo,
-) {
+pub fn do_move_player(player: &mut Player, pad: &Pad, entity: Entity, world: &mut SubWorld) {
     let position = <&mut Posture>::query().get_mut(world, entity).unwrap();
     let pos = &mut position.0;
-    player.prev_direction = player.curr_direction.clone();
-    player.curr_direction = None;
-    if game_info.frame_count % 2 == 0 {
-        player.curr_frame += 1
-    }
     if pad.is_pressed(PadBit::L) {
         pos.x -= PLAYER_SPEED;
         let left = 16 * ONE;
         if pos.x < left {
             pos.x = left;
         }
-        player.curr_direction = Some(Direction::Left)
+
+        player.index_y = 1;
+        player.index_x = 7;
     }
     if pad.is_pressed(PadBit::R) {
         pos.x += PLAYER_SPEED;
@@ -84,7 +68,8 @@ pub fn do_move_player(
             pos.x = right;
         }
 
-        player.curr_direction = Some(Direction::Right)
+        player.index_y = 2;
+        player.index_x = 7;
     }
 
     if pad.is_pressed(PadBit::U) {
@@ -102,10 +87,10 @@ pub fn do_move_player(
         }
     }
 
-    match (player.prev_direction, player.curr_direction) {
-        (Some(_), Some(_)) => (),
-        (None, None) => (),
-        _ => player.curr_frame = 0,
+    if pad.is_pressed(PadBit::L) && pad.is_pressed(PadBit::R)
+        || !pad.is_pressed(PadBit::L) && !pad.is_pressed(PadBit::R)
+    {
+        player.index_y = 0;
     }
 }
 
@@ -223,27 +208,18 @@ pub fn animate_player(
     sprite: &mut SpriteDrawable,
     #[resource] game_info: &mut GameInfo,
 ) {
-    do_animate_player(player, sprite, game_info.frame_count_over_5);
+    do_animate_player(player, sprite, game_info.frame_count);
 }
 
 pub fn do_animate_player(player: &mut Player, sprite: &mut SpriteDrawable, frame_count: u32) {
-    sprite.sprite_name = match player.curr_direction {
-        Some(Direction::Left) => {
-            let idx = if player.curr_frame >= TO_THE_LEFT.len() {
-                TO_THE_LEFT.len() - 1
-            } else {
-                player.curr_frame
-            };
-            TO_THE_LEFT[idx]
+    if frame_count % ANIMATION_SPAN == 0 {
+        player.index_x += 1;
+        if player.index_x > 7 && player.index_y == 0 {
+            player.index_x = 0;
+        } else if player.index_x > 7 && player.index_y > 0 {
+            player.index_x = 4;
         }
-        Some(Direction::Right) => {
-            let idx = if player.curr_frame >= TO_THE_RIGHT.len() {
-                TO_THE_RIGHT.len() - 1
-            } else {
-                player.curr_frame
-            };
-            TO_THE_RIGHT[idx]
-        }
-        None => STILL[(frame_count % 7) as usize],
-    };
+
+        sprite.sprite_name = SPRITE_TABLE[player.index_y][player.index_x];
+    }
 }

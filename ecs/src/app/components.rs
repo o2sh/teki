@@ -1,5 +1,5 @@
 use legion::*;
-use teki_common::game::{Direction, EnemyType, FormationIndex, ItemType, Traj, RGBA};
+use teki_common::game::{EnemyType, FormationIndex, ItemType, Traj, RGBA};
 use vector2d::Vector2D;
 
 #[derive(Clone, Copy)]
@@ -37,9 +37,8 @@ pub enum EnemyState {
 pub struct Player {
     pub shot_enable: bool,
     pub next_shoot_time: u32,
-    pub prev_direction: Option<Direction>,
-    pub curr_direction: Option<Direction>,
-    pub curr_frame: usize,
+    pub index_x: usize,
+    pub index_y: usize,
 }
 
 pub struct Enemy {

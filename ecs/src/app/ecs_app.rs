@@ -63,7 +63,6 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
         renderer.load_textures(
             "assets/gfx",
             &[
-                "sanae.png",
                 "marisa.png",
                 "reimu.png",
                 "enemy.png",
@@ -80,7 +79,6 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
                 "items.png",
             ],
         );
-        renderer.load_sprite_sheet("assets/gfx/sanae.json");
         renderer.load_sprite_sheet("assets/gfx/marisa.json");
         renderer.load_sprite_sheet("assets/gfx/reimu.json");
         renderer.load_sprite_sheet("assets/gfx/enemy.json");
