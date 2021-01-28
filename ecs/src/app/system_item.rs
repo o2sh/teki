@@ -1,8 +1,4 @@
-use crate::app::{
-    components::*,
-    resources::*,
-    system_player::{pos_to_coll_box, Player},
-};
+use crate::app::{components::*, resources::*, system_player::pos_to_coll_box};
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;

@@ -14,9 +14,7 @@ const FAIRY_SPRITES: [&str; 4] = ["enemy0", "enemy1", "enemy2", "enemy3"];
 
 impl EnemyBase {
     pub fn new(traj: Option<Traj>) -> Self {
-        Self {
-            traj
-        }
+        Self { traj }
     }
 
     pub fn update_trajectory<A: EneBaseAccessorTrait>(

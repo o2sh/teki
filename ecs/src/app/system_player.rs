@@ -5,6 +5,7 @@ use crate::app::system_item::spawn_item;
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
+use teki_common::game::Direction;
 use teki_common::utils::{
     collision::CollBox,
     consts::*,
@@ -20,28 +21,18 @@ const TO_THE_LEFT: [&str; 8] =
 const TO_THE_RIGHT: [&str; 8] =
     ["reimu16", "reimu17", "reimu18", "reimu19", "reimu20", "reimu21", "reimu22", "reimu23"];
 
-#[derive(Copy, Clone, PartialEq)]
-pub enum Direction {
-    Left,
-    Right,
-}
-
-pub struct Player {
-    pub shot_enable: bool,
-    pub next_shoot_time: u32,
-    pub prev_direction: Option<Direction>,
-    pub curr_direction: Option<Direction>,
-    pub curr_frame: usize,
-}
-
 pub fn new_player() -> Player {
     Player {
-        shot_enable: true,
+        shot_enable: false,
         next_shoot_time: 0,
         prev_direction: None,
         curr_direction: None,
         curr_frame: 0,
     }
+}
+
+pub fn enable_player_shot(player: &mut Player, enable: bool) {
+    player.shot_enable = enable;
 }
 
 pub fn player_hit_box() -> HitBox {
@@ -129,10 +120,10 @@ pub fn fire_myshot(
     #[resource] game_info: &mut GameInfo,
     commands: &mut CommandBuffer,
 ) {
-    if pad.is_pressed(PadBit::Z) {
+    if pad.is_pressed(PadBit::Z) && can_player_fire(player) {
         if player.next_shoot_time < game_info.frame_count {
             sound_queue.push_play(CH_SHOT, SE_SHOT);
-            do_fire_myshot(player, position, *entity, commands);
+            do_fire_myshot(position, *entity, commands);
             player.next_shoot_time = game_info.frame_count + SHOT_DELAY;
         }
     }
@@ -144,21 +135,14 @@ pub fn can_player_fire(player: &Player) -> bool {
     }
     true
 }
-pub fn do_fire_myshot(
-    player: &Player,
-    position: &Posture,
-    entity: Entity,
-    commands: &mut CommandBuffer,
-) {
-    if can_player_fire(player) {
-        let pos = Posture(Vector2D::new(position.0.x, position.0.y - 16 * ONE), 0);
-        commands.push((
-            MyShot { player_entity: entity },
-            pos,
-            HitBox { size: Vector2D::new(10, 20) },
-            SpriteDrawable { sprite_name: BULLET_SPRITE, offset: Vector2D::new(-8, -32) },
-        ));
-    }
+pub fn do_fire_myshot(position: &Posture, entity: Entity, commands: &mut CommandBuffer) {
+    let pos = Posture(Vector2D::new(position.0.x, position.0.y - 16 * ONE), 0);
+    commands.push((
+        MyShot { player_entity: entity },
+        pos,
+        HitBox { size: Vector2D::new(10, 20) },
+        SpriteDrawable { sprite_name: BULLET_SPRITE, offset: Vector2D::new(-8, -32) },
+    ));
 }
 
 #[system(for_each)]

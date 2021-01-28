@@ -1,3 +1,7 @@
+use crate::app::components::Player;
+use crate::app::system_player::enable_player_shot;
+use legion::world::SubWorld;
+use legion::*;
 use teki_common::game::formation_table::*;
 use teki_common::game::{FormationIndex, RGBA};
 use teki_common::traits::{Audio, Renderer};
@@ -60,7 +64,7 @@ impl GameInfo {
         self.score += add;
     }
 
-    pub fn update(&mut self, stage_indicator: &mut StageIndicator) {
+    pub fn update(&mut self, stage_indicator: &mut StageIndicator, world: &mut SubWorld) {
         self.frame_count = self.frame_count.wrapping_add(1);
 
         if self.frame_count % 5 == 0 {
@@ -83,6 +87,12 @@ impl GameInfo {
                 self.count += 1;
                 if self.count >= 180 as u32 {
                     self.game_state = GameState::Playing;
+                }
+
+                if self.count >= 30 as u32 {
+                    for player in <&mut Player>::query().iter_mut(world) {
+                        enable_player_shot(player, true);
+                    }
                 }
             }
             _ => {}

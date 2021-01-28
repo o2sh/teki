@@ -1,15 +1,18 @@
 use crate::app::components::*;
 use crate::app::resources::{GameInfo, GameState, StageIndicator};
+use legion::world::SubWorld;
 use legion::*;
 use teki_common::traits::Renderer;
 use teki_common::utils::{consts::*, math::*};
 
 #[system]
+#[write_component(Player)]
 pub fn update_game_info(
     #[resource] game_info: &mut GameInfo,
     #[resource] stage_indicator: &mut StageIndicator,
+    world: &mut SubWorld,
 ) {
-    game_info.update(stage_indicator);
+    game_info.update(stage_indicator, world);
 }
 
 pub fn draw_game<R: Renderer>(world: &World, resources: &Resources, renderer: &mut R) {

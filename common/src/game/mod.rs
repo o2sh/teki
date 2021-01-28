@@ -9,6 +9,12 @@ pub use self::appearance_manager::AppearanceManager;
 pub use self::traj::Traj;
 pub use self::traj_command::TrajCommand;
 
+#[derive(Copy, Clone, PartialEq)]
+pub enum Direction {
+    Left,
+    Right,
+}
+
 #[derive(Clone, Copy, PartialEq)]
 pub enum EnemyType {
     Fairy,

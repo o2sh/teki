@@ -177,7 +177,7 @@ struct Title;
 
 impl Title {
     fn update<A: Audio>(&mut self, pad: &Pad, audio: &mut A) -> Option<bool> {
-        if pad.is_pressed(PadBit::A) {
+        if pad.is_pressed(PadBit::Z) {
             audio.play_sound(CH_KILL, SE_OK);
             return Some(true);
         }
@@ -198,7 +198,7 @@ impl Title {
             false,
         );
 
-        let msg = "Press space to start";
+        let msg = "Press z to start";
         renderer.draw_str(
             RE_FONT,
             50,
@@ -220,7 +220,7 @@ struct CharacterSelect {
 impl CharacterSelect {
     fn update<A: Audio>(&mut self, pad: &Pad, audio: &mut A) -> Option<bool> {
         self.count += 1;
-        if pad.is_trigger(PadBit::A) {
+        if pad.is_trigger(PadBit::Z) {
             audio.play_sound(CH_KILL, SE_OK);
             return Some(true);
         }
