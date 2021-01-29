@@ -13,7 +13,7 @@ pub fn animate_avatar(
 ) {
     let player = <&mut Player>::query().iter_mut(world).next();
     if let Some(p) = player {
-        if pad.is_pressed(PadBit::Z) {
+        if pad.is_pressed(PadBit::Z) && p.shot_enable {
             sprite.sprite_name = p.data.attack_face;
         } else {
             sprite.sprite_name = p.data.neutral_face;
