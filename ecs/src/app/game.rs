@@ -22,6 +22,7 @@ impl Game {
             .add_system(fire_myshot_system())
             .add_system(move_myshot_system())
             .add_system(run_appearance_enemy_system())
+            .flush()
             .add_system(animate_enemy_system())
             .add_system(animate_player_system())
             .add_system(animate_avatar_system())
@@ -97,7 +98,7 @@ impl Game {
             match game_info.game_state {
                 GameState::StartStage => {
                     if let Some(stage_indicator) = get_stage_indicator(&self.resources) {
-                        stage_indicator.draw(renderer, game_info.count);
+                        stage_indicator.draw(renderer, game_info.frame_count);
                     }
                 }
                 _ => {}

@@ -1,10 +1,11 @@
 use crate::utils::math::*;
 
 pub const BASE_VOLUME: f32 = 1.0 / 6.0;
-pub const CHANNEL_COUNT: u32 = 3;
-pub const CH_SHOT: u32 = 0;
-pub const CH_BG_MUSIC: u32 = 1;
+pub const CHANNEL_COUNT: u32 = 4;
+pub const CH_BG_MUSIC: u32 = 0;
+pub const CH_SHOT: u32 = 1;
 pub const CH_KILL: u32 = 2;
+pub const CH_ITEM: u32 = 3;
 
 pub const WINDOW_WIDTH: i32 = 700;
 pub const WINDOW_HEIGHT: i32 = 256 * 2;
@@ -35,8 +36,8 @@ pub const TEXT_STAGE_ALPHA: u8 = 255;
 
 pub const BASE_Y: i32 = 75;
 
-pub const BG1_TEXTURE: &str = "bg_grass";
-pub const BG3_TEXTURE: &str = "bg_ground";
+pub const BG1_TEXTURE: &str = "bg_ground";
+pub const BG3_TEXTURE: &str = "bg_grass";
 pub const BG2_TEXTURE: &str = "bg_water";
 
 pub const BG_MUSIC: &str = "stage01";

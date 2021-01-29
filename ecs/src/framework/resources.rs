@@ -38,26 +38,13 @@ impl SoundQueue {
 pub struct GameInfo {
     pub stage: u16,
     pub score: u32,
-    pub count: u32,
     pub game_state: GameState,
     pub frame_count: u32,
-    pub frame_count_over_2: u32,
-    pub frame_count_over_5: u32,
-    pub frame_count_over_10: u32,
 }
 
 impl GameInfo {
     pub fn new() -> Self {
-        GameInfo {
-            stage: 0,
-            score: 0,
-            count: 0,
-            game_state: GameState::StartStage,
-            frame_count: 0,
-            frame_count_over_2: 0,
-            frame_count_over_5: 0,
-            frame_count_over_10: 0,
-        }
+        GameInfo { stage: 0, score: 0, game_state: GameState::StartStage, frame_count: 0 }
     }
 
     pub fn add_score(&mut self, add: u32) {
@@ -67,29 +54,16 @@ impl GameInfo {
     pub fn update(&mut self, stage_indicator: &mut StageIndicator, world: &mut SubWorld) {
         self.frame_count = self.frame_count.wrapping_add(1);
 
-        if self.frame_count % 5 == 0 {
-            self.frame_count_over_5 = self.frame_count_over_5.wrapping_add(1);
-        }
-
-        if self.frame_count % 10 == 0 {
-            self.frame_count_over_10 = self.frame_count_over_10.wrapping_add(1);
-        }
-
-        if self.frame_count % 2 == 0 {
-            self.frame_count_over_2 = self.frame_count_over_2.wrapping_add(1);
-        }
-
         match self.game_state {
             GameState::StartStage => {
-                if self.count == 0 {
+                if self.frame_count == 1 {
                     stage_indicator.set_stage();
                 }
-                self.count += 1;
-                if self.count >= 180 as u32 {
+                if self.frame_count >= 180 as u32 {
                     self.game_state = GameState::Playing;
                 }
 
-                if self.count >= 30 as u32 {
+                if self.frame_count >= 30 as u32 {
                     for player in <&mut Player>::query().iter_mut(world) {
                         enable_player_shot(player, true);
                     }

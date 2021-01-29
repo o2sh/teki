@@ -186,6 +186,7 @@ pub fn delete_entity(entity: Entity, commands: &mut CommandBuffer) {
 pub fn shot_collision_check(
     world: &mut SubWorld,
     #[resource] sound_queue: &mut SoundQueue,
+    #[resource] game_info: &GameInfo,
     commands: &mut CommandBuffer,
 ) {
     for (_, shot_pos, shot_hit_box, shot_entity) in
@@ -203,7 +204,7 @@ pub fn shot_collision_check(
                 delete_entity(*enemy_entity, commands);
                 create_enemy_explosion_effect(&enemy_pos.0, 1, commands);
                 sound_queue.push_play(CH_KILL, SE_KILL);
-                spawn_item(&enemy_pos.0, commands);
+                spawn_item(&enemy_pos.0, game_info.frame_count, commands);
             }
         }
     }

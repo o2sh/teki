@@ -11,6 +11,7 @@ use teki_common::utils::math::*;
 use vector2d::Vector2D;
 
 const FAIRY_SPRITES: [&str; 4] = ["enemy0", "enemy1", "enemy2", "enemy3"];
+const ANIMATION_SPAN: u32 = 10;
 
 impl EnemyBase {
     pub fn new(traj: Option<Traj>) -> Self {
@@ -180,14 +181,16 @@ pub fn animate_enemy(
     sprite: &mut SpriteDrawable,
     #[resource] game_info: &mut GameInfo,
 ) {
-    do_animate_enemy(enemy.enemy_type, sprite, game_info.frame_count_over_10);
+    do_animate_enemy(enemy.enemy_type, sprite, game_info.frame_count);
 }
 
 pub fn do_animate_enemy(enemy_type: EnemyType, sprite: &mut SpriteDrawable, frame_count: u32) {
-    let pat = frame_count % 4;
-    sprite.sprite_name = match enemy_type {
-        EnemyType::Fairy => FAIRY_SPRITES[pat as usize],
-    };
+    if frame_count % ANIMATION_SPAN == 0 {
+        let pat = frame_count % 4;
+        sprite.sprite_name = match enemy_type {
+            EnemyType::Fairy => FAIRY_SPRITES[pat as usize],
+        };
+    }
 }
 
 pub fn forward(posture: &mut Posture, speed: &Speed) {

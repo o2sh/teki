@@ -19,7 +19,7 @@ pub struct UnitTableEntry<'a> {
 counted_array!(pub const UNIT_TABLE: [[UnitTableEntry; 5]; _] = [
     [
         UnitTableEntry { pat: 0, table: &COMMAND_TABLE1, flip_x: false },
-        UnitTableEntry { pat: 1, table: &COMMAND_TABLE2, flip_x: false },
+        UnitTableEntry { pat: 1, table: &COMMAND_TABLE3, flip_x: false },
         UnitTableEntry { pat: 1, table: &COMMAND_TABLE3, flip_x: true },
         UnitTableEntry { pat: 2, table: &COMMAND_TABLE1, flip_x: false },
         UnitTableEntry { pat: 2, table: &COMMAND_TABLE1, flip_x: true },

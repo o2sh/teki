@@ -53,6 +53,7 @@ pub struct Enemy {
 
 pub struct Item {
     pub item_type: ItemType,
+    pub birth_time: u32,
 }
 
 pub struct HitBox {

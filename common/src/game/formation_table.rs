@@ -3,7 +3,7 @@ use lazy_static::lazy_static;
 
 use crate::utils::consts::*;
 
-pub const BASE_Y: i32 = 24;
+pub const BASE_Y: i32 = 30;
 
 lazy_static! {
     pub static ref BASE_X_TABLE: [i32; X_COUNT] = {
