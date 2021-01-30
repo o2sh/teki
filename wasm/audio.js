@@ -20,15 +20,15 @@ class AudioManager {
   }
 
 
-  playSe(channel, filename) {
-    this.playMusic(channel, filename, false)
+  playSe(channel, filename, volume) {
+    this.playMusic(channel, filename, volume, false)
   }
 
-  playLoop(channel, filename) {
-    this.playMusic(channel, filename, true)
+  playLoop(channel, filename, volume) {
+    this.playMusic(channel, filename, volume, true)
   }
 
-  playMusic(channel, filename, isLoop) {
+  playMusic(channel, filename, volume, isLoop) {
     if (!this.enabled)
       return
 
@@ -38,15 +38,18 @@ class AudioManager {
           this.channels[channel].stop()
         }
 
-        const source = this.context.createBufferSource()
-        source.connect(this.context.destination)
-        this.channels[channel] = source
+        const gainNode = this.context.createGain()
+        gainNode.gain.value = volume
+        gainNode.connect(this.context.destination)
 
+        const source = this.context.createBufferSource()
+        this.channels[channel] = source
         source.buffer = this.audios[filename]
-        source.start(0)
+        source.connect(gainNode)
         if (isLoop) {
           source.loop = true
         }
+        source.start(0)
       }
     }
   }

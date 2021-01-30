@@ -46,6 +46,7 @@ pub struct Player {
 pub struct Enemy {
     pub enemy_type: EnemyType,
     pub formation_index: FormationIndex,
+    pub index_x: usize,
     pub state: EnemyState,
     pub base: EnemyBase,
     pub is_formation: bool,

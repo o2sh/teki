@@ -22,7 +22,7 @@ pub enum VKey {
 fn main() -> Result<(), String> {
     App::new(crate_name!()).version(crate_version!()).about(crate_description!());
 
-    let audio = SdlAudio::new(CHANNEL_COUNT, BASE_VOLUME);
+    let audio = SdlAudio::new(CHANNEL_COUNT);
 
     let timer = StdTimer::new();
     let mut app = SdlApp::new(EcsApp::new(audio, timer))?;

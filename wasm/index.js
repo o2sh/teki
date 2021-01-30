@@ -20,12 +20,12 @@ const ICON_SOUND_OFF = 'assets/images/sound_off.svg'
 
 const CANVAS_ID = 'mycanvas'
 
-window.play_se = function play_se(channel, filename) {
-  audioManager.playSe(channel, filename)
+window.play_se = function play_se(channel, filename, volume) {
+  audioManager.playSe(channel, filename, volume)
 }
 
-window.play_loop = function play_loop(channel, filename) {
-  audioManager.playLoop(channel, filename)
+window.play_loop = function play_loop(channel, filename, volume) {
+  audioManager.playLoop(channel, filename, volume)
 }
 
 window.wait_for_loading = function wait_for_loading(filename) {
@@ -54,7 +54,7 @@ function setupSoundButton() {
   const toggleSound = () => {
     audioManager.toggleEnabled()
     if (audioManager.enabled)
-      audioManager.playSe(0, ENABLE_AUDIO)
+      audioManager.playSe(0, ENABLE_AUDIO, 0.05)
     document.getElementById('sound-icon').src = audioManager.enabled ? ICON_SOUND_ON : ICON_SOUND_OFF
   }
   const soundIconHolder = document.getElementById('sound-icon-holder')

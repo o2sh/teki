@@ -111,6 +111,7 @@ pub fn run_appearance_enemy(
             let enemy = Enemy {
                 enemy_type: e.enemy_type,
                 formation_index: e.fi,
+                index_x: 0,
                 state: EnemyState::Appearance,
                 base,
                 is_formation: false,
@@ -181,14 +182,17 @@ pub fn animate_enemy(
     sprite: &mut SpriteDrawable,
     #[resource] game_info: &mut GameInfo,
 ) {
-    do_animate_enemy(enemy.enemy_type, sprite, game_info.frame_count);
+    do_animate_enemy(enemy, sprite, game_info.frame_count);
 }
 
-pub fn do_animate_enemy(enemy_type: EnemyType, sprite: &mut SpriteDrawable, frame_count: u32) {
+pub fn do_animate_enemy(enemy: &mut Enemy, sprite: &mut SpriteDrawable, frame_count: u32) {
     if frame_count % ANIMATION_SPAN == 0 {
-        let pat = frame_count % 4;
-        sprite.sprite_name = match enemy_type {
-            EnemyType::Fairy => FAIRY_SPRITES[pat as usize],
+        enemy.index_x += 1;
+        if enemy.index_x > 3 {
+            enemy.index_x = 0;
+        }
+        sprite.sprite_name = match enemy.enemy_type {
+            EnemyType::Fairy => FAIRY_SPRITES[enemy.index_x],
         };
     }
 }
