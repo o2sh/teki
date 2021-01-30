@@ -16,7 +16,7 @@ pub const GAME_WIDTH: i32 = 512;
 pub const GAME_HEIGHT: i32 = 256 * 2;
 
 pub const X_COUNT: usize = 10;
-pub const Y_COUNT: usize = 6;
+pub const Y_COUNT: usize = 10;
 
 pub const CENTER_X: i32 = GAME_WIDTH * ONE / 2;
 pub const PLAYER_Y: i32 = (GAME_HEIGHT - 96) * ONE;

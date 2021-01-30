@@ -3,7 +3,7 @@ use teki_common::game::{EnemyType, FormationIndex, ItemType, PlayerData, Traj, R
 use vector2d::Vector2D;
 
 #[derive(Clone, Copy)]
-pub struct Posture(pub Vector2D<i32>, pub i32);
+pub struct Posture(pub Vector2D<i32>, pub i32, pub i32);
 
 pub struct Speed(pub i32, pub i32);
 

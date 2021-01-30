@@ -27,7 +27,7 @@ impl EnemyBase {
         if let Some(traj) = &mut self.traj {
             let cont = traj.update(&*accessor.traj_accessor());
             posture.0 = traj.pos();
-            posture.1 = traj.angle;
+            posture.2 = traj.angle;
             vel.0 = traj.speed;
             vel.1 = traj.vangle;
 
@@ -116,7 +116,7 @@ pub fn run_appearance_enemy(
                 base,
                 is_formation: false,
             };
-            let posture = Posture(e.pos, 0);
+            let posture = Posture(e.pos, 0, 0);
             let speed = Speed(0, 0);
             let hit_box = HitBox { size: Vector2D::new(32, 32) };
             let drawable = SpriteDrawable { sprite_name, offset: Vector2D::new(-16, -16) };
@@ -198,8 +198,8 @@ pub fn do_animate_enemy(enemy: &mut Enemy, sprite: &mut SpriteDrawable, frame_co
 }
 
 pub fn forward(posture: &mut Posture, speed: &Speed) {
-    posture.0 += calc_velocity(posture.1 + speed.1 / 2, speed.0);
-    posture.1 += speed.1;
+    posture.0 += calc_velocity(posture.2 + speed.1 / 2, speed.0);
+    posture.2 += speed.1;
 }
 
 pub fn move_to_formation(
@@ -210,7 +210,7 @@ pub fn move_to_formation(
 ) -> bool {
     let target = formation.pos(fi);
     let pos = &mut posture.0;
-    let angle = &mut posture.1;
+    let angle = &mut posture.2;
     let spd = &mut speed.0;
     let vangle = &mut speed.1;
     let diff = &target - &pos;

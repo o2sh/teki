@@ -24,7 +24,7 @@ pub fn spawn_item(pos: &Vector2D<i32>, frame_count: u32, commands: &mut CommandB
     };
     commands.push((
         Item { item_type, birth_time: frame_count },
-        Posture(pos.clone(), 0),
+        Posture(pos.clone(), 0, 0),
         hit_box,
         drawable,
     ));

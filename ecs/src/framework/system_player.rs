@@ -132,7 +132,7 @@ pub fn do_fire_myshot(
     entity: Entity,
     commands: &mut CommandBuffer,
 ) {
-    let pos = Posture(Vector2D::new(position.0.x, position.0.y - 16 * ONE), 0);
+    let pos = Posture(Vector2D::new(position.0.x, position.0.y - 16 * ONE), 0, 0);
     commands.push((
         MyShot { player_entity: entity },
         pos,

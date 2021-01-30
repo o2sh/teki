@@ -46,6 +46,7 @@ impl Game {
                     PLAYER_Y - 25 * ONE,
                 ),
                 0,
+                0,
             ),
             SpriteDrawable {
                 sprite_name: player.data.neutral_face,
@@ -55,7 +56,7 @@ impl Game {
 
         world.push((
             player,
-            Posture(Vector2D::new(CENTER_X, PLAYER_Y), 0),
+            Posture(Vector2D::new(CENTER_X, PLAYER_Y), 0, 0),
             player_hit_box(),
             player_sprite,
         ));

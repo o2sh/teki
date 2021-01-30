@@ -70,7 +70,7 @@ pub fn create_enemy_explosion_effect(
     let sprite_name = anime_table[0];
     let offset = Vector2D::new(-32, -32);
     commands.push((
-        Posture(pos.clone(), 0),
+        Posture(pos.clone(), 0, 0),
         new_seqanime(anime_table, offset, ENEMY_EXPLOSION_FRAME, delay),
         SpriteDrawable { sprite_name, offset },
     ));
