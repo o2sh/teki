@@ -1,5 +1,5 @@
 use crate::framework::components::*;
-use crate::framework::resources::{Formation, GameInfo};
+use crate::framework::resources::{EneShotSpawner, Formation, GameInfo};
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
@@ -8,6 +8,7 @@ use teki_common::game::{
     AppearanceManager, EnemyType, FormationIndex, Traj,
 };
 use teki_common::utils::math::*;
+use teki_common::utils::consts::*;
 use vector2d::Vector2D;
 
 const FAIRY_SPRITES: [&str; 4] = ["enemy0", "enemy1", "enemy2", "enemy3"];
@@ -15,7 +16,7 @@ const ANIMATION_SPAN: u32 = 10;
 
 impl EnemyBase {
     pub fn new(traj: Option<Traj>) -> Self {
-        Self { traj }
+        Self { traj, attack_frame_count: 0 }
     }
 
     pub fn update_trajectory<A: EneBaseAccessorTrait>(
@@ -38,6 +39,30 @@ impl EnemyBase {
         }
         false
     }
+
+    pub fn update_attack<A: EneBaseAccessorTrait>(
+        &mut self,
+        pos: &Vector2D<i32>,
+        shot_enable: bool,
+        accessor: &mut A,
+    ) -> bool {
+        self.attack_frame_count += 1;
+
+        let stage_no = accessor.get_stage_no();
+        let shot_count = std::cmp::min(2 + stage_no / 8, 5) as u32;
+        let shot_interval = 20 - shot_count * 2;
+
+        if self.attack_frame_count <= shot_interval * shot_count
+            && self.attack_frame_count % shot_interval == 0
+        {
+            if shot_enable {
+                accessor.fire_shot(pos);
+            }
+            true
+        } else {
+            false
+        }
+    }
 }
 
 struct SysAppearanceManagerAccessor<'a, 'b>(&'a mut SubWorld<'b>);
@@ -50,20 +75,30 @@ impl<'a, 'b> AppearanceManagerAccessor for SysAppearanceManagerAccessor<'a, 'b> 
 
 pub struct EneBaseAccessorImpl<'l> {
     pub formation: &'l Formation,
+    pub eneshot_spawner: &'l mut EneShotSpawner,
     pub stage_no: u16,
 }
 
 impl<'l> EneBaseAccessorImpl<'l> {
-    pub fn new(formation: &'l Formation, stage_no: u16) -> Self {
-        Self { formation, stage_no }
+    pub fn new(
+        formation: &'l Formation,
+        eneshot_spawner: &'l mut EneShotSpawner,
+        stage_no: u16,
+    ) -> Self {
+        Self { formation, eneshot_spawner, stage_no }
     }
 }
 pub trait EneBaseAccessorTrait {
+    fn fire_shot(&mut self, pos: &Vector2D<i32>);
     fn traj_accessor<'a>(&'a mut self) -> Box<dyn TrajAccessor + 'a>;
     fn get_stage_no(&self) -> u16;
 }
 
 impl<'a> EneBaseAccessorTrait for EneBaseAccessorImpl<'a> {
+    fn fire_shot(&mut self, pos: &Vector2D<i32>) {
+        self.eneshot_spawner.push(pos);
+    }
+
     fn traj_accessor<'b>(&'b mut self) -> Box<dyn TrajAccessor + 'b> {
         Box::new(TrajAccessorImpl { formation: self.formation, stage_no: self.stage_no })
     }
@@ -137,9 +172,10 @@ pub fn move_enemy(
     entity: &Entity,
     world: &mut SubWorld,
     #[resource] enemy_formation: &mut Formation,
+    #[resource] eneshot_spawner: &mut EneShotSpawner,
     #[resource] game_info: &mut GameInfo,
 ) {
-    do_move_enemy(*entity, enemy, speed, enemy_formation, game_info, world)
+    do_move_enemy(*entity, enemy, speed, enemy_formation, game_info, eneshot_spawner, world)
 }
 
 fn do_move_enemy(
@@ -148,11 +184,13 @@ fn do_move_enemy(
     speed: &mut Speed,
     enemy_formation: &Formation,
     game_info: &mut GameInfo,
+    eneshot_spawner: &mut EneShotSpawner,
     world: &mut SubWorld,
 ) {
     match enemy.state {
         EnemyState::Appearance => {
-            let mut accessor = EneBaseAccessorImpl::new(enemy_formation, game_info.stage);
+            let mut accessor =
+                EneBaseAccessorImpl::new(enemy_formation, eneshot_spawner, game_info.stage);
             let posture = <&mut Posture>::query().get_mut(world, entity).unwrap();
             if !enemy.base.update_trajectory(posture, speed, &mut accessor) {
                 enemy.base.traj = None;
@@ -172,6 +210,13 @@ fn do_move_enemy(
             let posture = <&mut Posture>::query().get_mut(world, entity).unwrap();
             let ang = ANGLE * ONE / 128;
             posture.1 -= clamp(posture.1, -ang, ang);
+            enemy.state = EnemyState::Attack(AttackType::Normal);
+        }
+        EnemyState::Attack(_) => {
+            let mut accessor =
+                EneBaseAccessorImpl::new(enemy_formation, eneshot_spawner, game_info.stage);
+            let posture = <&mut Posture>::query().get_mut(world, entity).unwrap();
+            enemy.base.update_attack(&posture.0, true, &mut accessor);
         }
     }
 }
@@ -229,4 +274,31 @@ pub fn move_to_formation(
         *vangle = 0;
         true
     }
+}
+
+
+#[system]
+#[read_component(Player)]
+#[read_component(Posture)]
+#[read_component(EneShot)]
+pub fn spawn_eneshot(world: &SubWorld, #[resource] eneshot_spawner: &mut EneShotSpawner, #[resource] game_info: &GameInfo, commands: &mut CommandBuffer) {
+    eneshot_spawner.update(game_info, world, commands);
+}
+
+#[system(for_each)]
+pub fn move_eneshot(shot: &mut EneShot, posture: &mut Posture, entity: &Entity, commands: &mut CommandBuffer) {
+    do_move_eneshot(shot, posture, *entity, commands);
+}
+
+
+pub fn do_move_eneshot(shot: &EneShot, posture: &mut Posture, entity: Entity, commands: &mut CommandBuffer) {
+    posture.0 += shot.0;
+    if out_of_screen(&posture.0) {
+        commands.remove(entity);
+    }
+}
+
+fn out_of_screen(pos: &Vector2D<i32>) -> bool {
+    pos.x < -16 * ONE || pos.x > (GAME_WIDTH + 16) * ONE ||
+        pos.y < -16 * ONE || pos.y > (GAME_HEIGHT + 16) * ONE
 }

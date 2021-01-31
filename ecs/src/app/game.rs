@@ -28,6 +28,8 @@ impl Game {
             .add_system(animate_avatar_system())
             .add_system(move_enemy_system())
             .add_system(move_item_system())
+            .add_system(spawn_eneshot_system())
+            .add_system(move_eneshot_system())
             .add_system(shot_collision_check_system())
             .add_system(item_collision_check_system())
             .add_system(move_sequential_anime_system())
@@ -66,6 +68,7 @@ impl Game {
         resources.insert(AppearanceManager::default());
         resources.insert(Formation::default());
         resources.insert(GameInfo::new());
+        resources.insert(EneShotSpawner::default());
         resources.insert(StageIndicator::default());
         Self { world, resources, schedule }
     }

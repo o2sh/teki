@@ -235,3 +235,8 @@ pub fn do_animate_player(player: &mut Player, sprite: &mut SpriteDrawable, frame
         sprite.sprite_name = player.data.animation_table[player.index_y][player.index_x];
     }
 }
+
+pub fn enum_player_target_pos(world: &SubWorld) -> Vector2D<i32> {
+    let (_, posture) = <(&Player, &Posture)>::query().iter(world).next().unwrap();
+    posture.0.clone()
+}

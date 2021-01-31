@@ -36,7 +36,6 @@ pub fn update_seqanime(
         }
         // Add SpriteDrawable component.
         if drawable.is_none() {
-            std::println!("{}", anime.sprites[0]);
             commands.add_component(
                 entity,
                 SpriteDrawable { sprite_name: anime.sprites[0], offset: anime.offset },

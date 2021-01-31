@@ -1,5 +1,7 @@
-use crate::framework::components::Player;
-use crate::framework::system_player::enable_player_shot;
+use crate::framework::components::EneShot;
+use crate::framework::components::*;
+use crate::framework::system_player::{enable_player_shot, enum_player_target_pos};
+use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
 use teki_common::game::formation_table::*;
@@ -183,4 +185,63 @@ impl Formation {
     pub fn pos(&self, formation_index: &FormationIndex) -> Vector2D<i32> {
         Vector2D::new(self.x_indices[formation_index.0], self.y_indices[formation_index.1])
     }
+}
+
+#[derive(Default)]
+pub struct EneShotSpawner {
+    queue: Vec<Vector2D<i32>>,
+    shot_paused_count: u32,
+}
+
+impl EneShotSpawner {
+    pub fn push(&mut self, pos: &Vector2D<i32>) {
+        self.queue.push(pos.clone());
+    }
+
+    pub fn update(&mut self, game_info: &GameInfo, world: &SubWorld, commands: &mut CommandBuffer) {
+        if self.shot_paused_count > 0 {
+            self.shot_paused_count -= 1;
+        } else {
+            self.process_queue(game_info, world, commands);
+        }
+        self.queue.clear();
+    }
+
+    pub fn pause_enemy_shot(&mut self, wait: u32) {
+        self.shot_paused_count = wait;
+    }
+
+    pub fn restart(&mut self) {
+        self.shot_paused_count = 0;
+        self.queue.clear();
+    }
+
+    fn process_queue(
+        &mut self,
+        game_info: &GameInfo,
+        world: &SubWorld,
+        commands: &mut CommandBuffer,
+    ) {
+        let shot_count = <&EneShot>::query().iter(world).count();
+        let target = enum_player_target_pos(world);
+        for (pos, _i) in self.queue.iter().zip(shot_count..MAX_ENE_SHOT_COUNT) {
+            let d = &target - pos;
+            let angle = atan2_lut(d.y, -d.x);
+            let limit = ANGLE * ONE * 30 / 360;
+            let angle = clamp(angle, -limit, limit);
+            let vel = calc_velocity(angle + ANGLE * ONE / 2, calc_ene_shot_speed(game_info.stage));
+            commands.push((
+                EneShot(vel),
+                Posture(*pos, 0, 0),
+                HitBox { size: Vector2D::new(16, 16) },
+                SpriteDrawable { sprite_name: "orb_green_full", offset: Vector2D::new(-8, -8) },
+            ));
+        }
+    }
+}
+
+fn calc_ene_shot_speed(stage: u16) -> i32 {
+    const MAX_STAGE: i32 = 64;
+    let per = std::cmp::min(stage as i32, MAX_STAGE) * ONE / MAX_STAGE;
+    (ENE_SHOT_SPEED2 - ENE_SHOT_SPEED1) * per / ONE + ENE_SHOT_SPEED1
 }

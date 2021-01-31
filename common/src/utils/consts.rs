@@ -37,6 +37,10 @@ pub const TEXT_STAGE_ALPHA: u8 = 255;
 
 pub const BASE_Y: i32 = 75;
 
+pub const MAX_ENE_SHOT_COUNT: usize = 12;
+pub const ENE_SHOT_SPEED1: i32 = 25 * ONE / 10;
+pub const ENE_SHOT_SPEED2: i32 = 40 * ONE / 10;
+
 pub const BG1_TEXTURE: &str = "bg_ground";
 pub const BG3_TEXTURE: &str = "bg_grass";
 pub const BG2_TEXTURE: &str = "bg_water";

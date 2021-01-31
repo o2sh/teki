@@ -23,8 +23,16 @@ pub struct MyShot {
     pub player_entity: Entity,
 }
 
+pub struct EneShot(pub Vector2D<i32>);
+
 pub struct EnemyBase {
     pub traj: Option<Traj>,
+    pub attack_frame_count: u32,
+}
+
+#[derive(Clone, Copy, PartialEq)]
+pub enum AttackType {
+    Normal,
 }
 
 #[derive(PartialEq)]
@@ -32,6 +40,7 @@ pub enum EnemyState {
     Appearance,
     MoveToFormation,
     Formation,
+    Attack(AttackType),
 }
 pub struct Avatar;
 
