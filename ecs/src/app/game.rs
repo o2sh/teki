@@ -31,8 +31,9 @@ impl Game {
             .add_system(spawn_eneshot_system())
             .add_system(move_eneshot_system())
             .add_system(player_shot_collision_check_system())
-            .add_system(item_collision_check_system())
+            .add_system(item_player_collision_check_system())
             .add_system(enemy_shot_collision_check_system())
+            .add_system(player_enemy_collision_check_system())
             .add_system(move_sequential_anime_system())
             .add_system(clear_text_system())
             .build();

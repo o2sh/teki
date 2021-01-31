@@ -1,7 +1,7 @@
 use crate::framework::components::*;
 use crate::framework::pos_to_coll_box;
 use crate::framework::resources::{GameInfo, SoundQueue, StageIndicator};
-use crate::framework::system_effect::create_enemy_explosion_effect;
+use crate::framework::system_effect::create_explosion_effect;
 use crate::framework::system_item::spawn_item;
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
@@ -207,7 +207,7 @@ pub fn player_shot_collision_check(
             if shot_coll_box.check_collision(&enemy_collbox) {
                 delete_entity(*shot_entity, commands);
                 delete_entity(*enemy_entity, commands);
-                create_enemy_explosion_effect(&enemy_pos.0, 1, commands);
+                create_explosion_effect(&enemy_pos.0, 1, commands);
                 sound_queue.push_play(CH_KILL, SE_KILL);
                 spawn_item(&enemy_pos.0, game_info.frame_count, commands);
             }
@@ -240,4 +240,36 @@ pub fn do_animate_player(player: &mut Player, sprite: &mut SpriteDrawable, frame
 pub fn enum_player_target_pos(world: &SubWorld) -> Vector2D<i32> {
     let (_, posture) = <(&Player, &Posture)>::query().iter(world).next().unwrap();
     posture.0.clone()
+}
+
+#[system]
+#[read_component(Enemy)]
+#[read_component(HitBox)]
+#[write_component(Posture)]
+#[write_component(Player)]
+pub fn player_enemy_collision_check(
+    world: &mut SubWorld,
+    #[resource] sound_queue: &mut SoundQueue,
+    commands: &mut CommandBuffer,
+) {
+    let mut colls: Vec<(Entity, Vector2D<i32>)> = Vec::new();
+
+    let (_, player_pos, player_hit_box, player_entity) =
+        <(&Player, &Posture, &HitBox, Entity)>::query().iter(world).next().unwrap();
+
+    let player_collbox = pos_to_coll_box(&player_pos.0, player_hit_box);
+    for (_enemy, enemy_pos, enemy_hit_box) in <(&Enemy, &Posture, &HitBox)>::query().iter(world) {
+        let enemy_collbox = CollBox { top_left: round_vec(&enemy_pos.0), size: enemy_hit_box.size };
+        if player_collbox.check_collision(&enemy_collbox) {
+            colls.push((*player_entity, player_pos.0));
+            break;
+        }
+    }
+
+    for (player_entity, pl_pos) in colls {
+        sound_queue.push_play(CH_SHOT, SE_DAMAGE);
+        create_explosion_effect(&pl_pos, 1, commands);
+        let posture = <&mut Posture>::query().get_mut(world, player_entity).unwrap();
+        posture.0 = Vector2D::new(CENTER_X, PLAYER_Y);
+    }
 }

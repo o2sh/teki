@@ -57,31 +57,16 @@ pub fn update_seqanime(
 
 pub const EXPLOSION_SPRITE_TABLE: [&str; 1] = ["shockwave0"];
 
-pub const ENEMY_EXPLOSION_FRAME: u32 = 0;
+pub const EXPLOSION_FRAME: u32 = 0;
 
-pub fn create_enemy_explosion_effect(
-    pos: &Vector2D<i32>,
-    delay: u32,
-    commands: &mut CommandBuffer,
-) {
+pub fn create_explosion_effect(pos: &Vector2D<i32>, delay: u32, commands: &mut CommandBuffer) {
     assert!(delay > 0);
     let anime_table = &EXPLOSION_SPRITE_TABLE;
     let sprite_name = anime_table[0];
     let offset = Vector2D::new(-32, -32);
     commands.push((
         Posture(pos.clone(), 0, 0),
-        new_seqanime(anime_table, offset, ENEMY_EXPLOSION_FRAME, delay),
-        SpriteDrawable { sprite_name, offset, alpha: 100 },
-    ));
-}
-
-pub fn create_player_explosion_effect(pos: &Vector2D<i32>, commands: &mut CommandBuffer) {
-    let anime_table = &EXPLOSION_SPRITE_TABLE;
-    let sprite_name = anime_table[0];
-    let offset = Vector2D::new(-32, -32);
-    commands.push((
-        Posture(pos.clone(), 0, 0),
-        new_seqanime(anime_table, offset, ENEMY_EXPLOSION_FRAME, 0),
+        new_seqanime(anime_table, offset, EXPLOSION_FRAME, delay),
         SpriteDrawable { sprite_name, offset, alpha: 100 },
     ));
 }

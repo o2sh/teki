@@ -1,7 +1,7 @@
 use crate::framework::components::*;
 use crate::framework::pos_to_coll_box;
 use crate::framework::resources::{EneShotSpawner, Formation, GameInfo, SoundQueue};
-use crate::framework::system_effect::create_player_explosion_effect;
+use crate::framework::system_effect::create_explosion_effect;
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
@@ -352,7 +352,7 @@ pub fn enemy_shot_collision_check(
 
     for (player_entity, pl_pos) in colls {
         sound_queue.push_play(CH_SHOT, SE_DAMAGE);
-        create_player_explosion_effect(&pl_pos, commands);
+        create_explosion_effect(&pl_pos, 1, commands);
         let posture = <&mut Posture>::query().get_mut(world, player_entity).unwrap();
         posture.0 = Vector2D::new(CENTER_X, PLAYER_Y);
     }

@@ -64,7 +64,7 @@ pub fn move_item(
 #[read_component(Posture)]
 #[read_component(HitBox)]
 #[write_component(Player)]
-pub fn item_collision_check(
+pub fn item_player_collision_check(
     world: &mut SubWorld,
     #[resource] sound_queue: &mut SoundQueue,
     #[resource] game_info: &mut GameInfo,
