@@ -39,8 +39,11 @@ impl CharacterSelect {
 
     pub fn draw<R: Renderer>(&self, renderer: &mut R) {
         renderer.draw_texture("menu_bg", WINDOW_WIDTH, WINDOW_HEIGHT);
-        renderer
-            .draw_sprite(CHARACTER_SELECT_PORTRAITS[self.index as usize], &Vector2D::new(-150, 50));
+        renderer.draw_sprite(
+            CHARACTER_SELECT_PORTRAITS[self.index as usize],
+            &Vector2D::new(-150, 50),
+            255,
+        );
         let msg = "Select Character";
         renderer.draw_str(
             IM_FONT,
@@ -51,6 +54,10 @@ impl CharacterSelect {
             &RGBA { r: 255, g: 255, b: 255, a: 255 },
             false,
         );
-        renderer.draw_sprite(CHARACTER_SELECT_DESCS[self.index as usize], &Vector2D::new(400, 220));
+        renderer.draw_sprite(
+            CHARACTER_SELECT_DESCS[self.index as usize],
+            &Vector2D::new(400, 220),
+            255,
+        );
     }
 }

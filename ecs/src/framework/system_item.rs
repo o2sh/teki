@@ -1,4 +1,4 @@
-use crate::framework::{components::*, resources::*, system_player::pos_to_coll_box};
+use crate::framework::{components::*, pos_to_coll_box, resources::*};
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
@@ -12,7 +12,8 @@ pub const ITEM_SPRITES: [&str; 2] = ["item0", "item1"];
 pub fn spawn_item(pos: &Vector2D<i32>, frame_count: u32, commands: &mut CommandBuffer) {
     let mut rng = rand::thread_rng();
     let i = rng.gen_range(0, 2);
-    let drawable = SpriteDrawable { sprite_name: ITEM_SPRITES[i], offset: Vector2D::new(-6, -6) };
+    let drawable =
+        SpriteDrawable { sprite_name: ITEM_SPRITES[i], offset: Vector2D::new(-6, -6), alpha: 255 };
     let hit_box = HitBox { size: Vector2D::new(12, 12) };
 
     let item_type = match i {

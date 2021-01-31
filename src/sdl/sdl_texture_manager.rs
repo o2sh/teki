@@ -24,10 +24,6 @@ impl SdlTextureManager {
         })
     }
 
-    pub fn get(&self, key: &str) -> Option<&Texture> {
-        self.resource_manager.get(key)
-    }
-
     pub fn get_mut(&mut self, key: &str) -> Option<&mut Texture> {
         self.resource_manager.get_mut(key)
     }

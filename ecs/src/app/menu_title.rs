@@ -17,7 +17,7 @@ impl Title {
 
     pub fn draw<R: Renderer>(&self, renderer: &mut R) {
         renderer.draw_texture("menu_bg", WINDOW_WIDTH, WINDOW_HEIGHT);
-        renderer.draw_sprite("title", &Vector2D::new(WINDOW_WIDTH - 432, 0));
+        renderer.draw_sprite("title", &Vector2D::new(WINDOW_WIDTH - 432, 0), 255);
         let title = "Teki";
         renderer.draw_str(
             IM_FONT,

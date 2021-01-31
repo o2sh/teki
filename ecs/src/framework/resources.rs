@@ -234,7 +234,11 @@ impl EneShotSpawner {
                 EneShot(vel),
                 Posture(*pos, 0, 0),
                 HitBox { size: Vector2D::new(16, 16) },
-                SpriteDrawable { sprite_name: "orb_green_full", offset: Vector2D::new(-8, -8) },
+                SpriteDrawable {
+                    sprite_name: "orb_green_full",
+                    offset: Vector2D::new(-8, -8),
+                    alpha: 255,
+                },
             ));
         }
     }

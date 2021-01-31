@@ -53,6 +53,7 @@ pub const SE_SHOT: &str = "assets/sfx/se_graze";
 pub const SE_OK: &str = "assets/sfx/se_ok00";
 pub const SE_SELECT: &str = "assets/sfx/se_select00";
 pub const SE_ITEM: &str = "assets/sfx/se_item00";
+pub const SE_DAMAGE: &str = "assets/sfx/se_damage";
 
 pub const RE_FONT: &str = "assets/fonts/regular.ttf";
 pub const IM_FONT: &str = "assets/fonts/immortal.ttf";

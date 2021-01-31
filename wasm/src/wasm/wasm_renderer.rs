@@ -104,11 +104,13 @@ impl Renderer for WasmRenderer {
 
         self.context.restore();
     }
-    fn draw_sprite(&mut self, sprite_name: &str, pos: &Vector2D<i32>) {
+    fn draw_sprite(&mut self, sprite_name: &str, pos: &Vector2D<i32>, alpha: u8) {
         let sprite_sheet = self.sprite_sheet.borrow();
         let (sheet, tex_name) = sprite_sheet.get(sprite_name).expect("No sprite_sheet");
         let image = self.images.borrow();
         if let Some(image) = image.get(tex_name) {
+            self.context.save();
+            self.context.set_global_alpha(alpha as f64 / 255.0);
             self.context
                 .draw_image_with_html_image_element_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
                     &image,
@@ -122,6 +124,7 @@ impl Renderer for WasmRenderer {
                     sheet.frame.h as f64,
                 )
                 .expect("draw_image_with... failed");
+            self.context.restore();
         }
     }
 
@@ -131,6 +134,7 @@ impl Renderer for WasmRenderer {
         pos: &Vector2D<i32>,
         angle: u8,
         center: Option<&Vector2D<i32>>,
+        alpha: u8,
     ) {
         let sprite_sheet = self.sprite_sheet.borrow();
         let (sheet, tex_name) = sprite_sheet.get(sprite_name).expect("No sprite_sheet");
@@ -142,6 +146,7 @@ impl Renderer for WasmRenderer {
             );
 
             self.context.save();
+            self.context.set_global_alpha(alpha as f64 / 255.0);
             self.context
                 .translate((pos.x + center.x) as f64, (pos.y + center.y) as f64)
                 .expect("translate failed");

@@ -10,6 +10,7 @@ pub struct Speed(pub i32, pub i32);
 pub struct SpriteDrawable {
     pub sprite_name: &'static str,
     pub offset: Vector2D<i32>,
+    pub alpha: u8,
 }
 
 pub struct Text {

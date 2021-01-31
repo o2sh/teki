@@ -54,11 +54,14 @@ impl Renderer for SdlRenderer {
         self.sprite_sheet.load_sprite_sheet(&text);
     }
 
-    fn draw_sprite(&mut self, sprite_name: &str, pos: &Vector2D<i32>) {
+    fn draw_sprite(&mut self, sprite_name: &str, pos: &Vector2D<i32>, alpha: u8) {
         let (sheet, tex_name) =
             self.sprite_sheet.get(sprite_name).expect(&format!("No sprite named: {}", sprite_name));
 
-        let texture = self.texture_manager.get(tex_name).expect("No texture");
+        let texture = self.texture_manager.get_mut(tex_name).expect("No texture");
+
+        texture.set_alpha_mod(alpha);
+
         self.canvas
             .copy(
                 &texture,
@@ -74,10 +77,14 @@ impl Renderer for SdlRenderer {
         pos: &Vector2D<i32>,
         angle: u8,
         center: Option<&Vector2D<i32>>,
+        alpha: u8,
     ) {
         let (sheet, tex_name) = self.sprite_sheet.get(sprite_name).expect("No sprite");
 
-        let texture = self.texture_manager.get(tex_name).expect("No texture");
+        let texture = self.texture_manager.get_mut(tex_name).expect("No texture");
+
+        texture.set_alpha_mod(alpha);
+
         let center = center.map(|v| Point::new(v.x, v.y));
         self.canvas
             .copy_ex(

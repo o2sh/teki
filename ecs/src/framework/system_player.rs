@@ -1,4 +1,5 @@
 use crate::framework::components::*;
+use crate::framework::pos_to_coll_box;
 use crate::framework::resources::{GameInfo, SoundQueue, StageIndicator};
 use crate::framework::system_effect::create_enemy_explosion_effect;
 use crate::framework::system_item::spawn_item;
@@ -30,7 +31,7 @@ pub fn player_hit_box() -> HitBox {
 }
 
 pub fn player_sprite(player: &Player) -> SpriteDrawable {
-    SpriteDrawable { sprite_name: player.data.sprite, offset: Vector2D::new(-16, -24) }
+    SpriteDrawable { sprite_name: player.data.sprite, offset: Vector2D::new(-16, -24), alpha: 255 }
 }
 
 #[system]
@@ -137,7 +138,11 @@ pub fn do_fire_myshot(
         MyShot { player_entity: entity },
         pos,
         HitBox { size: Vector2D::new(10, 20) },
-        SpriteDrawable { sprite_name: player.data.bullet, offset: Vector2D::new(-8, -32) },
+        SpriteDrawable {
+            sprite_name: player.data.bullet,
+            offset: Vector2D::new(-8, -32),
+            alpha: 255,
+        },
     ));
 }
 
@@ -183,7 +188,7 @@ pub fn delete_entity(entity: Entity, commands: &mut CommandBuffer) {
 #[read_component(Posture)]
 #[read_component(HitBox)]
 #[write_component(Enemy)]
-pub fn shot_collision_check(
+pub fn player_shot_collision_check(
     world: &mut SubWorld,
     #[resource] sound_queue: &mut SoundQueue,
     #[resource] game_info: &GameInfo,
@@ -208,10 +213,6 @@ pub fn shot_collision_check(
             }
         }
     }
-}
-
-pub fn pos_to_coll_box(pos: &Vector2D<i32>, coll_rect: &HitBox) -> CollBox {
-    CollBox { top_left: round_vec(pos), size: coll_rect.size }
 }
 
 #[system(for_each)]

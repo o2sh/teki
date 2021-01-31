@@ -15,13 +15,14 @@ pub trait Renderer {
         color: &RGBA,
         bold: bool,
     );
-    fn draw_sprite(&mut self, sprite_name: &str, pos: &Vector2D<i32>);
+    fn draw_sprite(&mut self, sprite_name: &str, pos: &Vector2D<i32>, alpha: u8);
     fn draw_sprite_rot(
         &mut self,
         sprite_name: &str,
         pos: &Vector2D<i32>,
         angle: u8,
         center: Option<&Vector2D<i32>>,
+        alpha: u8,
     );
     fn draw_texture(&mut self, tex_name: &str, width: i32, height: i32);
     fn draw_scrolling_bg(&mut self, sprite_name: &str, width: i32, height: i32);

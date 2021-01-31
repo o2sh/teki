@@ -30,8 +30,9 @@ impl Game {
             .add_system(move_item_system())
             .add_system(spawn_eneshot_system())
             .add_system(move_eneshot_system())
-            .add_system(shot_collision_check_system())
+            .add_system(player_shot_collision_check_system())
             .add_system(item_collision_check_system())
+            .add_system(enemy_shot_collision_check_system())
             .add_system(move_sequential_anime_system())
             .add_system(clear_text_system())
             .build();
@@ -53,6 +54,7 @@ impl Game {
             SpriteDrawable {
                 sprite_name: player.data.neutral_face,
                 offset: Vector2D::new(-50, -50),
+                alpha: 255,
             },
         ));
 
@@ -88,9 +90,9 @@ impl Game {
             let pos = round_vec(&posture.0) + drawable.offset;
             let angle = quantize_angle(posture.1, ANGLE_DIV);
             if angle == 0 {
-                renderer.draw_sprite(drawable.sprite_name, &pos);
+                renderer.draw_sprite(drawable.sprite_name, &pos, drawable.alpha);
             } else {
-                renderer.draw_sprite_rot(drawable.sprite_name, &pos, angle, None);
+                renderer.draw_sprite_rot(drawable.sprite_name, &pos, angle, None, drawable.alpha);
             }
         }
         for (posture, text) in <(&Posture, &Text)>::query().iter(&self.world) {

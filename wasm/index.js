@@ -11,6 +11,7 @@ const AUDIO_ASSETS = [
   'assets/sfx/se_ok00',
   'assets/sfx/se_select00',
   'assets/sfx/se_item00',
+  'assets/sfx/se_damage',
   'assets/audio/toggle_sound'
 ]
 const ENABLE_AUDIO = 'assets/audio/toggle_sound'

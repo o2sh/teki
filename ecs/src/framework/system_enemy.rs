@@ -1,5 +1,7 @@
 use crate::framework::components::*;
-use crate::framework::resources::{EneShotSpawner, Formation, GameInfo};
+use crate::framework::pos_to_coll_box;
+use crate::framework::resources::{EneShotSpawner, Formation, GameInfo, SoundQueue};
+use crate::framework::system_effect::create_player_explosion_effect;
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
@@ -7,8 +9,9 @@ use teki_common::game::{
     appearance_manager::Accessor as AppearanceManagerAccessor, traj::Accessor as TrajAccessor,
     AppearanceManager, EnemyType, FormationIndex, Traj,
 };
-use teki_common::utils::math::*;
+use teki_common::utils::collision::CollBox;
 use teki_common::utils::consts::*;
+use teki_common::utils::math::*;
 use vector2d::Vector2D;
 
 const FAIRY_SPRITES: [&str; 4] = ["enemy0", "enemy1", "enemy2", "enemy3"];
@@ -154,7 +157,8 @@ pub fn run_appearance_enemy(
             let posture = Posture(e.pos, 0, 0);
             let speed = Speed(0, 0);
             let hit_box = HitBox { size: Vector2D::new(32, 32) };
-            let drawable = SpriteDrawable { sprite_name, offset: Vector2D::new(-16, -16) };
+            let drawable =
+                SpriteDrawable { sprite_name, offset: Vector2D::new(-16, -16), alpha: 255 };
             commands.push((enemy, posture, speed, hit_box, drawable));
         });
     }
@@ -276,22 +280,35 @@ pub fn move_to_formation(
     }
 }
 
-
 #[system]
 #[read_component(Player)]
 #[read_component(Posture)]
 #[read_component(EneShot)]
-pub fn spawn_eneshot(world: &SubWorld, #[resource] eneshot_spawner: &mut EneShotSpawner, #[resource] game_info: &GameInfo, commands: &mut CommandBuffer) {
+pub fn spawn_eneshot(
+    world: &SubWorld,
+    #[resource] eneshot_spawner: &mut EneShotSpawner,
+    #[resource] game_info: &GameInfo,
+    commands: &mut CommandBuffer,
+) {
     eneshot_spawner.update(game_info, world, commands);
 }
 
 #[system(for_each)]
-pub fn move_eneshot(shot: &mut EneShot, posture: &mut Posture, entity: &Entity, commands: &mut CommandBuffer) {
+pub fn move_eneshot(
+    shot: &mut EneShot,
+    posture: &mut Posture,
+    entity: &Entity,
+    commands: &mut CommandBuffer,
+) {
     do_move_eneshot(shot, posture, *entity, commands);
 }
 
-
-pub fn do_move_eneshot(shot: &EneShot, posture: &mut Posture, entity: Entity, commands: &mut CommandBuffer) {
+pub fn do_move_eneshot(
+    shot: &EneShot,
+    posture: &mut Posture,
+    entity: Entity,
+    commands: &mut CommandBuffer,
+) {
     posture.0 += shot.0;
     if out_of_screen(&posture.0) {
         commands.remove(entity);
@@ -299,6 +316,44 @@ pub fn do_move_eneshot(shot: &EneShot, posture: &mut Posture, entity: Entity, co
 }
 
 fn out_of_screen(pos: &Vector2D<i32>) -> bool {
-    pos.x < -16 * ONE || pos.x > (GAME_WIDTH + 16) * ONE ||
-        pos.y < -16 * ONE || pos.y > (GAME_HEIGHT + 16) * ONE
+    pos.x < -16 * ONE
+        || pos.x > (GAME_WIDTH + 16) * ONE
+        || pos.y < -16 * ONE
+        || pos.y > (GAME_HEIGHT + 16) * ONE
+}
+
+#[system]
+#[read_component(EneShot)]
+#[read_component(HitBox)]
+#[write_component(Posture)]
+#[write_component(Player)]
+pub fn enemy_shot_collision_check(
+    world: &mut SubWorld,
+    #[resource] sound_queue: &mut SoundQueue,
+    commands: &mut CommandBuffer,
+) {
+    let mut colls: Vec<(Entity, Vector2D<i32>)> = Vec::new();
+
+    let (_, player_pos, player_hit_box, player_entity) =
+        <(&Player, &Posture, &HitBox, Entity)>::query().iter(world).next().unwrap();
+
+    let player_collbox = pos_to_coll_box(&player_pos.0, player_hit_box);
+    for (_eneshot, eneshot_pos, eneshot_hit_box, eneshot_entity) in
+        <(&EneShot, &Posture, &HitBox, Entity)>::query().iter(world)
+    {
+        let enemy_collbox =
+            CollBox { top_left: round_vec(&eneshot_pos.0), size: eneshot_hit_box.size };
+        if player_collbox.check_collision(&enemy_collbox) {
+            colls.push((*player_entity, player_pos.0));
+            commands.remove(*eneshot_entity);
+            break;
+        }
+    }
+
+    for (player_entity, pl_pos) in colls {
+        sound_queue.push_play(CH_SHOT, SE_DAMAGE);
+        create_player_explosion_effect(&pl_pos, commands);
+        let posture = <&mut Posture>::query().get_mut(world, player_entity).unwrap();
+        posture.0 = Vector2D::new(CENTER_X, PLAYER_Y);
+    }
 }

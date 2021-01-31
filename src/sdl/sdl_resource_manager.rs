@@ -25,10 +25,6 @@ impl<T> SdlResourceManager<T> {
         Ok(())
     }
 
-    pub fn get(&self, key: &str) -> Option<&T> {
-        self.map.get(key)
-    }
-
     pub fn get_mut(&mut self, key: &str) -> Option<&mut T> {
         self.map.get_mut(key)
     }
