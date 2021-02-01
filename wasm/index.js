@@ -1,7 +1,7 @@
 import { WasmApp, WasmRenderer } from './pkg/index'
 import { audioManager } from './audio'
 
-const CHANNEL_COUNT = 4
+const CHANNEL_COUNT = 5
 
 const AUDIO_ASSETS = [
   'assets/bgm/menu',

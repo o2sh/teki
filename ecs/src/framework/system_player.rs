@@ -267,7 +267,7 @@ pub fn player_enemy_collision_check(
     }
 
     for (player_entity, pl_pos) in colls {
-        sound_queue.push_play(CH_SHOT, SE_DAMAGE);
+        sound_queue.push_play(CH_DAMAGE, SE_DAMAGE);
         create_explosion_effect(&pl_pos, 1, commands);
         let posture = <&mut Posture>::query().get_mut(world, player_entity).unwrap();
         posture.0 = Vector2D::new(CENTER_X, PLAYER_Y);

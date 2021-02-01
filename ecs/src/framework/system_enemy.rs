@@ -316,8 +316,8 @@ pub fn do_move_eneshot(
 }
 
 fn out_of_screen(pos: &Vector2D<i32>) -> bool {
-    pos.x < -16 * ONE
-        || pos.x > (GAME_WIDTH + 16) * ONE
+    pos.x < -8 * ONE
+        || pos.x > (GAME_WIDTH - 3) * ONE
         || pos.y < -16 * ONE
         || pos.y > (GAME_HEIGHT + 16) * ONE
 }

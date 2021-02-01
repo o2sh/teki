@@ -2,11 +2,12 @@ use crate::utils::math::*;
 
 pub const SFX_VOLUME: f32 = 0.05;
 pub const BGM_VOLUME: f32 = 0.1;
-pub const CHANNEL_COUNT: u32 = 4;
+pub const CHANNEL_COUNT: u32 = 5;
 pub const CH_BG_MUSIC: u32 = 0;
 pub const CH_SHOT: u32 = 1;
 pub const CH_KILL: u32 = 2;
 pub const CH_ITEM: u32 = 3;
+pub const CH_DAMAGE: u32 = 4;
 
 pub const WINDOW_WIDTH: i32 = 700;
 pub const WINDOW_HEIGHT: i32 = 256 * 2;
