@@ -13,12 +13,12 @@ Since teki depends on SDL2, you first need to
 
 Once SDL2 is set up, you can build and run the app simply using:
 
-```
+```bash
 cargo run
 ```
 
 ### How to play (Control)
 
-  * The Arrow Keys move the character around
-  * Z causes a short barrage of shots to be fired; it may be held down for rapidfire
-  * Esc pauses the game and brings you to the in-game menu
+* The Arrow Keys move the character around
+* Z causes a short barrage of shots to be fired; it may be held down for rapidfire
+* Esc pauses the game and brings you to the in-game menu
