@@ -54,14 +54,17 @@ impl EnemyBase {
         let stage_no = accessor.get_stage_no();
         let shot_count = std::cmp::min(2 + stage_no / 8, 5) as u32;
         let shot_interval = 20 - shot_count * 2;
-
         if self.attack_frame_count <= shot_interval * shot_count
             && self.attack_frame_count % shot_interval == 0
         {
             if shot_enable {
                 accessor.fire_shot(pos);
             }
-            true
+            if self.attack_frame_count == shot_count * shot_interval {
+                true
+            } else {
+                false
+            }
         } else {
             false
         }

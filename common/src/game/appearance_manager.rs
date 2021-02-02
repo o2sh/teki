@@ -2,7 +2,7 @@ use crate::game::{appearance_table::*, EnemyType, FormationIndex, Traj, TrajComm
 use crate::utils::math::*;
 use vector2d::Vector2D;
 
-const UNIT_COUNT: u32 = 2;
+const UNIT_COUNT: u32 = 3;
 const STEP_WAIT: u32 = 32 / 3;
 
 pub struct NewBorn {
@@ -134,7 +134,7 @@ impl AppearanceManager {
             self.orders.clear();
             self.unit += 1;
             self.wait_stationary = true;
-            self.wait = 200;
+            self.wait = 150;
             self.time = 0;
         }
 

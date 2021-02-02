@@ -23,7 +23,7 @@ counted_array!(pub const COMMAND_TABLE2: [TrajCommand; _] = [
 ]);
 
 counted_array!(pub const COMMAND_TABLE3: [TrajCommand; _] = [
-    Pos(-8 * ONE, 244 * ONE),
+    Pos(-8 * ONE, (GAME_WIDTH / 2 + 40) * ONE),
     Speed(3 * ONE),
     Angle((ANGLE / 4) * ONE),
     VAngle(-2 * ONE),
