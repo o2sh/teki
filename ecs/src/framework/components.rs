@@ -42,6 +42,8 @@ pub enum EnemyState {
     MoveToFormation,
     Formation,
     Attack(AttackType),
+    Disappearance,
+    Destroy,
 }
 pub struct Avatar;
 

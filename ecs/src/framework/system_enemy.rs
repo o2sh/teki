@@ -178,8 +178,18 @@ pub fn move_enemy(
     #[resource] enemy_formation: &mut Formation,
     #[resource] eneshot_spawner: &mut EneShotSpawner,
     #[resource] game_info: &mut GameInfo,
+    commands: &mut CommandBuffer,
 ) {
-    do_move_enemy(*entity, enemy, speed, enemy_formation, game_info, eneshot_spawner, world)
+    do_move_enemy(
+        *entity,
+        enemy,
+        speed,
+        enemy_formation,
+        game_info,
+        eneshot_spawner,
+        world,
+        commands,
+    )
 }
 
 fn do_move_enemy(
@@ -190,6 +200,7 @@ fn do_move_enemy(
     game_info: &mut GameInfo,
     eneshot_spawner: &mut EneShotSpawner,
     world: &mut SubWorld,
+    commands: &mut CommandBuffer,
 ) {
     match enemy.state {
         EnemyState::Appearance => {
@@ -220,7 +231,20 @@ fn do_move_enemy(
             let mut accessor =
                 EneBaseAccessorImpl::new(enemy_formation, eneshot_spawner, game_info.stage);
             let posture = <&mut Posture>::query().get_mut(world, entity).unwrap();
-            enemy.base.update_attack(&posture.0, true, &mut accessor);
+            if enemy.base.update_attack(&posture.0, true, &mut accessor) {
+                enemy.state = EnemyState::Disappearance;
+            };
+        }
+        EnemyState::Disappearance => {
+            let posture = <&mut Posture>::query().get_mut(world, entity).unwrap();
+            let result = exit_screen(posture, speed);
+            forward(posture, speed);
+            if result {
+                enemy.state = EnemyState::Destroy;
+            }
+        }
+        EnemyState::Destroy => {
+            commands.remove(entity);
         }
     }
 }
@@ -258,12 +282,57 @@ pub fn move_to_formation(
     formation: &Formation,
 ) -> bool {
     let target = formation.pos(fi);
+
+    move_to_target(posture, speed, target)
+}
+
+pub fn exit_screen(posture: &mut Posture, speed: &mut Speed) -> bool {
     let pos = &mut posture.0;
+    let game_width = GAME_WIDTH * ONE;
+    let game_height = GAME_HEIGHT * ONE;
+    let margin = 16 * ONE;
+    let x = {
+        if pos.x <= game_width / 2 {
+            pos.x
+        } else {
+            game_width - pos.x
+        }
+    };
+
+    let y = {
+        if pos.y <= game_height / 2 {
+            pos.y
+        } else {
+            game_height - pos.y
+        }
+    };
+
+    let target = if x > y {
+        if pos.y <= game_height / 2 {
+            Vector2D::new(pos.x, -margin)
+        } else {
+            Vector2D::new(pos.x, game_height + margin)
+        }
+    } else {
+        if pos.x <= game_width / 2 {
+            Vector2D::new(-margin, pos.y)
+        } else {
+            Vector2D::new(game_width - margin, pos.y)
+        }
+    };
+
+    move_to_target(posture, speed, target)
+}
+
+pub fn move_to_target(posture: &mut Posture, speed: &mut Speed, target: Vector2D<i32>) -> bool {
+    let pos = &mut posture.0;
+    let diff = &target - &pos;
     let angle = &mut posture.2;
     let spd = &mut speed.0;
     let vangle = &mut speed.1;
-    let diff = &target - &pos;
+
     let sq_distance = square(diff.x >> (ONE_BIT / 2)) + square(diff.y >> (ONE_BIT / 2));
+
     if sq_distance > square(*spd >> (ONE_BIT / 2)) {
         let dlimit: i32 = *spd * 5 / 3;
         let target_angle = atan2_lut(-diff.y, diff.x);
@@ -272,10 +341,6 @@ pub fn move_to_formation(
         *vangle = 0;
         false
     } else {
-        *pos = target;
-        *spd = 0;
-        *angle = normalize_angle(*angle);
-        *vangle = 0;
         true
     }
 }
