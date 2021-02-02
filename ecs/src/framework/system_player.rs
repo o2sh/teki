@@ -19,7 +19,15 @@ pub const ANIMATION_SPAN: u32 = 5;
 
 pub fn new_player(character_index: u8) -> Player {
     let data = PlayerData::new(character_index);
-    Player { shot_enable: false, next_shoot_time: 0, index_x: 0, index_y: 0, data }
+    Player {
+        state: PlayerState::Normal,
+        shot_enable: false,
+        next_shoot_time: 0,
+        invincibility_starting_time: 0,
+        index_x: 0,
+        index_y: 0,
+        data,
+    }
 }
 
 pub fn enable_player_shot(player: &mut Player, enable: bool) {
@@ -247,29 +255,72 @@ pub fn enum_player_target_pos(world: &SubWorld) -> Vector2D<i32> {
 #[read_component(HitBox)]
 #[write_component(Posture)]
 #[write_component(Player)]
+#[write_component(SpriteDrawable)]
 pub fn player_enemy_collision_check(
     world: &mut SubWorld,
     #[resource] sound_queue: &mut SoundQueue,
+    #[resource] game_info: &mut GameInfo,
     commands: &mut CommandBuffer,
 ) {
-    let mut colls: Vec<(Entity, Vector2D<i32>)> = Vec::new();
+    let mut colls: Vec<Entity> = Vec::new();
 
-    let (_, player_pos, player_hit_box, player_entity) =
+    let (player, player_pos, player_hit_box, player_entity) =
         <(&Player, &Posture, &HitBox, Entity)>::query().iter(world).next().unwrap();
 
+    if player.state == PlayerState::Invincible {
+        return;
+    }
     let player_collbox = pos_to_coll_box(&player_pos.0, player_hit_box);
     for (_enemy, enemy_pos, enemy_hit_box) in <(&Enemy, &Posture, &HitBox)>::query().iter(world) {
         let enemy_collbox = CollBox { top_left: round_vec(&enemy_pos.0), size: enemy_hit_box.size };
         if player_collbox.check_collision(&enemy_collbox) {
-            colls.push((*player_entity, player_pos.0));
+            colls.push(*player_entity);
             break;
         }
     }
 
-    for (player_entity, pl_pos) in colls {
-        sound_queue.push_play(CH_DAMAGE, SE_DAMAGE);
-        create_explosion_effect(&pl_pos, 1, commands);
-        let posture = <&mut Posture>::query().get_mut(world, player_entity).unwrap();
-        posture.0 = Vector2D::new(CENTER_X, PLAYER_Y);
+    for player_entity in colls {
+        let (player, player_posture, player_sprite) =
+            <(&mut Player, &mut Posture, &mut SpriteDrawable)>::query()
+                .get_mut(world, player_entity)
+                .unwrap();
+        set_damage_to_player(
+            player,
+            player_posture,
+            player_sprite,
+            commands,
+            sound_queue,
+            game_info.frame_count,
+        );
+    }
+}
+
+pub fn set_damage_to_player(
+    player: &mut Player,
+    player_posture: &mut Posture,
+    player_sprite: &mut SpriteDrawable,
+    commands: &mut CommandBuffer,
+    sound_queue: &mut SoundQueue,
+    frame_count: u32,
+) {
+    create_explosion_effect(&player_posture.0, 1, commands);
+    sound_queue.push_play(CH_DAMAGE, SE_DAMAGE);
+    player_sprite.alpha = 175;
+    player_posture.0 = Vector2D::new(CENTER_X, PLAYER_Y);
+    player.state = PlayerState::Invincible;
+    player.invincibility_starting_time = frame_count;
+}
+
+#[system(for_each)]
+pub fn player_invincibility_frames(
+    player: &mut Player,
+    sprite: &mut SpriteDrawable,
+    #[resource] game_info: &mut GameInfo,
+) {
+    if player.state == PlayerState::Invincible
+        && game_info.frame_count > player.invincibility_starting_time + INVINCIBILITY_FRAMES
+    {
+        sprite.alpha = 255;
+        player.state = PlayerState::Normal;
     }
 }

@@ -1,7 +1,7 @@
 use crate::framework::components::*;
 use crate::framework::pos_to_coll_box;
 use crate::framework::resources::{EneShotSpawner, Formation, GameInfo, SoundQueue};
-use crate::framework::system_effect::create_explosion_effect;
+use crate::framework::system_player::set_damage_to_player;
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
@@ -394,17 +394,21 @@ fn out_of_screen(pos: &Vector2D<i32>) -> bool {
 #[read_component(EneShot)]
 #[read_component(HitBox)]
 #[write_component(Posture)]
+#[write_component(SpriteDrawable)]
 #[write_component(Player)]
 pub fn enemy_shot_collision_check(
     world: &mut SubWorld,
     #[resource] sound_queue: &mut SoundQueue,
+    #[resource] game_info: &mut GameInfo,
     commands: &mut CommandBuffer,
 ) {
-    let mut colls: Vec<(Entity, Vector2D<i32>)> = Vec::new();
+    let mut colls: Vec<Entity> = Vec::new();
 
-    let (_, player_pos, player_hit_box, player_entity) =
+    let (player, player_pos, player_hit_box, player_entity) =
         <(&Player, &Posture, &HitBox, Entity)>::query().iter(world).next().unwrap();
-
+    if player.state == PlayerState::Invincible {
+        return;
+    }
     let player_collbox = pos_to_coll_box(&player_pos.0, player_hit_box);
     for (_eneshot, eneshot_pos, eneshot_hit_box, eneshot_entity) in
         <(&EneShot, &Posture, &HitBox, Entity)>::query().iter(world)
@@ -412,16 +416,24 @@ pub fn enemy_shot_collision_check(
         let enemy_collbox =
             CollBox { top_left: round_vec(&eneshot_pos.0), size: eneshot_hit_box.size };
         if player_collbox.check_collision(&enemy_collbox) {
-            colls.push((*player_entity, player_pos.0));
+            colls.push(*player_entity);
             commands.remove(*eneshot_entity);
             break;
         }
     }
 
-    for (player_entity, pl_pos) in colls {
-        sound_queue.push_play(CH_SHOT, SE_DAMAGE);
-        create_explosion_effect(&pl_pos, 1, commands);
-        let posture = <&mut Posture>::query().get_mut(world, player_entity).unwrap();
-        posture.0 = Vector2D::new(CENTER_X, PLAYER_Y);
+    for player_entity in colls {
+        let (player, player_posture, player_sprite) =
+            <(&mut Player, &mut Posture, &mut SpriteDrawable)>::query()
+                .get_mut(world, player_entity)
+                .unwrap();
+        set_damage_to_player(
+            player,
+            player_posture,
+            player_sprite,
+            commands,
+            sound_queue,
+            game_info.frame_count,
+        );
     }
 }

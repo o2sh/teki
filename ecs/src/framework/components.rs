@@ -47,9 +47,17 @@ pub enum EnemyState {
 }
 pub struct Avatar;
 
+#[derive(PartialEq, Debug)]
+pub enum PlayerState {
+    Normal,
+    Invincible,
+}
+
 pub struct Player {
+    pub state: PlayerState,
     pub shot_enable: bool,
     pub next_shoot_time: u32,
+    pub invincibility_starting_time: u32,
     pub index_x: usize,
     pub index_y: usize,
     pub data: PlayerData<'static>,
