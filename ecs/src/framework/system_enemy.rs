@@ -150,7 +150,7 @@ pub fn run_appearance_enemy(
                     ("enemy_a0", HitBox { size: Vector2D::new(32, 32) }, Vector2D::new(-16, -16))
                 }
                 EnemyType::BigFairy => {
-                    ("enemy_b0", HitBox { size: Vector2D::new(64, 364) }, Vector2D::new(-32, -32))
+                    ("enemy_b0", HitBox { size: Vector2D::new(64, 64) }, Vector2D::new(-32, -32))
                 }
             };
 
