@@ -14,7 +14,7 @@ pub fn spawn_item(pos: &Vector2D<i32>, frame_count: u32, commands: &mut CommandB
     let i = rng.gen_range(0, 2);
     let drawable =
         SpriteDrawable { sprite_name: ITEM_SPRITES[i], offset: Vector2D::new(-6, -6), alpha: 255 };
-    let hit_box = HitBox { size: Vector2D::new(12, 12) };
+    let hit_box = HitBox { offset: Vector2D::new(-6, -6), size: Vector2D::new(12, 12) };
 
     let item_type = match i {
         0 => ItemType::Red,
@@ -76,8 +76,10 @@ pub fn item_player_collision_check(
         for (item, item_pos, item_hit_box, item_entity) in
             <(&Item, &Posture, &HitBox, Entity)>::query().iter(world)
         {
-            let item_collbox =
-                CollBox { top_left: round_vec(&item_pos.0), size: item_hit_box.size };
+            let item_collbox = CollBox {
+                top_left: round_vec(&item_pos.0) + item_hit_box.offset,
+                size: item_hit_box.size,
+            };
             if player_coll_box.check_collision(&item_collbox) {
                 commands.remove(*item_entity);
                 sound_queue.push_play(CH_ITEM, SE_ITEM);

@@ -1,6 +1,8 @@
 use crate::framework::components::*;
 use crate::framework::pos_to_coll_box;
 use crate::framework::resources::{EneShotSpawner, Formation, GameInfo, SoundQueue};
+use crate::framework::system_effect::create_explosion_effect;
+use crate::framework::system_item::spawn_item;
 use crate::framework::system_player::set_damage_to_player;
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
@@ -46,20 +48,21 @@ impl EnemyBase {
 
     pub fn update_attack<A: EneBaseAccessorTrait>(
         &mut self,
+        attack_type: AttackType,
         pos: &Vector2D<i32>,
         shot_enable: bool,
         accessor: &mut A,
     ) -> bool {
+        let (shot_count, shot_interval) = match attack_type {
+            AttackType::Normal => (2, 10),
+            AttackType::Intense => (30, 8),
+        };
         self.attack_frame_count += 1;
-
-        let stage_no = accessor.get_stage_no();
-        let shot_count = std::cmp::min(2 + stage_no / 8, 5) as u32;
-        let shot_interval = 20 - shot_count * 2;
         if self.attack_frame_count <= shot_interval * shot_count
             && self.attack_frame_count % shot_interval == 0
         {
             if shot_enable {
-                accessor.fire_shot(pos);
+                accessor.fire_shot(pos, attack_type);
             }
             if self.attack_frame_count == shot_count * shot_interval {
                 true
@@ -96,14 +99,18 @@ impl<'l> EneBaseAccessorImpl<'l> {
     }
 }
 pub trait EneBaseAccessorTrait {
-    fn fire_shot(&mut self, pos: &Vector2D<i32>);
+    fn fire_shot(&mut self, pos: &Vector2D<i32>, attack_type: AttackType);
     fn traj_accessor<'a>(&'a mut self) -> Box<dyn TrajAccessor + 'a>;
     fn get_stage_no(&self) -> u16;
 }
 
 impl<'a> EneBaseAccessorTrait for EneBaseAccessorImpl<'a> {
-    fn fire_shot(&mut self, pos: &Vector2D<i32>) {
-        self.eneshot_spawner.push(pos);
+    fn fire_shot(&mut self, pos: &Vector2D<i32>, attack_type: AttackType) {
+        let sprite_name = match attack_type {
+            AttackType::Normal => "orb_green_full",
+            AttackType::Intense => "orb_blue_full",
+        };
+        self.eneshot_spawner.push(pos, sprite_name);
     }
 
     fn traj_accessor<'b>(&'b mut self) -> Box<dyn TrajAccessor + 'b> {
@@ -145,13 +152,19 @@ pub fn run_appearance_enemy(
 
     if let Some(new_borns) = new_borns_opt {
         new_borns.into_iter().for_each(|e| {
-            let (sprite_name, hit_box, offset) = match e.enemy_type {
-                EnemyType::Fairy => {
-                    ("enemy_a0", HitBox { size: Vector2D::new(32, 32) }, Vector2D::new(-16, -16))
-                }
-                EnemyType::BigFairy => {
-                    ("enemy_b0", HitBox { size: Vector2D::new(64, 64) }, Vector2D::new(-32, -32))
-                }
+            let (sprite_name, hit_box, offset, life) = match e.enemy_type {
+                EnemyType::Fairy => (
+                    "enemy_a0",
+                    HitBox { offset: Vector2D::new(-8, -8), size: Vector2D::new(16, 16) },
+                    Vector2D::new(-16, -16),
+                    0,
+                ),
+                EnemyType::BigFairy => (
+                    "enemy_b0",
+                    HitBox { offset: Vector2D::new(-16, -16), size: Vector2D::new(32, 32) },
+                    Vector2D::new(-32, -32),
+                    15,
+                ),
             };
 
             let base = EnemyBase::new(Some(e.traj));
@@ -162,6 +175,7 @@ pub fn run_appearance_enemy(
                 state: EnemyState::Appearance,
                 base,
                 is_formation: false,
+                life,
             };
             let posture = Posture(e.pos, 0, 0);
             let speed = Speed(0, 0);
@@ -232,17 +246,20 @@ fn do_move_enemy(
             let posture = <&mut Posture>::query().get_mut(world, entity).unwrap();
             let ang = ANGLE * ONE / 128;
             posture.1 -= clamp(posture.1, -ang, ang);
-            enemy.state = EnemyState::Attack(AttackType::Normal);
+            enemy.state = match enemy.enemy_type {
+                EnemyType::Fairy => EnemyState::Attack(AttackType::Normal),
+                EnemyType::BigFairy => EnemyState::Attack(AttackType::Intense),
+            }
         }
-        EnemyState::Attack(_) => {
+        EnemyState::Attack(t) => {
             let mut accessor =
                 EneBaseAccessorImpl::new(enemy_formation, eneshot_spawner, game_info.stage);
             let posture = <&mut Posture>::query().get_mut(world, entity).unwrap();
-            if enemy.base.update_attack(&posture.0, true, &mut accessor) {
-                enemy.state = EnemyState::Disappearance;
+            if enemy.base.update_attack(t, &posture.0, true, &mut accessor) {
+                enemy.state = EnemyState::ExitScreen;
             };
         }
-        EnemyState::Disappearance => {
+        EnemyState::ExitScreen => {
             let posture = <&mut Posture>::query().get_mut(world, entity).unwrap();
             let result = exit_screen(posture, speed, enemy.enemy_type);
             forward(posture, speed);
@@ -421,8 +438,10 @@ pub fn enemy_shot_collision_check(
     for (_eneshot, eneshot_pos, eneshot_hit_box, eneshot_entity) in
         <(&EneShot, &Posture, &HitBox, Entity)>::query().iter(world)
     {
-        let enemy_collbox =
-            CollBox { top_left: round_vec(&eneshot_pos.0), size: eneshot_hit_box.size };
+        let enemy_collbox = CollBox {
+            top_left: round_vec(&eneshot_pos.0) + eneshot_hit_box.offset,
+            size: eneshot_hit_box.size,
+        };
         if player_collbox.check_collision(&enemy_collbox) {
             colls.push(*player_entity);
             commands.remove(*eneshot_entity);
@@ -443,5 +462,33 @@ pub fn enemy_shot_collision_check(
             sound_queue,
             game_info.frame_count,
         );
+    }
+}
+
+pub fn set_enemy_damage(
+    enemy: &mut Enemy,
+    enemy_entity: Entity,
+    enemy_pos: &Vector2D<i32>,
+    sound_queue: &mut SoundQueue,
+    game_info: &GameInfo,
+    commands: &mut CommandBuffer,
+) {
+    let is_dead = match enemy.enemy_type {
+        EnemyType::Fairy => true,
+        EnemyType::BigFairy => {
+            enemy.life -= 1;
+            if enemy.life == 0 {
+                true
+            } else {
+                false
+            }
+        }
+    };
+
+    if is_dead {
+        commands.remove(enemy_entity);
+        create_explosion_effect(enemy_pos, 1, commands);
+        sound_queue.push_play(CH_KILL, SE_KILL);
+        spawn_item(enemy_pos, game_info.frame_count, commands);
     }
 }

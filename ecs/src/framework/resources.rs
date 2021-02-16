@@ -189,13 +189,13 @@ impl Formation {
 
 #[derive(Default)]
 pub struct EneShotSpawner {
-    queue: Vec<Vector2D<i32>>,
+    queue: Vec<(Vector2D<i32>, &'static str)>,
     shot_paused_count: u32,
 }
 
 impl EneShotSpawner {
-    pub fn push(&mut self, pos: &Vector2D<i32>) {
-        self.queue.push(pos.clone());
+    pub fn push(&mut self, pos: &Vector2D<i32>, sprite_name: &'static str) {
+        self.queue.push((pos.clone(), sprite_name));
     }
 
     pub fn update(&mut self, game_info: &GameInfo, world: &SubWorld, commands: &mut CommandBuffer) {
@@ -224,7 +224,7 @@ impl EneShotSpawner {
     ) {
         let shot_count = <&EneShot>::query().iter(world).count();
         let target = enum_player_target_pos(world);
-        for (pos, _i) in self.queue.iter().zip(shot_count..MAX_ENE_SHOT_COUNT) {
+        for ((pos, sprite_name), _i) in self.queue.iter().zip(shot_count..MAX_ENE_SHOT_COUNT) {
             let d = &target - pos;
             let angle = atan2_lut(d.y, -d.x);
             let limit = ANGLE * ONE * 30 / 360;
@@ -233,12 +233,8 @@ impl EneShotSpawner {
             commands.push((
                 EneShot(vel),
                 Posture(*pos, 0, 0),
-                HitBox { size: Vector2D::new(16, 16) },
-                SpriteDrawable {
-                    sprite_name: "orb_green_full",
-                    offset: Vector2D::new(-8, -8),
-                    alpha: 255,
-                },
+                HitBox { offset: Vector2D::new(-4, -4), size: Vector2D::new(8, 8) },
+                SpriteDrawable { sprite_name, offset: Vector2D::new(-8, -8), alpha: 255 },
             ));
         }
     }

@@ -16,8 +16,8 @@ impl<'a> PlayerData<'a> {
                 bullet: "spell0",
                 neutral_face: "a_reimu0",
                 attack_face: "a_reimu1",
-                dialog_face: "a_reimu2",
-                damage_face: "a_reimu3",
+                damage_face: "a_reimu2",
+                dialog_face: "a_reimu3",
                 animation_table: [
                     [
                         "reimu0", "reimu1", "reimu2", "reimu3", "reimu4", "reimu5", "reimu6",
@@ -38,8 +38,8 @@ impl<'a> PlayerData<'a> {
                 bullet: "spell4",
                 neutral_face: "a_marisa0",
                 attack_face: "a_marisa1",
-                dialog_face: "a_marisa2",
-                damage_face: "a_marisa3",
+                damage_face: "a_marisa2",
+                dialog_face: "a_marisa3",
                 animation_table: [
                     [
                         "marisa0", "marisa1", "marisa2", "marisa3", "marisa4", "marisa5",

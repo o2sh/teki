@@ -2,7 +2,7 @@ use crate::framework::components::*;
 use crate::framework::pos_to_coll_box;
 use crate::framework::resources::{GameInfo, SoundQueue, StageIndicator};
 use crate::framework::system_effect::create_explosion_effect;
-use crate::framework::system_item::spawn_item;
+use crate::framework::system_enemy::set_enemy_damage;
 use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
@@ -35,7 +35,7 @@ pub fn enable_player_shot(player: &mut Player, enable: bool) {
 }
 
 pub fn player_hit_box() -> HitBox {
-    HitBox { size: Vector2D::new(40, 40) }
+    HitBox { offset: Vector2D::new(-10, -10), size: Vector2D::new(20, 20) }
 }
 
 pub fn player_sprite(player: &Player) -> SpriteDrawable {
@@ -145,7 +145,7 @@ pub fn do_fire_myshot(
     commands.push((
         MyShot { player_entity: entity },
         pos,
-        HitBox { size: Vector2D::new(10, 20) },
+        HitBox { offset: Vector2D::new(-5, -10), size: Vector2D::new(10, 20) },
         SpriteDrawable {
             sprite_name: player.data.bullet,
             offset: Vector2D::new(-8, -32),
@@ -177,7 +177,7 @@ pub fn do_move_myshot(entity: Entity, world: &mut SubWorld, commands: &mut Comma
         }
     }
     if !cont {
-        delete_entity(entity, commands);
+        commands.remove(entity);
     }
 }
 
@@ -185,10 +185,6 @@ fn out_of_screen(pos: &Vector2D<i32>) -> bool {
     const MARGIN: i32 = 10;
     const TOP: i32 = (MARGIN) * ONE;
     pos.y < TOP
-}
-
-pub fn delete_entity(entity: Entity, commands: &mut CommandBuffer) {
-    commands.remove(entity);
 }
 
 #[system]
@@ -202,6 +198,7 @@ pub fn player_shot_collision_check(
     #[resource] game_info: &GameInfo,
     commands: &mut CommandBuffer,
 ) {
+    let mut colls: Vec<(Entity, Vector2D<i32>)> = Vec::new();
     for (_, shot_pos, shot_hit_box, shot_entity) in
         <(&MyShot, &Posture, &HitBox, Entity)>::query().iter(world)
     {
@@ -210,16 +207,20 @@ pub fn player_shot_collision_check(
         for (_enemy, enemy_pos, enemy_hit_box, enemy_entity) in
             <(&Enemy, &Posture, &HitBox, Entity)>::query().iter(world)
         {
-            let enemy_collbox =
-                CollBox { top_left: round_vec(&enemy_pos.0), size: enemy_hit_box.size };
+            let enemy_collbox = CollBox {
+                top_left: round_vec(&enemy_pos.0) + enemy_hit_box.offset,
+                size: enemy_hit_box.size,
+            };
             if shot_coll_box.check_collision(&enemy_collbox) {
-                delete_entity(*shot_entity, commands);
-                delete_entity(*enemy_entity, commands);
-                create_explosion_effect(&enemy_pos.0, 1, commands);
-                sound_queue.push_play(CH_KILL, SE_KILL);
-                spawn_item(&enemy_pos.0, game_info.frame_count, commands);
+                commands.remove(*shot_entity);
+                colls.push((*enemy_entity, enemy_pos.0));
             }
         }
+    }
+
+    for (enemy_entity, enemy_position) in colls {
+        let enemy = <&mut Enemy>::query().get_mut(world, enemy_entity).unwrap();
+        set_enemy_damage(enemy, enemy_entity, &enemy_position, sound_queue, game_info, commands);
     }
 }
 
@@ -272,7 +273,10 @@ pub fn player_enemy_collision_check(
     }
     let player_collbox = pos_to_coll_box(&player_pos.0, player_hit_box);
     for (_enemy, enemy_pos, enemy_hit_box) in <(&Enemy, &Posture, &HitBox)>::query().iter(world) {
-        let enemy_collbox = CollBox { top_left: round_vec(&enemy_pos.0), size: enemy_hit_box.size };
+        let enemy_collbox = CollBox {
+            top_left: round_vec(&enemy_pos.0) + enemy_hit_box.offset,
+            size: enemy_hit_box.size,
+        };
         if player_collbox.check_collision(&enemy_collbox) {
             colls.push(*player_entity);
             break;

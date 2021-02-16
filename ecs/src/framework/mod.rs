@@ -13,5 +13,5 @@ pub mod system_player;
 pub mod system_text;
 
 pub fn pos_to_coll_box(pos: &Vector2D<i32>, coll_rect: &HitBox) -> CollBox {
-    CollBox { top_left: round_vec(pos), size: coll_rect.size }
+    CollBox { top_left: round_vec(pos) + coll_rect.offset, size: coll_rect.size }
 }

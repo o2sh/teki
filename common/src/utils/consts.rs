@@ -39,7 +39,7 @@ pub const TEXT_STAGE_ALPHA: u8 = 255;
 
 pub const BASE_Y: i32 = 75;
 
-pub const MAX_ENE_SHOT_COUNT: usize = 12;
+pub const MAX_ENE_SHOT_COUNT: usize = 100;
 pub const ENE_SHOT_SPEED1: i32 = 25 * ONE / 10;
 pub const ENE_SHOT_SPEED2: i32 = 40 * ONE / 10;
 

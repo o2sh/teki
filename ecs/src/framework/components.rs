@@ -34,6 +34,7 @@ pub struct EnemyBase {
 #[derive(Clone, Copy, PartialEq)]
 pub enum AttackType {
     Normal,
+    Intense,
 }
 
 #[derive(PartialEq)]
@@ -42,7 +43,7 @@ pub enum EnemyState {
     MoveToFormation,
     Formation,
     Attack(AttackType),
-    Disappearance,
+    ExitScreen,
     Destroy,
 }
 pub struct Avatar;
@@ -70,6 +71,7 @@ pub struct Enemy {
     pub state: EnemyState,
     pub base: EnemyBase,
     pub is_formation: bool,
+    pub life: u32,
 }
 
 pub struct Item {
@@ -78,6 +80,7 @@ pub struct Item {
 }
 
 pub struct HitBox {
+    pub offset: Vector2D<i32>,
     pub size: Vector2D<i32>,
 }
 
