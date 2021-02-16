@@ -59,13 +59,14 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
             &[
                 "marisa.png",
                 "reimu.png",
-                "enemy.png",
+                "enemy_a.png",
+                "enemy_b.png",
                 "orbs.png",
                 "bg.png",
                 "spells.png",
                 "shockwave.png",
-                "a_reimu.png",
-                "a_marisa.png",
+                "avatar_reimu.png",
+                "avatar_marisa.png",
                 "player_select.png",
                 "menu_bg.png",
                 "desc_char.png",
@@ -75,13 +76,14 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
         );
         renderer.load_sprite_sheet("assets/gfx/marisa.json");
         renderer.load_sprite_sheet("assets/gfx/reimu.json");
-        renderer.load_sprite_sheet("assets/gfx/enemy.json");
+        renderer.load_sprite_sheet("assets/gfx/enemy_a.json");
+        renderer.load_sprite_sheet("assets/gfx/enemy_b.json");
         renderer.load_sprite_sheet("assets/gfx/orbs.json");
         renderer.load_sprite_sheet("assets/gfx/bg.json");
         renderer.load_sprite_sheet("assets/gfx/spells.json");
         renderer.load_sprite_sheet("assets/gfx/shockwave.json");
-        renderer.load_sprite_sheet("assets/gfx/a_reimu.json");
-        renderer.load_sprite_sheet("assets/gfx/a_marisa.json");
+        renderer.load_sprite_sheet("assets/gfx/avatar_reimu.json");
+        renderer.load_sprite_sheet("assets/gfx/avatar_marisa.json");
         renderer.load_sprite_sheet("assets/gfx/player_select.json");
         renderer.load_sprite_sheet("assets/gfx/desc_char.json");
         renderer.load_sprite_sheet("assets/gfx/title.json");

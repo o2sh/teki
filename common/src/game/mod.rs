@@ -14,6 +14,7 @@ pub use self::traj_command::TrajCommand;
 #[derive(Clone, Copy, PartialEq)]
 pub enum EnemyType {
     Fairy,
+    BigFairy,
 }
 
 pub enum ItemType {

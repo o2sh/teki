@@ -2,7 +2,7 @@ use crate::game::{appearance_table::*, EnemyType, FormationIndex, Traj, TrajComm
 use crate::utils::math::*;
 use vector2d::Vector2D;
 
-const UNIT_COUNT: u32 = 3;
+const UNIT_COUNT: u32 = 4;
 const STEP_WAIT: u32 = 32 / 3;
 
 pub struct NewBorn {
@@ -152,7 +152,7 @@ impl AppearanceManager {
             0 | 1 | 2 => {
                 for count in 0..4 {
                     let fi = ORDER[(base + count) as usize];
-                    let info = self.create_info(fi, count);
+                    let info = self.create_info(fi, count, EnemyType::Fairy);
                     self.orders.push(info);
                 }
             }
@@ -161,9 +161,14 @@ impl AppearanceManager {
                 for count in 0..4 {
                     let side = count & 1;
                     let fi = ORDER[(base + (count / 2 + (side ^ flip) * 4)) as usize];
-                    let info = self.create_info(fi, count);
+                    let info = self.create_info(fi, count, EnemyType::Fairy);
                     self.orders.push(info);
                 }
+            }
+            4 => {
+                let fi = ORDER[base as usize];
+                let info = self.create_info(fi, 0, EnemyType::BigFairy);
+                self.orders.push(info);
             }
 
             _ => {
@@ -172,42 +177,22 @@ impl AppearanceManager {
         }
     }
 
-    fn create_info(&self, fi: FormationIndex, count: u32) -> Info {
+    fn create_info(&self, fi: FormationIndex, count: u32, enemy_type: EnemyType) -> Info {
         let entry = &UNIT_TABLE[(self.stage as usize) % UNIT_TABLE.len()][self.unit as usize];
-        let enemy_type = EnemyType::Fairy;
+
+        let offset = match enemy_type {
+            EnemyType::Fairy => Vector2D::new(16 * ONE, 0),
+            EnemyType::BigFairy => Vector2D::new(32 * ONE, 0),
+        };
         match entry.pat {
             0 => {
                 let side = count & 1;
                 let time = (count / 2) * STEP_WAIT;
-                Info::new(time, enemy_type, fi, Vector2D::new(16 * ONE, 0), side == 0, entry.table)
+                Info::new(time, enemy_type, fi, offset, side == 0, entry.table)
             }
-            1 => {
+            1 | _ => {
                 let time = count * STEP_WAIT;
-                Info::new(
-                    time,
-                    enemy_type,
-                    fi,
-                    Vector2D::new(16 * ONE, 0),
-                    entry.flip_x,
-                    entry.table,
-                )
-            }
-            2 => {
-                let time = count * STEP_WAIT;
-                Info::new(time, enemy_type, fi, Vector2D::new(0, 0), entry.flip_x, entry.table)
-            }
-            3 | _ => {
-                let side = count & 1;
-                let flag = 1 - (side as i32) * 2;
-                let time = (count / 2) * STEP_WAIT;
-                Info::new(
-                    time,
-                    enemy_type,
-                    fi,
-                    Vector2D::new(flag * 16 * ONE, 0),
-                    entry.flip_x,
-                    entry.table,
-                )
+                Info::new(time, enemy_type, fi, offset, entry.flip_x, entry.table)
             }
         }
     }

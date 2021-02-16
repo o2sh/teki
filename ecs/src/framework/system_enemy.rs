@@ -14,7 +14,8 @@ use teki_common::utils::consts::*;
 use teki_common::utils::math::*;
 use vector2d::Vector2D;
 
-const FAIRY_SPRITES: [&str; 4] = ["enemy0", "enemy1", "enemy2", "enemy3"];
+const FAIRY_SPRITES: [&str; 4] = ["enemy_a0", "enemy_a1", "enemy_a2", "enemy_a3"];
+const BIG_FAIRY_SPRITES: [&str; 5] = ["enemy_b0", "enemy_b1", "enemy_b2", "enemy_b3", "enemy_b4"];
 const ANIMATION_SPAN: u32 = 10;
 
 impl EnemyBase {
@@ -144,8 +145,13 @@ pub fn run_appearance_enemy(
 
     if let Some(new_borns) = new_borns_opt {
         new_borns.into_iter().for_each(|e| {
-            let sprite_name = match e.enemy_type {
-                EnemyType::Fairy => "enemy0",
+            let (sprite_name, hit_box, offset) = match e.enemy_type {
+                EnemyType::Fairy => {
+                    ("enemy_a0", HitBox { size: Vector2D::new(32, 32) }, Vector2D::new(-16, -16))
+                }
+                EnemyType::BigFairy => {
+                    ("enemy_b0", HitBox { size: Vector2D::new(64, 364) }, Vector2D::new(-32, -32))
+                }
             };
 
             let base = EnemyBase::new(Some(e.traj));
@@ -159,9 +165,7 @@ pub fn run_appearance_enemy(
             };
             let posture = Posture(e.pos, 0, 0);
             let speed = Speed(0, 0);
-            let hit_box = HitBox { size: Vector2D::new(32, 32) };
-            let drawable =
-                SpriteDrawable { sprite_name, offset: Vector2D::new(-16, -16), alpha: 255 };
+            let drawable = SpriteDrawable { sprite_name, offset, alpha: 255 };
             commands.push((enemy, posture, speed, hit_box, drawable));
         });
     }
@@ -240,7 +244,7 @@ fn do_move_enemy(
         }
         EnemyState::Disappearance => {
             let posture = <&mut Posture>::query().get_mut(world, entity).unwrap();
-            let result = exit_screen(posture, speed);
+            let result = exit_screen(posture, speed, enemy.enemy_type);
             forward(posture, speed);
             if result {
                 enemy.state = EnemyState::Destroy;
@@ -269,6 +273,7 @@ pub fn do_animate_enemy(enemy: &mut Enemy, sprite: &mut SpriteDrawable, frame_co
         }
         sprite.sprite_name = match enemy.enemy_type {
             EnemyType::Fairy => FAIRY_SPRITES[enemy.index_x],
+            EnemyType::BigFairy => BIG_FAIRY_SPRITES[enemy.index_x],
         };
     }
 }
@@ -289,11 +294,14 @@ pub fn move_to_formation(
     move_to_target(posture, speed, target)
 }
 
-pub fn exit_screen(posture: &mut Posture, speed: &mut Speed) -> bool {
+pub fn exit_screen(posture: &mut Posture, speed: &mut Speed, enemy_type: EnemyType) -> bool {
     let pos = &mut posture.0;
     let game_width = GAME_WIDTH * ONE;
     let game_height = GAME_HEIGHT * ONE;
-    let margin = 16 * ONE;
+    let margin = match enemy_type {
+        EnemyType::Fairy => 16 * ONE,
+        EnemyType::BigFairy => 32 * ONE,
+    };
     let x = {
         if pos.x <= game_width / 2 {
             pos.x
