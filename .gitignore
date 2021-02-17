@@ -10,3 +10,4 @@ Cargo.lock
 **/*.rs.bk
 
 /docs/assets/audio/*.ogg
+.DS_Store

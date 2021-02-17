@@ -163,7 +163,7 @@ pub fn run_appearance_enemy(
                     "enemy_b0",
                     HitBox { offset: Vector2D::new(-16, -16), size: Vector2D::new(32, 32) },
                     Vector2D::new(-32, -32),
-                    7,
+                    3,
                 ),
             };
 
