@@ -2,7 +2,7 @@ use crate::game::{appearance_table::*, EnemyType, FormationIndex, Traj, TrajComm
 use crate::utils::math::*;
 use vector2d::Vector2D;
 
-const UNIT_COUNT: u32 = 4;
+const UNIT_COUNT: u32 = 3;
 const STEP_WAIT: u32 = 32 / 3;
 
 pub struct NewBorn {
@@ -146,7 +146,7 @@ impl AppearanceManager {
     }
 
     fn create_orders(&mut self) {
-        let base = self.unit * 4;
+        let base = UNIT_BASE[self.unit as usize] as u32;
         let entry = &UNIT_TABLE[(self.stage as usize) % UNIT_TABLE.len()][self.unit as usize];
         match entry.pat {
             0 | 1 | 2 => {
@@ -166,9 +166,11 @@ impl AppearanceManager {
                 }
             }
             4 => {
-                let fi = ORDER[base as usize];
-                let info = self.create_info(fi, 0, EnemyType::BigFairy);
-                self.orders.push(info);
+                for count in 0..2 {
+                    let fi = ORDER[(base + count) as usize];
+                    let info = self.create_info(fi, count, EnemyType::BigFairy);
+                    self.orders.push(info);
+                }
             }
 
             _ => {
@@ -185,7 +187,7 @@ impl AppearanceManager {
             EnemyType::BigFairy => Vector2D::new(32 * ONE, 0),
         };
         match entry.pat {
-            0 => {
+            0 | 4 => {
                 let side = count & 1;
                 let time = (count / 2) * STEP_WAIT;
                 Info::new(time, enemy_type, fi, offset, side == 0, entry.table)
