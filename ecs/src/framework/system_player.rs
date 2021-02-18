@@ -145,7 +145,7 @@ pub fn do_fire_myshot(
     commands.push((
         MyShot { player_entity: entity },
         pos,
-        HitBox { offset: Vector2D::new(-5, -10), size: Vector2D::new(10, 20) },
+        HitBox { offset: Vector2D::new(-8, -32), size: Vector2D::new(16, 16) },
         SpriteDrawable {
             sprite_name: player.data.bullet,
             offset: Vector2D::new(-8, -32),
