@@ -62,6 +62,7 @@ pub struct Avatar;
 pub enum PlayerState {
     Normal,
     Invincible,
+    Special,
 }
 
 pub struct Player {

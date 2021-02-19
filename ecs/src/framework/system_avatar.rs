@@ -24,6 +24,9 @@ pub fn animate_avatar(
             PlayerState::Invincible => {
                 sprite.sprite_name = p.data.damage_face;
             }
+            PlayerState::Special => {
+                sprite.sprite_name = p.data.dialog_face;
+            }
         }
     }
 }

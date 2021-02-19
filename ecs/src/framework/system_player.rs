@@ -368,6 +368,7 @@ pub fn special_attack(
     #[resource] sound_queue: &mut SoundQueue,
 ) {
     if pad.is_trigger(PadBit::X) {
+        player.state = PlayerState::Special;
         sound_queue.push_play(CH_SPELL, SE_SPELL);
         game_info.alpha = 100;
         let text = Text {
@@ -414,6 +415,7 @@ pub fn special_attack(
 }
 
 #[system(for_each)]
+#[write_component(Player)]
 #[write_component(Posture)]
 #[write_component(SpriteDrawable)]
 pub fn move_special_attack(
@@ -432,6 +434,8 @@ pub fn move_special_attack(
     }
 
     if game_info.frame_count > special_attack.0 {
+        let player = <&mut Player>::query().iter_mut(world).next().unwrap();
+        player.state = PlayerState::Normal;
         commands.remove(*entity);
         game_info.alpha = BG_ALPHA;
         return;
