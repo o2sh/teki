@@ -22,6 +22,8 @@ impl Game {
             .add_system(fire_myshot_system())
             .add_system(move_myshot_system())
             .add_system(run_appearance_enemy_system())
+            .add_system(special_attack_system())
+            .add_system(move_special_attack_system())
             .flush()
             .add_system(animate_enemy_system())
             .add_system(animate_player_system())
@@ -86,22 +88,36 @@ impl Game {
     }
 
     pub fn draw<R: Renderer>(&self, renderer: &mut R) {
-        renderer.draw_scrolling_bg(BG1_TEXTURE, GAME_WIDTH, GAME_HEIGHT);
-        renderer.draw_vertical_separation(GAME_WIDTH, GAME_HEIGHT);
-        for (posture, drawable) in <(&Posture, &SpriteDrawable)>::query().iter(&self.world) {
-            let pos = round_vec(&posture.0) + drawable.offset;
-            let angle = quantize_angle(posture.1, ANGLE_DIV);
-            if angle == 0 {
-                renderer.draw_sprite(drawable.sprite_name, &pos, drawable.alpha);
-            } else {
-                renderer.draw_sprite_rot(drawable.sprite_name, &pos, angle, None, drawable.alpha);
-            }
-        }
-        for (posture, text) in <(&Posture, &Text)>::query().iter(&self.world) {
-            let pos = round_vec(&posture.0) + text.offset;
-            renderer.draw_str(RE_FONT, pos.x, pos.y, 10, &text.msg, &text.color, false);
-        }
         if let Some(game_info) = get_game_info(&self.resources) {
+            renderer.draw_scrolling_bg(BG1_TEXTURE, GAME_WIDTH, GAME_HEIGHT, game_info.alpha);
+            renderer.draw_vertical_separation(GAME_WIDTH, GAME_HEIGHT);
+            for (posture, drawable) in <(&Posture, &SpriteDrawable)>::query().iter(&self.world) {
+                let pos = round_vec(&posture.0) + drawable.offset;
+                let angle = quantize_angle(posture.1, ANGLE_DIV);
+                if angle == 0 {
+                    renderer.draw_sprite(drawable.sprite_name, &pos, drawable.alpha);
+                } else {
+                    renderer.draw_sprite_rot(
+                        drawable.sprite_name,
+                        &pos,
+                        angle,
+                        None,
+                        drawable.alpha,
+                    );
+                }
+            }
+            for (posture, text) in <(&Posture, &Text)>::query().iter(&self.world) {
+                let pos = round_vec(&posture.0) + text.offset;
+                renderer.draw_str(
+                    text.font,
+                    pos.x,
+                    pos.y,
+                    text.size,
+                    &text.msg,
+                    &text.color,
+                    false,
+                );
+            }
             game_info.draw(renderer);
             match game_info.game_state {
                 GameState::StartStage => {

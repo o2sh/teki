@@ -190,7 +190,7 @@ impl Renderer for WasmRenderer {
         self.context.set_fill_style(&JsValue::from(format!("rgb({},{},{})", r, g, b)));
     }
 
-    fn draw_scrolling_bg(&mut self, sprite_name: &str, width: i32, height: i32) {
+    fn draw_scrolling_bg(&mut self, sprite_name: &str, width: i32, height: i32, alpha: u8) {
         let sprite_sheet = self.sprite_sheet.borrow_mut();
         let (sheet, tex_name) = sprite_sheet.get(sprite_name).expect("No sprite_sheet");
         self.scrolling_offset -= 1 * SCROLLING_BG_VEL;
@@ -201,7 +201,7 @@ impl Renderer for WasmRenderer {
         let image = self.images.borrow();
         if let Some(image) = image.get(tex_name) {
             self.context.save();
-            self.context.set_global_alpha(BG_ALPHA as f64 / 255.0);
+            self.context.set_global_alpha(alpha as f64 / 255.0);
             self.context
                 .draw_image_with_html_image_element_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
                     &image,

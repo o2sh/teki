@@ -59,6 +59,7 @@ impl WasmApp {
 fn to_key(key_code: &str) -> Option<Key> {
     match key_code {
         "KeyZ" => Some(Key::Z),
+        "KeyX" => Some(Key::X),
         "Space" => Some(Key::Space),
         "Escape" => Some(Key::Escape),
         "ArrowLeft" => Some(Key::Left),

@@ -466,6 +466,7 @@ pub fn enemy_shot_collision_check(
 }
 
 pub fn set_enemy_damage(
+    damage: u32,
     enemy: &mut Enemy,
     enemy_entity: Entity,
     enemy_pos: &Vector2D<i32>,
@@ -476,8 +477,8 @@ pub fn set_enemy_damage(
     let is_dead = match enemy.enemy_type {
         EnemyType::Fairy => true,
         EnemyType::BigFairy => {
-            enemy.life -= 1;
-            if enemy.life == 0 {
+            enemy.life -= damage as i32;
+            if enemy.life < 0 {
                 true
             } else {
                 false

@@ -1,6 +1,8 @@
 pub struct PlayerData<'a> {
     pub sprite: &'a str,
     pub bullet: &'a str,
+    pub special: &'a str,
+    pub big_orb: &'a str,
     pub neutral_face: &'a str,
     pub attack_face: &'a str,
     pub dialog_face: &'a str,
@@ -14,6 +16,8 @@ impl<'a> PlayerData<'a> {
             0 => Self {
                 sprite: "reimu0",
                 bullet: "spell0",
+                special: "special0",
+                big_orb: "big_orb0",
                 neutral_face: "a_reimu0",
                 attack_face: "a_reimu1",
                 damage_face: "a_reimu2",
@@ -36,6 +40,8 @@ impl<'a> PlayerData<'a> {
             _ => Self {
                 sprite: "marisa0",
                 bullet: "spell4",
+                special: "special1",
+                big_orb: "big_orb1",
                 neutral_face: "a_marisa0",
                 attack_face: "a_marisa1",
                 damage_face: "a_marisa2",

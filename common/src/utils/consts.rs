@@ -2,12 +2,13 @@ use crate::utils::math::*;
 
 pub const SFX_VOLUME: f32 = 0.05;
 pub const BGM_VOLUME: f32 = 0.1;
-pub const CHANNEL_COUNT: u32 = 5;
+pub const CHANNEL_COUNT: u32 = 6;
 pub const CH_BG_MUSIC: u32 = 0;
 pub const CH_SHOT: u32 = 1;
 pub const CH_KILL: u32 = 2;
 pub const CH_ITEM: u32 = 3;
 pub const CH_DAMAGE: u32 = 4;
+pub const CH_SPELL: u32 = 5;
 
 pub const WINDOW_WIDTH: i32 = 700;
 pub const WINDOW_HEIGHT: i32 = 256 * 2;
@@ -44,7 +45,6 @@ pub const ENE_SHOT_SPEED1: i32 = 25 * ONE / 10;
 pub const ENE_SHOT_SPEED2: i32 = 40 * ONE / 10;
 
 pub const BG1_TEXTURE: &str = "bg_ground";
-pub const BG3_TEXTURE: &str = "bg_grass";
 pub const BG2_TEXTURE: &str = "bg_water";
 
 pub const BG_MUSIC: &str = "stage01";
@@ -56,6 +56,7 @@ pub const SE_OK: &str = "assets/sfx/se_ok00";
 pub const SE_SELECT: &str = "assets/sfx/se_select00";
 pub const SE_ITEM: &str = "assets/sfx/se_item00";
 pub const SE_DAMAGE: &str = "assets/sfx/se_damage";
+pub const SE_SPELL: &str = "assets/sfx/se_spell";
 
 pub const RE_FONT: &str = "assets/fonts/regular.ttf";
 pub const IM_FONT: &str = "assets/fonts/immortal.ttf";

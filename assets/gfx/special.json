@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "image": "special.png",
+    "size": {
+      "w": 640,
+      "h": 488
+    },
+    "scale": "1"
+  },
+  "frames": {
+    "special0.png": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 488
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 488
+      },
+      "sourceSize": {
+        "w": 320,
+        "h": 488
+      }
+    },
+    "special1.png": {
+      "frame": {
+        "x": 320,
+        "y": 0,
+        "w": 320,
+        "h": 488
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 488
+      },
+      "sourceSize": {
+        "w": 320,
+        "h": 488
+      }
+    }
+  }
+}

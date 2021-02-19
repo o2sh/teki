@@ -42,11 +42,18 @@ pub struct GameInfo {
     pub score: u32,
     pub game_state: GameState,
     pub frame_count: u32,
+    pub alpha: u8,
 }
 
 impl GameInfo {
     pub fn new() -> Self {
-        GameInfo { stage: 0, score: 0, game_state: GameState::StartStage, frame_count: 0 }
+        GameInfo {
+            stage: 0,
+            score: 0,
+            game_state: GameState::StartStage,
+            frame_count: 0,
+            alpha: 190,
+        }
     }
 
     pub fn add_score(&mut self, add: u32) {

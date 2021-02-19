@@ -94,6 +94,8 @@ pub fn item_player_collision_check(
                     color,
                     offset: Vector2D::new(-32, -32),
                     delay: 12,
+                    size: 10,
+                    font: RE_FONT,
                 };
 
                 commands.push((text, player_pos.clone()));

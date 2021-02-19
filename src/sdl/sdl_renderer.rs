@@ -99,7 +99,7 @@ impl Renderer for SdlRenderer {
             .expect("copy_ex failed");
     }
 
-    fn draw_scrolling_bg(&mut self, sprite_name: &str, width: i32, height: i32) {
+    fn draw_scrolling_bg(&mut self, sprite_name: &str, width: i32, height: i32, alpha: u8) {
         let (sheet, tex_name) = self.sprite_sheet.get(sprite_name).expect("No sprite");
         let texture = self.texture_manager.get_mut(tex_name).expect("No texture");
 
@@ -108,7 +108,7 @@ impl Renderer for SdlRenderer {
             self.scrolling_offset = 0;
         }
 
-        texture.set_alpha_mod(BG_ALPHA);
+        texture.set_alpha_mod(alpha);
 
         self.canvas
             .copy(

@@ -18,10 +18,14 @@ pub struct Text {
     pub color: RGBA,
     pub offset: Vector2D<i32>,
     pub delay: u32,
+    pub size: u32,
+    pub font: &'static str,
 }
 
 pub struct MyShot {
     pub player_entity: Entity,
+    pub size: u32,
+    pub shot_type: ShotType,
 }
 
 pub struct EneShot(pub Vector2D<i32>);
@@ -35,6 +39,12 @@ pub struct EnemyBase {
 pub enum AttackType {
     Normal,
     Intense,
+}
+
+#[derive(Clone, Copy, PartialEq)]
+pub enum ShotType {
+    Normal,
+    Special,
 }
 
 #[derive(PartialEq)]
@@ -71,7 +81,7 @@ pub struct Enemy {
     pub state: EnemyState,
     pub base: EnemyBase,
     pub is_formation: bool,
-    pub life: u32,
+    pub life: i32,
 }
 
 pub struct Item {
@@ -83,6 +93,8 @@ pub struct HitBox {
     pub offset: Vector2D<i32>,
     pub size: Vector2D<i32>,
 }
+
+pub struct SpecialAttack(pub u32);
 
 pub struct SequentialSpriteAnime {
     pub sprites: &'static [&'static str],

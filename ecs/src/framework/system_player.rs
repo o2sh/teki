@@ -7,6 +7,8 @@ use legion::systems::CommandBuffer;
 use legion::world::SubWorld;
 use legion::*;
 use teki_common::game::PlayerData;
+use teki_common::game::RGBA;
+use teki_common::utils::math::calc_velocity;
 use teki_common::utils::{
     collision::CollBox,
     consts::*,
@@ -16,6 +18,7 @@ use teki_common::utils::{
 use vector2d::Vector2D;
 
 pub const ANIMATION_SPAN: u32 = 5;
+pub const SPECIAL_SPAN: u32 = 50;
 
 pub fn new_player(character_index: u8) -> Player {
     let data = PlayerData::new(character_index);
@@ -143,7 +146,7 @@ pub fn do_fire_myshot(
 ) {
     let pos = Posture(Vector2D::new(position.0.x, position.0.y - 16 * ONE), 0, 0);
     commands.push((
-        MyShot { player_entity: entity },
+        MyShot { player_entity: entity, size: 64, shot_type: ShotType::Normal },
         pos,
         HitBox { offset: Vector2D::new(-8, -32), size: Vector2D::new(16, 16) },
         SpriteDrawable {
@@ -157,22 +160,33 @@ pub fn do_fire_myshot(
 #[system(for_each)]
 #[write_component(Posture)]
 pub fn move_myshot(
-    _: &MyShot,
+    my_shot: &MyShot,
     entity: &Entity,
     world: &mut SubWorld,
     commands: &mut CommandBuffer,
 ) {
-    do_move_myshot(*entity, world, commands);
+    do_move_myshot(my_shot, *entity, world, commands);
 }
 
-pub fn do_move_myshot(entity: Entity, world: &mut SubWorld, commands: &mut CommandBuffer) {
+pub fn do_move_myshot(
+    my_shot: &MyShot,
+    entity: Entity,
+    world: &mut SubWorld,
+    commands: &mut CommandBuffer,
+) {
     let mut cont = false;
     for e in [Some(entity)].iter().flatten() {
-        let position = <&mut Posture>::query().get_mut(world, *e).unwrap();
-        let pos = &mut position.0;
+        let posture = <&mut Posture>::query().get_mut(world, *e).unwrap();
+        let pos = &mut posture.0;
+        let angle = &posture.1;
 
-        pos.y -= MYSHOT_SPEED;
-        if !out_of_screen(pos) {
+        if *angle == 0 {
+            pos.y -= MYSHOT_SPEED;
+        } else {
+            *pos += calc_velocity(*angle, MYSHOT_SPEED);
+        }
+
+        if !out_of_screen(pos, my_shot.size as i32) {
             cont = true;
         }
     }
@@ -181,10 +195,12 @@ pub fn do_move_myshot(entity: Entity, world: &mut SubWorld, commands: &mut Comma
     }
 }
 
-fn out_of_screen(pos: &Vector2D<i32>) -> bool {
-    const MARGIN: i32 = 10;
-    const TOP: i32 = (MARGIN) * ONE;
-    pos.y < TOP
+fn out_of_screen(pos: &Vector2D<i32>, size: i32) -> bool {
+    let top = -size * ONE;
+    let left = -size * ONE;
+    let right = (GAME_WIDTH - size / 2) * ONE;
+    let bottom = (GAME_HEIGHT + size) * ONE;
+    pos.y < top || pos.x < left || pos.x > right || pos.y > bottom
 }
 
 #[system]
@@ -198,8 +214,8 @@ pub fn player_shot_collision_check(
     #[resource] game_info: &GameInfo,
     commands: &mut CommandBuffer,
 ) {
-    let mut colls: Vec<(Entity, Vector2D<i32>)> = Vec::new();
-    for (_, shot_pos, shot_hit_box, shot_entity) in
+    let mut colls: Vec<(Entity, Vector2D<i32>, u32)> = Vec::new();
+    for (shot, shot_pos, shot_hit_box, shot_entity) in
         <(&MyShot, &Posture, &HitBox, Entity)>::query().iter(world)
     {
         let shot_coll_box = pos_to_coll_box(&shot_pos.0, &shot_hit_box);
@@ -213,14 +229,26 @@ pub fn player_shot_collision_check(
             };
             if shot_coll_box.check_collision(&enemy_collbox) {
                 commands.remove(*shot_entity);
-                colls.push((*enemy_entity, enemy_pos.0));
+                let damage = match shot.shot_type {
+                    ShotType::Normal => 1,
+                    ShotType::Special => 10,
+                };
+                colls.push((*enemy_entity, enemy_pos.0, damage));
             }
         }
     }
 
-    for (enemy_entity, enemy_position) in colls {
+    for (enemy_entity, enemy_position, damage) in colls {
         let enemy = <&mut Enemy>::query().get_mut(world, enemy_entity).unwrap();
-        set_enemy_damage(enemy, enemy_entity, &enemy_position, sound_queue, game_info, commands);
+        set_enemy_damage(
+            damage,
+            enemy,
+            enemy_entity,
+            &enemy_position,
+            sound_queue,
+            game_info,
+            commands,
+        );
     }
 }
 
@@ -326,5 +354,92 @@ pub fn player_invincibility_frames(
     {
         sprite.alpha = 255;
         player.state = PlayerState::Normal;
+    }
+}
+
+#[system(for_each)]
+pub fn special_attack(
+    player: &mut Player,
+    player_pos: &Posture,
+    entity: &Entity,
+    commands: &mut CommandBuffer,
+    #[resource] pad: &Pad,
+    #[resource] game_info: &mut GameInfo,
+    #[resource] sound_queue: &mut SoundQueue,
+) {
+    if pad.is_trigger(PadBit::X) {
+        sound_queue.push_play(CH_SPELL, SE_SPELL);
+        game_info.alpha = 100;
+        let text = Text {
+            msg: String::from("Magic Sign \"Stellar Vortex\""),
+            color: RGBA { r: 255, g: 255, b: 255, a: 255 },
+            offset: Vector2D::new(0, 0),
+            delay: 30,
+            size: 16,
+            font: IM_FONT,
+        };
+
+        let text_pos = Posture(Vector2D::new(50 * ONE, (GAME_HEIGHT - 75) * ONE), 0, 0);
+        commands.push((text, text_pos));
+
+        let sprite_pos = Posture(Vector2D::new((GAME_WIDTH - 330) * ONE, 50 * ONE), 0, 0);
+
+        commands.push((
+            SpecialAttack(game_info.frame_count + SPECIAL_SPAN),
+            sprite_pos,
+            SpriteDrawable {
+                sprite_name: player.data.special,
+                offset: Vector2D::new(0, 0),
+                alpha: 140,
+            },
+        ));
+
+        const DANGLE: i32 = ANGLE * ONE / ANGLE_DIV;
+
+        for i in 0..8 {
+            let angle = DANGLE * i * 9;
+            let pos = Posture(Vector2D::new(player_pos.0.x, player_pos.0.y - 32 * ONE), angle, 0);
+            commands.push((
+                MyShot { player_entity: *entity, size: 64, shot_type: ShotType::Special },
+                pos,
+                HitBox { offset: Vector2D::new(-32, -32), size: Vector2D::new(64, 64) },
+                SpriteDrawable {
+                    sprite_name: player.data.big_orb,
+                    offset: Vector2D::new(-32, -32),
+                    alpha: 255,
+                },
+            ));
+        }
+    }
+}
+
+#[system(for_each)]
+#[write_component(Posture)]
+#[write_component(SpriteDrawable)]
+pub fn move_special_attack(
+    special_attack: &mut SpecialAttack,
+    entity: &Entity,
+    world: &mut SubWorld,
+    commands: &mut CommandBuffer,
+    #[resource] game_info: &mut GameInfo,
+) {
+    let (position, sprite) =
+        <(&mut Posture, &mut SpriteDrawable)>::query().get_mut(world, *entity).unwrap();
+    let pos = &mut position.0;
+
+    if pos.x > 10 * ONE {
+        pos.x -= (1 << 3) * ONE;
+    }
+
+    if game_info.frame_count > special_attack.0 {
+        commands.remove(*entity);
+        game_info.alpha = BG_ALPHA;
+        return;
+    };
+
+    let sp = (SPECIAL_SPAN >> 1) as f32;
+    if ((special_attack.0 - game_info.frame_count) as f32) < sp {
+        let ratio = (sp - (special_attack.0 - game_info.frame_count) as f32) / (4.0 * sp);
+        sprite.alpha = (sprite.alpha as f32 * (1.0 - ratio)) as u8;
     }
 }

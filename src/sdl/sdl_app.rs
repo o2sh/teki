@@ -135,6 +135,7 @@ counted_array!(const KEY_MAP_TABLE: [(Keycode, Key); _] = [
     (Keycode::Up,     Key::Up),
     (Keycode::Down,   Key::Down),
     (Keycode::Z,      Key::Z),
+    (Keycode::X,      Key::X),
 
 ]);
 

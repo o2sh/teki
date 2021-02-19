@@ -1,7 +1,7 @@
 import { WasmApp, WasmRenderer } from './pkg/index'
 import { audioManager } from './audio'
 
-const CHANNEL_COUNT = 5
+const CHANNEL_COUNT = 6
 
 const AUDIO_ASSETS = [
   'assets/bgm/menu',
@@ -12,6 +12,7 @@ const AUDIO_ASSETS = [
   'assets/sfx/se_select00',
   'assets/sfx/se_item00',
   'assets/sfx/se_damage',
+  'assets/sfx/se_spell',
   'assets/audio/toggle_sound'
 ]
 const ENABLE_AUDIO = 'assets/audio/toggle_sound'

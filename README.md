@@ -21,4 +21,5 @@ cargo run
 
 * The Arrow Keys move the character around
 * Z causes a short barrage of shots to be fired; it may be held down for rapidfire
+* X releases a bomb, also known as a Spell Card (presuming that any are left)
 * Esc pauses the game and brings you to the in-game menu
