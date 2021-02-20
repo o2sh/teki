@@ -367,7 +367,7 @@ pub fn special_attack(
     #[resource] game_info: &mut GameInfo,
     #[resource] sound_queue: &mut SoundQueue,
 ) {
-    if pad.is_trigger(PadBit::X) {
+    if pad.is_trigger(PadBit::X) && player.state != PlayerState::Special {
         player.state = PlayerState::Special;
         sound_queue.push_play(CH_SPELL, SE_SPELL);
         game_info.alpha = 100;
@@ -395,10 +395,8 @@ pub fn special_attack(
             },
         ));
 
-        const DANGLE: i32 = ANGLE * ONE / ANGLE_DIV;
-
         for i in 0..8 {
-            let angle = DANGLE * i * 9;
+            let angle = (ANGLE * ONE / 8) * i;
             let pos = Posture(Vector2D::new(player_pos.0.x, player_pos.0.y - 32 * ONE), angle, 0);
             commands.push((
                 MyShot { player_entity: *entity, size: 64, shot_type: ShotType::Special },
