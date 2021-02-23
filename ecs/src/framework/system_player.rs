@@ -30,6 +30,7 @@ pub fn new_player(character_index: u8) -> Player {
         index_x: 0,
         index_y: 0,
         data,
+        orbs_enable: false,
     }
 }
 
@@ -126,7 +127,7 @@ pub fn fire_myshot(
     if pad.is_pressed(PadBit::Z) && can_player_fire(player) {
         if player.next_shoot_time < game_info.frame_count {
             sound_queue.push_play(CH_SHOT, SE_SHOT);
-            do_fire_myshot(player, position, *entity, commands);
+            do_fire_myshot(player, position, *entity, commands, game_info);
             player.next_shoot_time = game_info.frame_count + SHOT_DELAY;
         }
     }
@@ -143,18 +144,30 @@ pub fn do_fire_myshot(
     position: &Posture,
     entity: Entity,
     commands: &mut CommandBuffer,
+    game_info: &mut GameInfo,
 ) {
-    let pos = Posture(Vector2D::new(position.0.x, position.0.y - 16 * ONE), 0, 0);
-    commands.push((
-        MyShot { player_entity: entity, size: 64, shot_type: ShotType::Normal },
-        pos,
-        HitBox { offset: Vector2D::new(-8, -32), size: Vector2D::new(16, 16) },
-        SpriteDrawable {
-            sprite_name: player.data.bullet,
-            offset: Vector2D::new(-8, -32),
-            alpha: 255,
-        },
-    ));
+    let mut postures: Vec<Posture> = Vec::new();
+    if game_info.score >= 200 {
+        let a1 = -(ANGLE * ONE) / (ANGLE_DIV << 2);
+        let a2 = (ANGLE * ONE) / (ANGLE_DIV << 2);
+        postures.push(Posture(Vector2D::new(position.0.x, position.0.y - 16 * ONE), a1, 0));
+        postures.push(Posture(Vector2D::new(position.0.x, position.0.y - 16 * ONE), a2, 0));
+    } else {
+        postures.push(Posture(Vector2D::new(position.0.x, position.0.y - 16 * ONE), 0, 0));
+    }
+
+    for pos in postures {
+        commands.push((
+            MyShot { player_entity: entity, size: 64, shot_type: ShotType::Card },
+            pos,
+            HitBox { offset: Vector2D::new(-8, -32), size: Vector2D::new(16, 16) },
+            SpriteDrawable {
+                sprite_name: player.data.bullet,
+                offset: Vector2D::new(-8, -32),
+                alpha: 255,
+            },
+        ));
+    }
 }
 
 #[system(for_each)]
@@ -198,7 +211,7 @@ pub fn do_move_myshot(
 fn out_of_screen(pos: &Vector2D<i32>, size: i32) -> bool {
     let top = -size * ONE;
     let left = -size * ONE;
-    let right = (GAME_WIDTH - size / 2) * ONE;
+    let right = (GAME_WIDTH + size) * ONE;
     let bottom = (GAME_HEIGHT + size) * ONE;
     pos.y < top || pos.x < left || pos.x > right || pos.y > bottom
 }
@@ -230,8 +243,8 @@ pub fn player_shot_collision_check(
             if shot_coll_box.check_collision(&enemy_collbox) {
                 commands.remove(*shot_entity);
                 let damage = match shot.shot_type {
-                    ShotType::Normal => 1,
-                    ShotType::Special => 10,
+                    ShotType::SpecialCard => 10,
+                    _ => 1,
                 };
                 colls.push((*enemy_entity, enemy_pos.0, damage));
             }
@@ -367,7 +380,7 @@ pub fn special_attack(
     #[resource] game_info: &mut GameInfo,
     #[resource] sound_queue: &mut SoundQueue,
 ) {
-    if pad.is_trigger(PadBit::X) && player.state != PlayerState::Special {
+    if pad.is_trigger(PadBit::X) && player.state == PlayerState::Normal {
         player.state = PlayerState::Special;
         sound_queue.push_play(CH_SPELL, SE_SPELL);
         game_info.alpha = 100;
@@ -399,7 +412,7 @@ pub fn special_attack(
             let angle = (ANGLE * ONE / 8) * i;
             let pos = Posture(Vector2D::new(player_pos.0.x, player_pos.0.y - 32 * ONE), angle, 0);
             commands.push((
-                MyShot { player_entity: *entity, size: 64, shot_type: ShotType::Special },
+                MyShot { player_entity: *entity, size: 64, shot_type: ShotType::SpecialCard },
                 pos,
                 HitBox { offset: Vector2D::new(-32, -32), size: Vector2D::new(64, 64) },
                 SpriteDrawable {
@@ -443,5 +456,54 @@ pub fn move_special_attack(
     if ((special_attack.0 - game_info.frame_count) as f32) < sp {
         let ratio = (sp - (special_attack.0 - game_info.frame_count) as f32) / (4.0 * sp);
         sprite.alpha = (sprite.alpha as f32 * (1.0 - ratio)) as u8;
+    }
+}
+
+#[system(for_each)]
+#[write_component(Player)]
+pub fn enable_yin_yang_orbs(
+    player: &mut Player,
+    player_pos: &Posture,
+    commands: &mut CommandBuffer,
+    #[resource] game_info: &mut GameInfo,
+) {
+    if !player.orbs_enable && game_info.score >= 200 {
+        player.orbs_enable = true;
+        let left_orb_pos = Vector2D::new(player_pos.0.x - 30 * ONE, player_pos.0.y);
+        let right_orb_pos = Vector2D::new(player_pos.0.x + 30 * ONE, player_pos.0.y);
+        let sprite = SpriteDrawable {
+            sprite_name: player.data.yin_yang_orb,
+            offset: Vector2D::new(-8, -8),
+            alpha: 255,
+        };
+        commands.push((
+            YinYangOrb { is_left: true },
+            Posture(left_orb_pos.clone(), 0, 0),
+            sprite.clone(),
+        ));
+        commands.push((
+            YinYangOrb { is_left: false },
+            Posture(right_orb_pos.clone(), 0, 0),
+            sprite.clone(),
+        ));
+    }
+}
+
+#[system]
+#[read_component(Player)]
+#[write_component(Posture)]
+#[write_component(YinYangOrb)]
+pub fn move_yin_yang_orbs(world: &mut SubWorld) {
+    let (_, player_pos) = <(&Player, &Posture)>::query().iter(world).next().unwrap();
+
+    const DANGLE: i32 = ANGLE * ONE / ANGLE_DIV;
+    let p_pos = player_pos.0.clone();
+    for (yin_yang_orb, yin_yang_orb_pos) in
+        <(&mut YinYangOrb, &mut Posture)>::query().iter_mut(world)
+    {
+        yin_yang_orb_pos.1 += DANGLE;
+        let x_shift = if yin_yang_orb.is_left { -30 * ONE } else { 30 * ONE };
+        yin_yang_orb_pos.0.x = p_pos.x + x_shift;
+        yin_yang_orb_pos.0.y = p_pos.y;
     }
 }

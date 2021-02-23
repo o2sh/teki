@@ -3,7 +3,7 @@ use crate::framework::{
     system_item::*, system_player::*, system_text::*,
 };
 use legion::*;
-use teki_common::game::AppearanceManager;
+use teki_common::game::{AppearanceManager, RGBA};
 use teki_common::traits::{Audio, Renderer};
 use teki_common::utils::{consts::*, math::*, pad::Pad};
 use vector2d::Vector2D;
@@ -39,6 +39,8 @@ impl Game {
             .add_system(player_invincibility_frames_system())
             .add_system(move_sequential_anime_system())
             .add_system(clear_text_system())
+            .add_system(enable_yin_yang_orbs_system())
+            .add_system(move_yin_yang_orbs_system())
             .build();
         let mut world = World::default();
 
@@ -90,8 +92,10 @@ impl Game {
     pub fn draw<R: Renderer>(&self, renderer: &mut R) {
         if let Some(game_info) = get_game_info(&self.resources) {
             renderer.draw_scrolling_bg(BG1_TEXTURE, GAME_WIDTH, GAME_HEIGHT, game_info.alpha);
-            renderer.draw_vertical_separation(GAME_WIDTH, GAME_HEIGHT);
-            for (posture, drawable) in <(&Posture, &SpriteDrawable)>::query().iter(&self.world) {
+            for (posture, drawable) in <(&Posture, &SpriteDrawable)>::query()
+                .filter(!component::<Avatar>())
+                .iter(&self.world)
+            {
                 let pos = round_vec(&posture.0) + drawable.offset;
                 let angle = quantize_angle(posture.1, ANGLE_DIV);
                 if angle == 0 {
@@ -118,6 +122,21 @@ impl Game {
                     false,
                 );
             }
+            renderer.draw_vertical_separation(GAME_WIDTH, GAME_HEIGHT);
+            renderer.draw_rect(
+                &Vector2D::new(GAME_WIDTH + 2, 0),
+                WINDOW_WIDTH - GAME_WIDTH,
+                GAME_HEIGHT,
+                RGBA { r: 0, g: 0, b: 0, a: 255 },
+            );
+
+            for (_, posture, drawable) in
+                <(&Avatar, &Posture, &SpriteDrawable)>::query().iter(&self.world)
+            {
+                let pos = round_vec(&posture.0) + drawable.offset;
+                renderer.draw_sprite(drawable.sprite_name, &pos, drawable.alpha);
+            }
+
             game_info.draw(renderer);
             match game_info.game_state {
                 GameState::StartStage => {

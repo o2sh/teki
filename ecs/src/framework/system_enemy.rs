@@ -48,14 +48,14 @@ impl EnemyBase {
 
     pub fn update_attack<A: EneBaseAccessorTrait>(
         &mut self,
-        attack_type: AttackType,
+        attack_type: EnemyAttackType,
         pos: &Vector2D<i32>,
         shot_enable: bool,
         accessor: &mut A,
     ) -> bool {
         let (shot_count, shot_interval) = match attack_type {
-            AttackType::Normal => (2, 10),
-            AttackType::Intense => (30, 8),
+            EnemyAttackType::Normal => (2, 10),
+            EnemyAttackType::Intense => (30, 8),
         };
         self.attack_frame_count += 1;
         if self.attack_frame_count <= shot_interval * shot_count
@@ -99,16 +99,16 @@ impl<'l> EneBaseAccessorImpl<'l> {
     }
 }
 pub trait EneBaseAccessorTrait {
-    fn fire_shot(&mut self, pos: &Vector2D<i32>, attack_type: AttackType);
+    fn fire_shot(&mut self, pos: &Vector2D<i32>, attack_type: EnemyAttackType);
     fn traj_accessor<'a>(&'a mut self) -> Box<dyn TrajAccessor + 'a>;
     fn get_stage_no(&self) -> u16;
 }
 
 impl<'a> EneBaseAccessorTrait for EneBaseAccessorImpl<'a> {
-    fn fire_shot(&mut self, pos: &Vector2D<i32>, attack_type: AttackType) {
+    fn fire_shot(&mut self, pos: &Vector2D<i32>, attack_type: EnemyAttackType) {
         let sprite_name = match attack_type {
-            AttackType::Normal => "orb_green_full",
-            AttackType::Intense => "orb_blue_full",
+            EnemyAttackType::Normal => "orb_green_full",
+            EnemyAttackType::Intense => "orb_blue_full",
         };
         self.eneshot_spawner.push(pos, sprite_name);
     }
@@ -247,8 +247,8 @@ fn do_move_enemy(
             let ang = ANGLE * ONE / 128;
             posture.1 -= clamp(posture.1, -ang, ang);
             enemy.state = match enemy.enemy_type {
-                EnemyType::Fairy => EnemyState::Attack(AttackType::Normal),
-                EnemyType::BigFairy => EnemyState::Attack(AttackType::Intense),
+                EnemyType::Fairy => EnemyState::Attack(EnemyAttackType::Normal),
+                EnemyType::BigFairy => EnemyState::Attack(EnemyAttackType::Intense),
             }
         }
         EnemyState::Attack(t) => {
@@ -409,8 +409,8 @@ pub fn do_move_eneshot(
 }
 
 fn out_of_screen(pos: &Vector2D<i32>) -> bool {
-    pos.x < -8 * ONE
-        || pos.x > (GAME_WIDTH - 3) * ONE
+    pos.x < -16 * ONE
+        || pos.x > (GAME_WIDTH + 16) * ONE
         || pos.y < -16 * ONE
         || pos.y > (GAME_HEIGHT + 16) * ONE
 }

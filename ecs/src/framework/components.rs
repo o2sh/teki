@@ -7,6 +7,7 @@ pub struct Posture(pub Vector2D<i32>, pub i32, pub i32);
 
 pub struct Speed(pub i32, pub i32);
 
+#[derive(Clone, Copy, PartialEq)]
 pub struct SpriteDrawable {
     pub sprite_name: &'static str,
     pub offset: Vector2D<i32>,
@@ -36,15 +37,16 @@ pub struct EnemyBase {
 }
 
 #[derive(Clone, Copy, PartialEq)]
-pub enum AttackType {
+pub enum EnemyAttackType {
     Normal,
     Intense,
 }
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum ShotType {
-    Normal,
-    Special,
+    Card,
+    SpecialCard,
+    YinYangOrb,
 }
 
 #[derive(PartialEq)]
@@ -52,7 +54,7 @@ pub enum EnemyState {
     Appearance,
     MoveToFormation,
     Formation,
-    Attack(AttackType),
+    Attack(EnemyAttackType),
     ExitScreen,
     Destroy,
 }
@@ -73,6 +75,7 @@ pub struct Player {
     pub index_x: usize,
     pub index_y: usize,
     pub data: PlayerData<'static>,
+    pub orbs_enable: bool,
 }
 
 pub struct Enemy {
@@ -88,6 +91,10 @@ pub struct Enemy {
 pub struct Item {
     pub item_type: ItemType,
     pub birth_time: u32,
+}
+
+pub struct YinYangOrb {
+    pub is_left: bool,
 }
 
 pub struct HitBox {

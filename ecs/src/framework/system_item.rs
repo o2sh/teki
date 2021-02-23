@@ -54,7 +54,7 @@ pub fn move_item(
         pos.1 -= clamp(pos.1, -ang, ang);
     }
 
-    if pos.0.y > WINDOW_HEIGHT * ONE {
+    if pos.0.y > (WINDOW_HEIGHT + 12) * ONE {
         commands.remove(*entity);
     }
 }
