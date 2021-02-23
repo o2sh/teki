@@ -316,8 +316,8 @@ pub fn exit_screen(posture: &mut Posture, speed: &mut Speed, enemy_type: EnemyTy
     let game_width = GAME_WIDTH * ONE;
     let game_height = GAME_HEIGHT * ONE;
     let margin = match enemy_type {
-        EnemyType::Fairy => 16 * ONE,
-        EnemyType::BigFairy => 32 * ONE,
+        EnemyType::Fairy => 32 * ONE,
+        EnemyType::BigFairy => 64 * ONE,
     };
     let x = {
         if pos.x <= game_width / 2 {
@@ -345,7 +345,7 @@ pub fn exit_screen(posture: &mut Posture, speed: &mut Speed, enemy_type: EnemyTy
         if pos.x <= game_width / 2 {
             Vector2D::new(-margin, pos.y)
         } else {
-            Vector2D::new(game_width - margin, pos.y)
+            Vector2D::new(game_width + margin, pos.y)
         }
     };
 
