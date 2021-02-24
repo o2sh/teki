@@ -420,6 +420,7 @@ fn out_of_screen(pos: &Vector2D<i32>) -> bool {
 #[read_component(HitBox)]
 #[write_component(Posture)]
 #[write_component(SpriteDrawable)]
+#[write_component(YinYangOrb)]
 #[write_component(Player)]
 pub fn enemy_shot_collision_check(
     world: &mut SubWorld,
@@ -449,11 +450,12 @@ pub fn enemy_shot_collision_check(
         }
     }
 
-    for player_entity in colls {
+    for player_entity in &colls {
         let (player, player_posture, player_sprite) =
             <(&mut Player, &mut Posture, &mut SpriteDrawable)>::query()
-                .get_mut(world, player_entity)
+                .get_mut(world, *player_entity)
                 .unwrap();
+
         set_damage_to_player(
             player,
             player_posture,
@@ -462,6 +464,14 @@ pub fn enemy_shot_collision_check(
             sound_queue,
             game_info.frame_count,
         );
+    }
+
+    if colls.len() > 0 {
+        for (_, yin_yang_orb_sprite) in
+            <(&mut YinYangOrb, &mut SpriteDrawable)>::query().iter_mut(world)
+        {
+            yin_yang_orb_sprite.alpha = 175;
+        }
     }
 }
 

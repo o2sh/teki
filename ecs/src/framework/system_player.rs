@@ -297,6 +297,7 @@ pub fn enum_player_target_pos(world: &SubWorld) -> Vector2D<i32> {
 #[read_component(HitBox)]
 #[write_component(Posture)]
 #[write_component(Player)]
+#[write_component(YinYangOrb)]
 #[write_component(SpriteDrawable)]
 pub fn player_enemy_collision_check(
     world: &mut SubWorld,
@@ -324,11 +325,12 @@ pub fn player_enemy_collision_check(
         }
     }
 
-    for player_entity in colls {
+    for player_entity in &colls {
         let (player, player_posture, player_sprite) =
             <(&mut Player, &mut Posture, &mut SpriteDrawable)>::query()
-                .get_mut(world, player_entity)
+                .get_mut(world, *player_entity)
                 .unwrap();
+
         set_damage_to_player(
             player,
             player_posture,
@@ -337,6 +339,14 @@ pub fn player_enemy_collision_check(
             sound_queue,
             game_info.frame_count,
         );
+    }
+
+    if colls.len() > 0 {
+        for (_, yin_yang_orb_sprite) in
+            <(&mut YinYangOrb, &mut SpriteDrawable)>::query().iter_mut(world)
+        {
+            yin_yang_orb_sprite.alpha = 175;
+        }
     }
 }
 
@@ -356,17 +366,25 @@ pub fn set_damage_to_player(
     player.invincibility_starting_time = frame_count;
 }
 
-#[system(for_each)]
-pub fn player_invincibility_frames(
-    player: &mut Player,
-    sprite: &mut SpriteDrawable,
-    #[resource] game_info: &mut GameInfo,
-) {
+#[system]
+#[write_component(Player)]
+#[write_component(YinYangOrb)]
+#[write_component(SpriteDrawable)]
+pub fn player_invincibility_frames(world: &mut SubWorld, #[resource] game_info: &mut GameInfo) {
+    let (player, player_sprite) =
+        <(&mut Player, &mut SpriteDrawable)>::query().iter_mut(world).next().unwrap();
+
     if player.state == PlayerState::Invincible
         && game_info.frame_count > player.invincibility_starting_time + INVINCIBILITY_FRAMES
     {
-        sprite.alpha = 255;
+        player_sprite.alpha = 255;
         player.state = PlayerState::Normal;
+
+        for (_, yin_yang_orb_sprite) in
+            <(&mut YinYangOrb, &mut SpriteDrawable)>::query().iter_mut(world)
+        {
+            yin_yang_orb_sprite.alpha = 255;
+        }
     }
 }
 
