@@ -26,6 +26,7 @@ pub fn new_player(character_index: u8) -> Player {
         state: PlayerState::Normal,
         shot_enable: false,
         next_shoot_time: 0,
+        next_orb_shoot_time: 0,
         invincibility_starting_time: 0,
         index_x: 0,
         index_y: 0,
@@ -114,11 +115,9 @@ pub fn do_move_player(player: &mut Player, pad: &Pad, entity: Entity, world: &mu
 }
 
 #[system(for_each)]
-#[read_component(MyShot)]
 pub fn fire_myshot(
     player: &mut Player,
-    position: &Posture,
-    entity: &Entity,
+    pos: &Posture,
     #[resource] pad: &Pad,
     #[resource] sound_queue: &mut SoundQueue,
     #[resource] game_info: &mut GameInfo,
@@ -127,8 +126,49 @@ pub fn fire_myshot(
     if pad.is_pressed(PadBit::Z) && can_player_fire(player) {
         if player.next_shoot_time < game_info.frame_count {
             sound_queue.push_play(CH_SHOT, SE_SHOT);
-            do_fire_myshot(player, position, *entity, commands, game_info);
+            do_fire_myshot(player, pos, commands);
             player.next_shoot_time = game_info.frame_count + SHOT_DELAY;
+        }
+    }
+}
+
+#[system]
+#[write_component(Player)]
+#[read_component(YinYangOrb)]
+#[read_component(Posture)]
+pub fn fire_myshot2(
+    world: &mut SubWorld,
+    #[resource] pad: &Pad,
+    #[resource] game_info: &mut GameInfo,
+    commands: &mut CommandBuffer,
+) {
+    let (mut subworld1, mut subworld2) = world.split::<&mut Player>();
+
+    let player = <&mut Player>::query().iter_mut(&mut subworld1).next().unwrap();
+
+    if pad.is_pressed(PadBit::Z) && can_player_fire(player) && player.orbs_enable {
+        if player.next_orb_shoot_time < game_info.frame_count {
+            for (yin_yang_orb, yin_yang_orb_pos) in
+                <(&YinYangOrb, &Posture)>::query().iter(&mut subworld2)
+            {
+                let mut angle = (ANGLE * ONE) / (ANGLE_DIV << 2);
+
+                if yin_yang_orb.is_left {
+                    angle = -angle;
+                };
+
+                commands.push((
+                    MyShot { size: 32, shot_type: ShotType::YinYangOrb },
+                    Posture(Vector2D::new(yin_yang_orb_pos.0.x, yin_yang_orb_pos.0.y), angle, 0),
+                    HitBox { offset: Vector2D::new(-8, -8), size: Vector2D::new(16, 16) },
+                    SpriteDrawable {
+                        sprite_name: player.data.med_orb,
+                        offset: Vector2D::new(-16, -16),
+                        alpha: 170,
+                    },
+                ));
+                player.next_orb_shoot_time = game_info.frame_count + (SHOT_DELAY << 2);
+            }
         }
     }
 }
@@ -139,15 +179,9 @@ pub fn can_player_fire(player: &Player) -> bool {
     }
     true
 }
-pub fn do_fire_myshot(
-    player: &Player,
-    position: &Posture,
-    entity: Entity,
-    commands: &mut CommandBuffer,
-    game_info: &mut GameInfo,
-) {
+pub fn do_fire_myshot(player: &Player, position: &Posture, commands: &mut CommandBuffer) {
     let mut postures: Vec<Posture> = Vec::new();
-    if game_info.score >= 200 {
+    if player.orbs_enable {
         let a1 = -(ANGLE * ONE) / (ANGLE_DIV << 2);
         let a2 = (ANGLE * ONE) / (ANGLE_DIV << 2);
         postures.push(Posture(Vector2D::new(position.0.x, position.0.y - 16 * ONE), a1, 0));
@@ -158,7 +192,7 @@ pub fn do_fire_myshot(
 
     for pos in postures {
         commands.push((
-            MyShot { player_entity: entity, size: 64, shot_type: ShotType::Card },
+            MyShot { size: 64, shot_type: ShotType::Card },
             pos,
             HitBox { offset: Vector2D::new(-8, -32), size: Vector2D::new(16, 16) },
             SpriteDrawable {
@@ -392,7 +426,6 @@ pub fn player_invincibility_frames(world: &mut SubWorld, #[resource] game_info: 
 pub fn special_attack(
     player: &mut Player,
     player_pos: &Posture,
-    entity: &Entity,
     commands: &mut CommandBuffer,
     #[resource] pad: &Pad,
     #[resource] game_info: &mut GameInfo,
@@ -430,7 +463,7 @@ pub fn special_attack(
             let angle = (ANGLE * ONE / 8) * i;
             let pos = Posture(Vector2D::new(player_pos.0.x, player_pos.0.y - 32 * ONE), angle, 0);
             commands.push((
-                MyShot { player_entity: *entity, size: 64, shot_type: ShotType::SpecialCard },
+                MyShot { size: 64, shot_type: ShotType::SpecialCard },
                 pos,
                 HitBox { offset: Vector2D::new(-32, -32), size: Vector2D::new(64, 64) },
                 SpriteDrawable {

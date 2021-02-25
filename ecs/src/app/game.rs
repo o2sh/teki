@@ -20,6 +20,7 @@ impl Game {
             .add_system(update_game_info_system())
             .add_system(move_player_system())
             .add_system(fire_myshot_system())
+            .add_system(fire_myshot2_system())
             .add_system(move_myshot_system())
             .add_system(run_appearance_enemy_system())
             .add_system(special_attack_system())

@@ -1,4 +1,3 @@
-use legion::*;
 use teki_common::game::{EnemyType, FormationIndex, ItemType, PlayerData, Traj, RGBA};
 use vector2d::Vector2D;
 
@@ -24,7 +23,6 @@ pub struct Text {
 }
 
 pub struct MyShot {
-    pub player_entity: Entity,
     pub size: u32,
     pub shot_type: ShotType,
 }
@@ -71,6 +69,7 @@ pub struct Player {
     pub state: PlayerState,
     pub shot_enable: bool,
     pub next_shoot_time: u32,
+    pub next_orb_shoot_time: u32,
     pub invincibility_starting_time: u32,
     pub index_x: usize,
     pub index_y: usize,

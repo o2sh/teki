@@ -75,6 +75,7 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
                 "special.png",
                 "big_orbs.png",
                 "fighter_orbs.png",
+                "medium_orbs.png",
             ],
         );
         renderer.load_sprite_sheet("assets/gfx/marisa.json");
@@ -94,6 +95,7 @@ impl<R: Renderer, A: Audio, T: Timer> App<R> for EcsApp<A, T> {
         renderer.load_sprite_sheet("assets/gfx/special.json");
         renderer.load_sprite_sheet("assets/gfx/big_orbs.json");
         renderer.load_sprite_sheet("assets/gfx/fighter_orbs.json");
+        renderer.load_sprite_sheet("assets/gfx/medium_orbs.json");
 
         self.audio.load_musics("assets/bgm", &["stage01.ogg", "menu.ogg"]).expect("");
     }
