@@ -1,30 +1,30 @@
 [package]
-name = "teki"
-version = "0.4.0"
-description = "Touhou-style shoot'em up"
 authors = ["o2sh <ossama-hjaji@live.fr>"]
+description = "Touhou-style shoot'em up"
 edition = "2018"
+license = "GPL-3.0-or-later"
+name = "teki"
 readme = "README.md"
-license = "MIT"
 repository = "https://github.com/o2sh/teki"
+version = "0.4.0"
 
 [dependencies]
 clap = "2.33.3"
-vector2d = "2.2.0"
-lazy_static = "1.4.0"
 counted-array = "0.1.2"
+lazy_static = "1.4.0"
+vector2d = "2.2.0"
 
-teki-ecs = {path = "./ecs" }
-teki-common = {path = "./common" }
+teki-common = {path = "./common"}
+teki-ecs = {path = "./ecs"}
 
 [dependencies.sdl2]
-version = "0.34.3"
 default-features = false
-features = ["image","unsafe_textures", "mixer", "ttf"]
+features = ["image", "unsafe_textures", "mixer", "ttf"]
+version = "0.34.3"
 
 [workspace]
 members = [
-    "ecs",
-    "wasm",
-    "common"
+  "ecs",
+  "wasm",
+  "common",
 ]

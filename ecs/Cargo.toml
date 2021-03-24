@@ -1,16 +1,16 @@
 [package]
-name = "teki-ecs"
-version = "0.4.0"
 authors = ["o2sh <ossama-hjaji@live.fr>"]
 edition = "2018"
+name = "teki-ecs"
+version = "0.4.0"
 
 [dependencies]
-legion = { version = "0.3.1", default-features = false, features = ["codegen"] }
-vector2d = "2.2.0"
 lazy_static = "1.4.0"
-rand = {version = "0.7", features = ["wasm-bindgen"] }
+legion = {version = "0.3.1", default-features = false, features = ["codegen"]}
+rand = {version = "0.7", features = ["wasm-bindgen"]}
+vector2d = "2.2.0"
 
-teki-common = {path = "../common" }
+teki-common = {path = "../common"}
 
 [features]
 wasm = ["legion/wasm-bindgen"]
